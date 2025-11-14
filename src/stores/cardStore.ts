@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { Card, Category, CardStatus } from '@types/index';
+import type { Card, Category, CardStatus } from '@types';
 
 interface CardStore {
   cards: Card[];

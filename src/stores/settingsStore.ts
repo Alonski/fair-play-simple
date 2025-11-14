@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { AppSettings, DealMode } from '@types/index';
+import type { AppSettings, DealMode } from '@types';
 
 interface SettingsStore extends AppSettings {
   // Actions

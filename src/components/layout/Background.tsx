@@ -1,4 +1,3 @@
-import React from 'react';
 
 /**
  * Background component with decorative elements

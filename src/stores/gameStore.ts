@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { GameState, DealMode, Partner, PartnerId } from '@types/index';
+import type { GameState, DealMode } from '@types';
 
 interface GameStoreState {
   gameState: GameState | null;

@@ -1,1 +1,2 @@
-// Game components will be exported here
+export { default as GameBoard } from './GameBoard';
+export { default as PartnerZone } from './PartnerZone';

@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSettingsStore } from '@stores/index';
-import { db, initializeSampleData } from '@services/database';
+import { initializeSampleData } from '@services/database';
 
 // Components
 import Navigation from '@components/layout/Navigation';

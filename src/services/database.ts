@@ -1,5 +1,5 @@
 import Dexie, { Table } from 'dexie';
-import type { Card, Partner, GameState, Negotiation } from '@types/index';
+import type { Card, Partner, GameState, Negotiation } from '@types';
 
 export class FairPlayDatabase extends Dexie {
   cards!: Table<Card>;
@@ -15,7 +15,7 @@ export class FairPlayDatabase extends Dexie {
       partners:
         '&id, name, &theme.color',
       gameStates:
-        '++id, isActive, &createdAt',
+        '++id, &createdAt',
       negotiations:
         '++id, initiator, status, &createdAt',
     });
@@ -88,7 +88,7 @@ export const dbOperations = {
   },
 
   async getActiveGameState(): Promise<GameState | undefined> {
-    return db.gameStates.where('isActive').equals(true).first();
+    return db.gameStates.filter((gs) => gs.isActive).first();
   },
 
   async updateGameState(gameState: GameState): Promise<void> {
