@@ -1,0 +1,80 @@
+{
+  "common": {
+    "appName": "פייר פליי דק",
+    "appDescription": "ניהול מטלות בית עם בן/בת הזוג",
+    "ok": "אישור",
+    "cancel": "ביטול",
+    "save": "שמור",
+    "delete": "מחק",
+    "edit": "ערוך",
+    "add": "הוסף",
+    "close": "סגור",
+    "back": "חזור",
+    "next": "הבא",
+    "prev": "הקודם",
+    "loading": "טוען...",
+    "error": "שגיאה",
+    "success": "הצלחה"
+  },
+  "navigation": {
+    "dashboard": "לוח בקרה",
+    "gameBoard": "לוח המשחק",
+    "cardGallery": "כרטיסים",
+    "insights": "תובנות",
+    "settings": "הגדרות"
+  },
+  "cards": {
+    "title": "כרטיסים",
+    "dailyGrind": "השגרה היומית",
+    "kids": "ילדים",
+    "home": "הבית",
+    "magic": "קסם",
+    "wild": "פרא",
+    "custom": "מותאם אישית",
+    "unassigned": "לא משוייך",
+    "assigned": "משוייך",
+    "completed": "הושלם",
+    "noCards": "אין כרטיסים עדיין. צור או ייבא כרטיסים כדי להתחיל."
+  },
+  "partners": {
+    "partnerA": "שותף א",
+    "partnerB": "שותף ב",
+    "createPartner": "יצור פרופיל שותף",
+    "editPartner": "ערוך שותף",
+    "name": "שם",
+    "avatar": "אווטר",
+    "theme": "צבע ערכת הנושא"
+  },
+  "game": {
+    "deal": "חלק כרטיסים",
+    "dealModes": {
+      "random": "חלוקה אקראית",
+      "weighted": "משוקלל",
+      "draft": "מצב ערסול",
+      "auction": "מכירה פומבית",
+      "quick": "חלוקה מהירה"
+    },
+    "negotiate": "משא ומתן",
+    "propose": "הצע החלפה",
+    "accept": "קבל",
+    "reject": "דחה",
+    "counter": "הצע נגדית"
+  },
+  "onboarding": {
+    "welcome": "ברוכים הבאים ל-Fair Play Deck",
+    "step1": "נהל מטלות בית יחד",
+    "step2": "חלוקה הוגנת של אחריות",
+    "step3": "משא ומתן והאזנת עומסי עבודה",
+    "getStarted": "בואו נתחיל"
+  },
+  "settings": {
+    "title": "הגדרות",
+    "language": "שפה",
+    "theme": "ערכת נושא",
+    "notifications": "התראות",
+    "sound": "אפקטי קול",
+    "animations": "אנימציות",
+    "backup": "גיבוי וייצוא",
+    "about": "אודות"
+  }
+}
