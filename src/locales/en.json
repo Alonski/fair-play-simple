@@ -1,0 +1,80 @@
+{
+  "common": {
+    "appName": "Fair Play Deck",
+    "appDescription": "Manage household tasks with your partner",
+    "ok": "OK",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "prev": "Previous",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success"
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "gameBoard": "Game Board",
+    "cardGallery": "Cards",
+    "insights": "Insights",
+    "settings": "Settings"
+  },
+  "cards": {
+    "title": "Cards",
+    "dailyGrind": "Daily Grind",
+    "kids": "Kids",
+    "home": "Home",
+    "magic": "Magic",
+    "wild": "Wild",
+    "custom": "Custom",
+    "unassigned": "Unassigned",
+    "assigned": "Assigned",
+    "completed": "Completed",
+    "noCards": "No cards yet. Create or import some to get started."
+  },
+  "partners": {
+    "partnerA": "Partner A",
+    "partnerB": "Partner B",
+    "createPartner": "Create Partner Profile",
+    "editPartner": "Edit Partner",
+    "name": "Name",
+    "avatar": "Avatar",
+    "theme": "Theme Color"
+  },
+  "game": {
+    "deal": "Deal Cards",
+    "dealModes": {
+      "random": "Random Deal",
+      "weighted": "Weighted",
+      "draft": "Draft Mode",
+      "auction": "Auction",
+      "quick": "Quick Deal"
+    },
+    "negotiate": "Negotiate",
+    "propose": "Propose Trade",
+    "accept": "Accept",
+    "reject": "Reject",
+    "counter": "Counter Offer"
+  },
+  "onboarding": {
+    "welcome": "Welcome to Fair Play Deck",
+    "step1": "Manage household tasks together",
+    "step2": "Fair distribution of responsibilities",
+    "step3": "Negotiate and balance workload",
+    "getStarted": "Get Started"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "theme": "Theme",
+    "notifications": "Notifications",
+    "sound": "Sound Effects",
+    "animations": "Animations",
+    "backup": "Backup & Export",
+    "about": "About"
+  }
+}
