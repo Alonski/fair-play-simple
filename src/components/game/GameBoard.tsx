@@ -84,7 +84,7 @@ export default function GameBoard({ onDeal }: GameBoardProps) {
     if (card) {
       useCardStore.setState((state) => ({
         cards: state.cards.map((c) =>
-          c.id === cardId ? { ...c, holder: holderId as any } : c
+          c.id === cardId ? { ...c, holder: holderId as CardType['holder'] } : c
         ),
       }));
     }
