@@ -104,12 +104,12 @@ export default function Card({
         className="w-full h-full relative"
         animate={{ rotateY: isFlipped ? 180 : 0 }}
         transition={{ duration: 0.6, type: 'spring', stiffness: 100 }}
-        style={{ transformStyle: 'preserve-3d' } as any}
+        style={{ transformStyle: 'preserve-3d' } as { [key: string]: string }}
       >
         {/* Front side */}
         <div
           className={`absolute w-full h-full ${getCardColor()} border-4 ${getCategoryColor()} rounded-lg p-6 flex flex-col justify-between torn-paper grain`}
-          style={{ backfaceVisibility: 'hidden' } as any}
+          style={{ backfaceVisibility: 'hidden' } as { [key: string]: string }}
         >
           <div>
             <div className="text-xs font-display font-bold text-paper mb-2 opacity-80 uppercase tracking-wider">
@@ -153,7 +153,7 @@ export default function Card({
           style={{
             backfaceVisibility: 'hidden',
             transform: 'rotateY(180deg)',
-          } as any}
+          } as { [key: string]: string }}
         >
           <div>
             <h4 className="font-display text-sm font-bold text-ink mb-3 uppercase">

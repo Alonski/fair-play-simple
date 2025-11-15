@@ -1,7 +1,9 @@
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSettingsStore } from '@stores/index';
+import { useCardStore } from '@stores/index';
 import { initializeSampleData } from '@services/database';
+import { sampleCards } from '@utils/sampleCards';
 
 // Components
 import Navigation from '@components/layout/Navigation';
@@ -17,9 +19,16 @@ export default function App() {
   const { i18n } = useTranslation();
   const { language, theme, animations } = useSettingsStore();
 
-  // Initialize database and set language/theme on mount
+  // Initialize database and load sample cards on mount
   useEffect(() => {
     initializeSampleData().catch(console.error);
+
+    // Load sample cards into store on first run
+    const cardStore = useCardStore.getState();
+    const hasCards = cardStore.getCards().length > 0;
+    if (!hasCards) {
+      cardStore.bulkAddCards(sampleCards);
+    }
   }, []);
 
   useEffect(() => {
