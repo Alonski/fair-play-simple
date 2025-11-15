@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useCardStore, useGameStore } from '@stores/index';
 import Card from '@components/cards/Card';
+import CardModal from '@components/cards/CardModal';
 import PartnerZone from './PartnerZone';
 import type { Card as CardType, Partner, DealMode } from '@types';
 
@@ -27,6 +28,8 @@ export default function GameBoard({ onDeal }: GameBoardProps) {
   const [partnerACards, setPartnerACards] = useState<CardType[]>([]);
   const [partnerBCards, setPartnerBCards] = useState<CardType[]>([]);
   const [activeTab, setActiveTab] = useState<'deal' | 'gallery'>('deal');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedCard, setSelectedCard] = useState<CardType | undefined>();
 
   // Initialize sample partners
   const [partners] = useState<Partner[]>([
@@ -87,6 +90,21 @@ export default function GameBoard({ onDeal }: GameBoardProps) {
     }
   };
 
+  const handleOpenCreateModal = () => {
+    setSelectedCard(undefined);
+    setIsModalOpen(true);
+  };
+
+  const handleOpenEditModal = (card: CardType) => {
+    setSelectedCard(card);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedCard(undefined);
+  };
+
   const getTimeCommitment = (cardList: CardType[]) => {
     return cardList.reduce((sum, card) => sum + card.metadata.timeEstimate, 0);
   };
@@ -95,9 +113,20 @@ export default function GameBoard({ onDeal }: GameBoardProps) {
     <div className="relative z-10 max-w-7xl mx-auto px-4 py-8">
       {/* Header */}
       <div className="mb-8">
-        <h2 className="text-display-md font-display font-bold text-ink mb-4">
-          {t('navigation.gameBoard')}
-        </h2>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-display-md font-display font-bold text-ink">
+            {t('navigation.gameBoard')}
+          </h2>
+          <motion.button
+            onClick={handleOpenCreateModal}
+            className="px-4 py-2 bg-partner-a text-paper font-display font-bold rounded-lg hover:shadow-brutal transition-all"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            title="Add a new card"
+          >
+            + New Card
+          </motion.button>
+        </div>
 
         {/* Deal mode selector */}
         <div className="flex gap-3 flex-wrap mb-6">
@@ -178,8 +207,16 @@ export default function GameBoard({ onDeal }: GameBoardProps) {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.05 }}
+                    className="group relative"
                   >
                     <Card card={card} draggable={true} />
+                    <button
+                      onClick={() => handleOpenEditModal(card)}
+                      className="absolute top-2 right-2 p-1 bg-white/90 text-ink rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                      title="Edit card"
+                    >
+                      ✏️
+                    </button>
                   </motion.div>
                 ))}
               </div>
@@ -213,6 +250,7 @@ export default function GameBoard({ onDeal }: GameBoardProps) {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: index * 0.05 }}
+                className="group relative"
               >
                 <Card
                   card={card}
@@ -221,6 +259,13 @@ export default function GameBoard({ onDeal }: GameBoardProps) {
                     e.dataTransfer.setData('cardId', card.id);
                   }}
                 />
+                <button
+                  onClick={() => handleOpenEditModal(card)}
+                  className="absolute top-2 right-2 p-1 bg-white/90 text-ink rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                  title="Edit card"
+                >
+                  ✏️
+                </button>
               </motion.div>
             ))
           ) : (
@@ -232,6 +277,16 @@ export default function GameBoard({ onDeal }: GameBoardProps) {
           )}
         </motion.div>
       )}
+
+      {/* Card Modal */}
+      <CardModal
+        isOpen={isModalOpen}
+        card={selectedCard}
+        onClose={handleCloseModal}
+        onSuccess={() => {
+          // Modal will close automatically, cards will update via Zustand
+        }}
+      />
 
       {/* Summary Footer */}
       <motion.div
