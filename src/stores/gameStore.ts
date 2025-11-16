@@ -1,9 +1,10 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { GameState, DealMode } from '@types';
+import type { GameState, DealMode, Partner } from '@types';
 
 interface GameStoreState {
   gameState: GameState | null;
+  partners: Partner[];
   currentDealMode: DealMode;
   isDealing: boolean;
   dealHistory: string[];
@@ -12,6 +13,8 @@ interface GameStoreState {
   initializeGame: (gameState: GameState) => void;
   setGameState: (gameState: GameState) => void;
   getGameState: () => GameState | null;
+  setPartners: (partners: Partner[]) => void;
+  getPartners: () => Partner[];
   setCurrentDealMode: (mode: DealMode) => void;
   setIsDealing: (isDealing: boolean) => void;
   addToDealHistory: (dealId: string) => void;
@@ -24,6 +27,7 @@ export const useGameStore = create<GameStoreState>()(
   persist(
     (set, get) => ({
       gameState: null,
+      partners: [],
       currentDealMode: 'random',
       isDealing: false,
       dealHistory: [],
@@ -31,6 +35,7 @@ export const useGameStore = create<GameStoreState>()(
       initializeGame: (gameState) =>
         set(() => ({
           gameState,
+          partners: gameState.partners,
           isDealing: false,
         })),
 
@@ -42,6 +47,16 @@ export const useGameStore = create<GameStoreState>()(
       getGameState: () => {
         const state = get();
         return state.gameState;
+      },
+
+      setPartners: (partners) =>
+        set(() => ({
+          partners,
+        })),
+
+      getPartners: () => {
+        const state = get();
+        return state.partners;
       },
 
       setCurrentDealMode: (mode) =>

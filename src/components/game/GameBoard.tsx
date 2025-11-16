@@ -5,6 +5,7 @@ import { useCardStore, useGameStore } from '@stores/index';
 import Card from '@components/cards/Card';
 import CardModal from '@components/cards/CardModal';
 import PartnerZone from './PartnerZone';
+import PartnerSetupWizard from '@components/partners/PartnerSetupWizard';
 import { dealCards, resetDeal } from '@utils/dealAlgorithms';
 import type { Card as CardType, Partner, DealMode } from '@types';
 
@@ -23,7 +24,7 @@ interface GameBoardProps {
 export default function GameBoard({ onDeal }: GameBoardProps) {
   const { t } = useTranslation();
   const cards = useCardStore((state) => state.getCards());
-  const { currentDealMode, setCurrentDealMode } = useGameStore();
+  const { currentDealMode, setCurrentDealMode, partners, setPartners } = useGameStore();
 
   const [unassignedCards, setUnassignedCards] = useState<CardType[]>([]);
   const [partnerACards, setPartnerACards] = useState<CardType[]>([]);
@@ -31,36 +32,19 @@ export default function GameBoard({ onDeal }: GameBoardProps) {
   const [activeTab, setActiveTab] = useState<'deal' | 'gallery'>('deal');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCard, setSelectedCard] = useState<CardType | undefined>();
+  const [isWizardOpen, setIsWizardOpen] = useState(false);
 
-  // Initialize sample partners
-  const [partners] = useState<Partner[]>([
-    {
-      id: 'partner-a',
-      name: t('partners.partnerA'),
-      avatar: { type: 'avatar-builder', data: 'A' },
-      preferences: {
-        favoriteCards: [],
-        avoidCards: [],
-        strongSuits: ['home'],
-        availability: {},
-      },
-      stats: { currentCards: 0, totalTimeCommitment: 0, streaks: [], achievements: [] },
-      theme: { color: '#E63946', pattern: { type: 'solid', color: '#E63946' }, icon: 'A' },
-    },
-    {
-      id: 'partner-b',
-      name: t('partners.partnerB'),
-      avatar: { type: 'avatar-builder', data: 'B' },
-      preferences: {
-        favoriteCards: [],
-        avoidCards: [],
-        strongSuits: ['kids'],
-        availability: {},
-      },
-      stats: { currentCards: 0, totalTimeCommitment: 0, streaks: [], achievements: [] },
-      theme: { color: '#06AED5', pattern: { type: 'solid', color: '#06AED5' }, icon: 'B' },
-    },
-  ]);
+  // Check if partners need to be set up
+  useEffect(() => {
+    if (partners.length === 0) {
+      setIsWizardOpen(true);
+    }
+  }, [partners]);
+
+  const handleWizardComplete = (newPartners: Partner[]) => {
+    setPartners(newPartners);
+    setIsWizardOpen(false);
+  };
 
   // Update card assignments
   useEffect(() => {
@@ -144,6 +128,15 @@ export default function GameBoard({ onDeal }: GameBoardProps) {
             {t('navigation.gameBoard')}
           </h2>
           <div className="flex gap-3">
+            <motion.button
+              onClick={() => setIsWizardOpen(true)}
+              className="px-4 py-2 bg-partner-b text-paper font-display font-bold rounded-lg hover:shadow-brutal transition-all"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              title="Edit partner profiles"
+            >
+              ⚙ Partners
+            </motion.button>
             <motion.button
               onClick={handleResetDeal}
               className="px-4 py-2 bg-concrete text-paper font-display font-bold rounded-lg hover:shadow-brutal transition-all"
@@ -325,6 +318,18 @@ export default function GameBoard({ onDeal }: GameBoardProps) {
         }}
       />
 
+      {/* Partner Setup Wizard */}
+      <PartnerSetupWizard
+        isOpen={isWizardOpen}
+        onComplete={handleWizardComplete}
+        onClose={() => {
+          // Only allow closing if partners are already set up
+          if (partners.length > 0) {
+            setIsWizardOpen(false);
+          }
+        }}
+      />
+
       {/* Summary Footer */}
       <motion.div
         className="mt-8 pt-6 border-t-2 border-ink grid grid-cols-3 gap-4"
@@ -333,7 +338,9 @@ export default function GameBoard({ onDeal }: GameBoardProps) {
         transition={{ delay: 0.3 }}
       >
         <div className="text-center p-4 bg-partner-a/10 rounded-lg">
-          <p className="text-sm font-body text-concrete mb-2">Partner A</p>
+          <p className="text-sm font-body text-concrete mb-2">
+            {partners[0]?.name || 'Partner A'}
+          </p>
           <p className="text-2xl font-display font-bold text-partner-a">
             {partnerACards.length}
           </p>
@@ -351,7 +358,9 @@ export default function GameBoard({ onDeal }: GameBoardProps) {
           </p>
         </div>
         <div className="text-center p-4 bg-partner-b/10 rounded-lg">
-          <p className="text-sm font-body text-concrete mb-2">Partner B</p>
+          <p className="text-sm font-body text-concrete mb-2">
+            {partners[1]?.name || 'Partner B'}
+          </p>
           <p className="text-2xl font-display font-bold text-partner-b">
             {partnerBCards.length}
           </p>
