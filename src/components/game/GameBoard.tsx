@@ -5,6 +5,7 @@ import { useCardStore, useGameStore } from '@stores/index';
 import Card from '@components/cards/Card';
 import CardModal from '@components/cards/CardModal';
 import PartnerZone from './PartnerZone';
+import { dealCards, resetDeal } from '@utils/dealAlgorithms';
 import type { Card as CardType, Partner, DealMode } from '@types';
 
 interface GameBoardProps {
@@ -76,7 +77,32 @@ export default function GameBoard({ onDeal }: GameBoardProps) {
 
   const handleDealMode = (mode: DealMode) => {
     setCurrentDealMode(mode);
+
+    // Execute deal algorithm
+    const allCards = useCardStore.getState().getCards();
+    const dealtCards = dealCards(mode, allCards, partners);
+
+    // Update card store with dealt cards
+    useCardStore.setState((state) => ({
+      cards: state.cards.map(card => {
+        const dealtCard = dealtCards.find(dc => dc.id === card.id);
+        return dealtCard || card;
+      }),
+    }));
+
     onDeal?.(mode);
+  };
+
+  const handleResetDeal = () => {
+    const allCards = useCardStore.getState().getCards();
+    const resetCards = resetDeal(allCards);
+
+    useCardStore.setState((state) => ({
+      cards: state.cards.map(card => {
+        const resetCard = resetCards.find(rc => rc.id === card.id);
+        return resetCard || card;
+      }),
+    }));
   };
 
   const handleCardDrop = (cardId: string, holderId: string | null) => {
@@ -117,15 +143,26 @@ export default function GameBoard({ onDeal }: GameBoardProps) {
           <h2 className="text-display-md font-display font-bold text-ink">
             {t('navigation.gameBoard')}
           </h2>
-          <motion.button
-            onClick={handleOpenCreateModal}
-            className="px-4 py-2 bg-partner-a text-paper font-display font-bold rounded-lg hover:shadow-brutal transition-all"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            title="Add a new card"
-          >
-            + New Card
-          </motion.button>
+          <div className="flex gap-3">
+            <motion.button
+              onClick={handleResetDeal}
+              className="px-4 py-2 bg-concrete text-paper font-display font-bold rounded-lg hover:shadow-brutal transition-all"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              title="Reset all card assignments"
+            >
+              ↺ Reset
+            </motion.button>
+            <motion.button
+              onClick={handleOpenCreateModal}
+              className="px-4 py-2 bg-partner-a text-paper font-display font-bold rounded-lg hover:shadow-brutal transition-all"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              title="Add a new card"
+            >
+              + New Card
+            </motion.button>
+          </div>
         </div>
 
         {/* Deal mode selector */}
