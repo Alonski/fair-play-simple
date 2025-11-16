@@ -1,6 +1,17 @@
 import Dexie, { Table } from 'dexie';
 import type { Card, Partner, GameState, Negotiation } from '@types';
 
+interface ImportDataPayload {
+  version: number;
+  exportedAt: string;
+  data: {
+    cards?: Card[];
+    partners?: Partner[];
+    gameStates?: GameState[];
+    negotiations?: Negotiation[];
+  };
+}
+
 export class FairPlayDatabase extends Dexie {
   cards!: Table<Card>;
   partners!: Table<Partner>;
@@ -146,7 +157,7 @@ export const dbOperations = {
     };
   },
 
-  async importData(data: any): Promise<void> {
+  async importData(data: ImportDataPayload | { data: ImportDataPayload['data'] }): Promise<void> {
     const { cards = [], partners = [], gameStates = [], negotiations = [] } =
       data.data || data;
 
