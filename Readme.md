@@ -1,5 +1,7 @@
 # Fair Play Deck App - Product Requirements Document v2.0
 
+**GitHub Repository**: https://github.com/Alonski/fair-play-simple
+
 ## Executive Summary
 A distinctive, production-grade Progressive Web App for couples to manage Fair Play cards with an unforgettable design aesthetic that breaks from generic app patterns. Built with modern frontend architecture using React, TypeScript, Catalyst UI, and innovative design principles.
 
