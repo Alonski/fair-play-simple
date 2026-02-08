@@ -6,3 +6,4 @@ export { default as Dashboard } from './layout/Dashboard';
 // Export subdirectories for more specific imports
 export * from './cards';
 export * from './game';
+export * from './partners';

@@ -67,6 +67,19 @@
     "step3": "Negotiate and balance workload",
     "getStarted": "Get Started"
   },
+  "partnerSetup": {
+    "title": "Set Up Your Partners",
+    "subtitle": "Let's create profiles for both partners. You can always change these later.",
+    "letsStart": "Let's Start",
+    "setupPartner": "Set Up Partner {{number}}",
+    "partnerDescription": "Choose a name, avatar, and theme color.",
+    "namePlaceholder": "Enter name...",
+    "colorTaken": "Already chosen by the other partner",
+    "preview": "Preview",
+    "reviewTitle": "Ready to Play!",
+    "partner": "Partner",
+    "startPlaying": "Start Playing"
+  },
   "settings": {
     "title": "Settings",
     "language": "Language",

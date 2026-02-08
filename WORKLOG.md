@@ -88,14 +88,68 @@
 ✅ Git repository initialized and pushed
 
 ### 📋 Next Phase (Phase 2: Core Features)
-- [ ] Create sample card templates (Fair Play deck set)
+- [x] Create sample card templates (Fair Play deck set)
 - [ ] Implement card import/export functionality
-- [ ] Build partner profile setup wizard
+- [x] Build partner profile setup wizard
 - [ ] Create deal algorithms for different deal modes
 - [ ] Implement drag-and-drop card assignment
 - [ ] Add time tracking UI
 - [ ] Build negotiation interface
 - [ ] Create analytics dashboard
+
+---
+
+## Session 3: Partner Profile Setup Wizard ✅ (2026-02-08)
+
+### ✅ Completed Tasks
+
+#### Partner Store
+- [x] Created `partnerStore.ts` - Zustand store with persistence for partner management
+  - Partner CRUD: setPartners, updatePartner, getPartner, getPartners
+  - Setup state tracking: isSetupComplete, completeSetup
+  - Reset functionality for full store reset
+
+#### Partner Setup Wizard
+- [x] Created `PartnerSetupWizard.tsx` - 4-step wizard component
+  - Step 0: Welcome intro with animated partner avatars
+  - Step 1: Partner A setup (name, avatar icon, theme color)
+  - Step 2: Partner B setup (name, avatar icon, theme color)
+  - Step 3: Review & confirm with partner summaries
+  - Animated slide transitions between steps using Framer Motion
+  - Progress indicator with step dots
+  - Validation: name required before proceeding
+  - Color exclusion: prevents both partners from choosing same color
+
+- [x] Created `PartnerForm.tsx` - Reusable partner profile form
+  - Name input with placeholder and max length
+  - Avatar icon selector (8 letter options with color preview)
+  - Theme color selector (10 colors, shows which are taken)
+  - Live preview of partner avatar with name and color bar
+
+#### Integration
+- [x] Updated `Dashboard.tsx` to show wizard before GameBoard when setup incomplete
+- [x] Updated `GameBoard.tsx` to use partner store instead of hardcoded partners
+  - Removed hardcoded Partner[] state
+  - Footer summary now shows actual partner names
+- [x] Added i18n strings for EN and HE (partner setup wizard text)
+- [x] Updated barrel exports in stores/index.ts and components/index.ts
+
+### 📊 Metrics
+- **TypeScript**: Strict mode, 0 errors
+- **Bundle Size**: 350.86KB main (109.39KB gzipped) - within 200KB target
+- **Build Time**: 4.74 seconds
+- **New Components**: 3 (PartnerSetupWizard, PartnerForm, partners/index)
+- **New Stores**: 1 (partnerStore)
+- **New i18n Keys**: 10 per language (partnerSetup namespace)
+
+### 🚀 Phase 2 Progress
+- ✅ Task 1: Sample Card Templates (67 cards)
+- ✅ Task 2: Card CRUD Operations
+- ✅ Task 3: Partner Profile Setup Wizard
+- ⏳ Task 4: Working Drag & Drop Card Assignment
+- ⏳ Task 5: Implement Deal Algorithms
+
+---
 
 ### 📝 Technical Notes
 - Using "Organic Brutalism" design aesthetic throughout

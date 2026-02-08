@@ -2,10 +2,11 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useCardStore, useGameStore } from '@stores/index';
+import { usePartnerStore } from '@stores/partnerStore';
 import Card from '@components/cards/Card';
 import CardModal from '@components/cards/CardModal';
 import PartnerZone from './PartnerZone';
-import type { Card as CardType, Partner, DealMode } from '@types';
+import type { Card as CardType, DealMode } from '@types';
 
 interface GameBoardProps {
   onDeal?: (mode: DealMode) => void;
@@ -23,6 +24,7 @@ export default function GameBoard({ onDeal }: GameBoardProps) {
   const { t } = useTranslation();
   const cards = useCardStore((state) => state.getCards());
   const { currentDealMode, setCurrentDealMode } = useGameStore();
+  const partners = usePartnerStore((state) => state.getPartners());
 
   const [unassignedCards, setUnassignedCards] = useState<CardType[]>([]);
   const [partnerACards, setPartnerACards] = useState<CardType[]>([]);
@@ -30,36 +32,6 @@ export default function GameBoard({ onDeal }: GameBoardProps) {
   const [activeTab, setActiveTab] = useState<'deal' | 'gallery'>('deal');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCard, setSelectedCard] = useState<CardType | undefined>();
-
-  // Initialize sample partners
-  const [partners] = useState<Partner[]>([
-    {
-      id: 'partner-a',
-      name: t('partners.partnerA'),
-      avatar: { type: 'avatar-builder', data: 'A' },
-      preferences: {
-        favoriteCards: [],
-        avoidCards: [],
-        strongSuits: ['home'],
-        availability: {},
-      },
-      stats: { currentCards: 0, totalTimeCommitment: 0, streaks: [], achievements: [] },
-      theme: { color: '#E63946', pattern: { type: 'solid', color: '#E63946' }, icon: 'A' },
-    },
-    {
-      id: 'partner-b',
-      name: t('partners.partnerB'),
-      avatar: { type: 'avatar-builder', data: 'B' },
-      preferences: {
-        favoriteCards: [],
-        avoidCards: [],
-        strongSuits: ['kids'],
-        availability: {},
-      },
-      stats: { currentCards: 0, totalTimeCommitment: 0, streaks: [], achievements: [] },
-      theme: { color: '#06AED5', pattern: { type: 'solid', color: '#06AED5' }, icon: 'B' },
-    },
-  ]);
 
   // Update card assignments
   useEffect(() => {
@@ -296,7 +268,9 @@ export default function GameBoard({ onDeal }: GameBoardProps) {
         transition={{ delay: 0.3 }}
       >
         <div className="text-center p-4 bg-partner-a/10 rounded-lg">
-          <p className="text-sm font-body text-concrete mb-2">Partner A</p>
+          <p className="text-sm font-body text-concrete mb-2">
+            {partners[0]?.name || t('partners.partnerA')}
+          </p>
           <p className="text-2xl font-display font-bold text-partner-a">
             {partnerACards.length}
           </p>
@@ -305,7 +279,7 @@ export default function GameBoard({ onDeal }: GameBoardProps) {
           </p>
         </div>
         <div className="text-center p-4 bg-unassigned/10 rounded-lg">
-          <p className="text-sm font-body text-concrete mb-2">Unassigned</p>
+          <p className="text-sm font-body text-concrete mb-2">{t('cards.unassigned')}</p>
           <p className="text-2xl font-display font-bold text-unassigned">
             {unassignedCards.length}
           </p>
@@ -314,7 +288,9 @@ export default function GameBoard({ onDeal }: GameBoardProps) {
           </p>
         </div>
         <div className="text-center p-4 bg-partner-b/10 rounded-lg">
-          <p className="text-sm font-body text-concrete mb-2">Partner B</p>
+          <p className="text-sm font-body text-concrete mb-2">
+            {partners[1]?.name || t('partners.partnerB')}
+          </p>
           <p className="text-2xl font-display font-bold text-partner-b">
             {partnerBCards.length}
           </p>

@@ -67,6 +67,19 @@
     "step3": "משא ומתן והאזנת עומסי עבודה",
     "getStarted": "בואו נתחיל"
   },
+  "partnerSetup": {
+    "title": "הגדרת השותפים",
+    "subtitle": "בואו ניצור פרופילים לשני השותפים. תמיד אפשר לשנות אחר כך.",
+    "letsStart": "בואו נתחיל",
+    "setupPartner": "הגדרת שותף/ה {{number}}",
+    "partnerDescription": "בחרו שם, אווטר וצבע ערכת נושא.",
+    "namePlaceholder": "הכניסו שם...",
+    "colorTaken": "כבר נבחר על ידי השותף/ה השני/ה",
+    "preview": "תצוגה מקדימה",
+    "reviewTitle": "מוכנים לשחק!",
+    "partner": "שותף/ה",
+    "startPlaying": "בואו נשחק"
+  },
   "settings": {
     "title": "הגדרות",
     "language": "שפה",

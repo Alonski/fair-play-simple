@@ -1,19 +1,29 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import GameBoard from '@components/game/GameBoard';
+import PartnerSetupWizard from '@components/partners/PartnerSetupWizard';
 import { useCardStore } from '@stores/index';
+import { usePartnerStore } from '@stores/partnerStore';
 
 /**
  * Dashboard component - main landing/overview or game board page
+ * Shows partner setup wizard if partners haven't been configured,
+ * then shows the GameBoard once setup is complete and cards exist.
  */
 export default function Dashboard() {
   const { t } = useTranslation();
   const cards = useCardStore((state) => state.getCards());
+  const isSetupComplete = usePartnerStore((state) => state.isSetupComplete);
   const [hasCards, setHasCards] = useState(false);
 
   useEffect(() => {
     setHasCards(cards.length > 0);
   }, [cards]);
+
+  // Show partner setup wizard if not completed yet
+  if (!isSetupComplete) {
+    return <PartnerSetupWizard />;
+  }
 
   if (hasCards) {
     return <GameBoard />;
