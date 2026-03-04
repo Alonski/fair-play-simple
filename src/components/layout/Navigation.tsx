@@ -1,17 +1,18 @@
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSettingsStore } from '@stores/index';
 
-export default function Navigation() {
+interface NavigationProps {
+  activeTab: string;
+  onTabChange: (tab: string) => void;
+}
+
+export default function Navigation({ activeTab, onTabChange }: NavigationProps) {
   const { t } = useTranslation();
   const { setLanguage, language } = useSettingsStore();
-  const [activeTab, setActiveTab] = useState<string>('dashboard');
 
   const navItems = [
-    { id: 'dashboard', label: t('navigation.dashboard') },
     { id: 'gameBoard', label: t('navigation.gameBoard') },
     { id: 'cardGallery', label: t('navigation.cardGallery') },
-    { id: 'insights', label: t('navigation.insights') },
     { id: 'settings', label: t('navigation.settings') },
   ];
 
@@ -31,7 +32,7 @@ export default function Navigation() {
             {navItems.map((item) => (
               <button
                 key={item.id}
-                onClick={() => setActiveTab(item.id)}
+                onClick={() => onTabChange(item.id)}
                 className={`text-sm font-body transition-all ${
                   activeTab === item.id
                     ? 'text-partner-a font-bold'
@@ -43,7 +44,7 @@ export default function Navigation() {
             ))}
           </div>
 
-          {/* Language toggle and settings */}
+          {/* Language toggle */}
           <div className="flex gap-4 items-center">
             <button
               onClick={() => setLanguage(language === 'en' ? 'he' : 'en')}
@@ -59,7 +60,7 @@ export default function Navigation() {
           {navItems.map((item) => (
             <button
               key={item.id}
-              onClick={() => setActiveTab(item.id)}
+              onClick={() => onTabChange(item.id)}
               className={`px-3 py-1 rounded text-xs whitespace-nowrap transition-all ${
                 activeTab === item.id
                   ? 'bg-partner-a text-paper font-bold'

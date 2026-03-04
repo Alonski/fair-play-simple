@@ -47,6 +47,12 @@
   },
   "game": {
     "deal": "Deal Cards",
+    "reset": "Reset",
+    "newCard": "New Card",
+    "dealTab": "Deal",
+    "galleryTab": "Gallery",
+    "comingSoon": "soon",
+    "week": "week",
     "dealModes": {
       "random": "Random Deal",
       "weighted": "Weighted",
@@ -58,7 +64,24 @@
     "propose": "Propose Trade",
     "accept": "Accept",
     "reject": "Reject",
-    "counter": "Counter Offer"
+    "counter": "Counter Offer",
+    "allAssigned": "All cards assigned!",
+    "allAssignedDesc": "Great job distributing the workload.",
+    "dropCardsHere": "Drop cards here",
+    "orTapToAssign": "or tap a card then tap here to assign",
+    "tapToAssign": "Selected: {{card}} — tap a zone to assign",
+    "tapHereToAssign": "Tap here to assign selected card",
+    "tapHereToUnassign": "Tap here to unassign",
+    "clickToEditName": "Click to edit name",
+    "cardCount": "card(s)",
+    "timeCommitment": "Time Commitment",
+    "minutesPerWeek": "minutes/week",
+    "difficulty": "Difficulty",
+    "status": "Status",
+    "active": "Active",
+    "paused": "Paused",
+    "markDone": "Mark as done",
+    "markNotDone": "Mark as not done"
   },
   "onboarding": {
     "welcome": "Welcome to Fair Play Deck",

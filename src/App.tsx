@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSettingsStore } from '@stores/index';
 import { useCardStore } from '@stores/index';
@@ -8,7 +8,7 @@ import { sampleCards } from '@utils/sampleCards';
 // Components
 import Navigation from '@components/layout/Navigation';
 import Background from '@components/layout/Background';
-import Dashboard from '@components/layout/Dashboard';
+import GameBoard from '@components/game/GameBoard';
 
 // Styles
 import '@styles/globals.css';
@@ -16,8 +16,9 @@ import '@styles/animations.css';
 import '@styles/textures.css';
 
 export default function App() {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { language, theme, animations } = useSettingsStore();
+  const [activeTab, setActiveTab] = useState('gameBoard');
 
   // Initialize database and load sample cards on mount
   useEffect(() => {
@@ -63,6 +64,28 @@ export default function App() {
     }
   }, [animations]);
 
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'gameBoard':
+        return <GameBoard />;
+      case 'cardGallery':
+        return <GameBoard />;
+      case 'settings':
+        return (
+          <div className="relative z-10 max-w-7xl mx-auto px-4 py-12 text-center">
+            <h2 className="text-display-md font-display font-bold text-ink mb-4">
+              {t('settings.title')}
+            </h2>
+            <p className="text-lg font-body text-concrete">
+              {t('game.comingSoon')}
+            </p>
+          </div>
+        );
+      default:
+        return <GameBoard />;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-paper text-ink overflow-x-hidden">
       {/* Background element */}
@@ -71,11 +94,11 @@ export default function App() {
       {/* Main content */}
       <div className="flex flex-col h-screen">
         {/* Navigation */}
-        <Navigation />
+        <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
 
         {/* Main content area */}
         <main className="flex-1 overflow-y-auto">
-          <Dashboard />
+          {renderContent()}
         </main>
       </div>
     </div>

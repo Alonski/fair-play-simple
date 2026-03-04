@@ -47,6 +47,12 @@
   },
   "game": {
     "deal": "חלק כרטיסים",
+    "reset": "איפוס",
+    "newCard": "כרטיס חדש",
+    "dealTab": "חלוקה",
+    "galleryTab": "גלריה",
+    "comingSoon": "בקרוב",
+    "week": "שבוע",
     "dealModes": {
       "random": "חלוקה אקראית",
       "weighted": "משוקלל",
@@ -58,7 +64,24 @@
     "propose": "הצע החלפה",
     "accept": "קבל",
     "reject": "דחה",
-    "counter": "הצע נגדית"
+    "counter": "הצע נגדית",
+    "allAssigned": "כל הכרטיסים חולקו!",
+    "allAssignedDesc": "עבודה מצוינת בחלוקת העומס.",
+    "dropCardsHere": "שחרר כרטיסים כאן",
+    "orTapToAssign": "או הקש על כרטיס ואז הקש כאן כדי לשייך",
+    "tapToAssign": "נבחר: {{card}} — הקש על אזור כדי לשייך",
+    "tapHereToAssign": "הקש כאן כדי לשייך כרטיס",
+    "tapHereToUnassign": "הקש כאן כדי לבטל שיוך",
+    "clickToEditName": "לחץ כדי לערוך שם",
+    "cardCount": "כרטיס(ים)",
+    "timeCommitment": "מחויבות זמן",
+    "minutesPerWeek": "דקות/שבוע",
+    "difficulty": "קושי",
+    "status": "סטטוס",
+    "active": "פעיל",
+    "paused": "מושהה",
+    "markDone": "סמן כבוצע",
+    "markNotDone": "סמן כלא בוצע"
   },
   "onboarding": {
     "welcome": "ברוכים הבאים ל-Fair Play Deck",
