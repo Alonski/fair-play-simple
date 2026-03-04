@@ -1,4 +1,4 @@
-name: CI/CD Pipeline
+name: CI Pipeline
 
 on:
   push:
@@ -6,17 +6,7 @@ on:
   pull_request:
     branches: [main, master]
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
-
 jobs:
-  # Lint and Build Job (runs on all branches)
   lint-and-build:
     runs-on: ubuntu-latest
 
@@ -38,57 +28,20 @@ jobs:
         run: npm ci
 
       - name: Run linter
-        run: npm run lint
+        run: npx oxlint src --deny-warnings
 
       - name: Run type check
         run: npx tsc --noEmit
+        env:
+          VITE_SUPABASE_URL: https://placeholder.supabase.co
+          VITE_SUPABASE_ANON_KEY: placeholder-key
 
       - name: Build project
         run: npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
 
       - name: Run tests
         run: npm run test -- --run
         continue-on-error: true
-
-      - name: Upload build artifacts
-        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
-        uses: actions/upload-artifact@v4
-        with:
-          name: dist
-          path: dist/
-          retention-days: 1
-
-  # Deploy Job (only on main branch push)
-  deploy:
-    needs: lint-and-build
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
-
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-
-    steps:
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: dist
-          path: dist/
-
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
-
-      - name: Upload artifact to Pages
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: 'dist'
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v3
-
-      - name: Deployment Summary
-        run: |
-          echo "✅ Deployment Complete!"
-          echo "📦 Site deployed to: ${{ steps.deployment.outputs.page_url }}"
-          echo "🔗 GitHub Pages URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"

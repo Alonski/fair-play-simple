@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useCardStore, useGameStore } from '@stores/index';
+import { useAuthStore } from '@stores/authStore';
 import Card from '@components/cards/Card';
 import CardModal from '@components/cards/CardModal';
 import PartnerZone from './PartnerZone';
@@ -19,6 +20,7 @@ export default function GameBoard({ onDeal }: GameBoardProps) {
   const { t } = useTranslation();
   const cards = useCardStore((state) => state.getCards());
   const { currentDealMode, setCurrentDealMode, partnerAName, partnerBName, setPartnerAName, setPartnerBName } = useGameStore();
+  const myPartnerSlot = useAuthStore((state) => state.profile?.partner_slot);
 
   const [unassignedCards, setUnassignedCards] = useState<CardType[]>([]);
   const [partnerACards, setPartnerACards] = useState<CardType[]>([]);
@@ -410,7 +412,14 @@ export default function GameBoard({ onDeal }: GameBoardProps) {
         transition={{ delay: 0.3 }}
       >
         <div className="text-center p-4 bg-partner-a/10 rounded-lg">
-          <p className="text-sm font-body text-concrete mb-2">{partnerAName}</p>
+          <p className="text-sm font-body text-concrete mb-2">
+            {partnerAName}
+            {myPartnerSlot === 'partner-a' && (
+              <span className="ml-1 text-xs bg-partner-a text-paper px-1.5 py-0.5 rounded-full font-bold">
+                {t('game.you', 'You')}
+              </span>
+            )}
+          </p>
           <p className="text-2xl font-display font-bold text-partner-a">{partnerACards.length}</p>
           <p className="text-xs text-concrete/70 mt-1">{getTimeCommitment(partnerACards)}m/{t('game.week')}</p>
         </div>
@@ -420,7 +429,14 @@ export default function GameBoard({ onDeal }: GameBoardProps) {
           <p className="text-xs text-concrete/70 mt-1">{getTimeCommitment(unassignedCards)}m</p>
         </div>
         <div className="text-center p-4 bg-partner-b/10 rounded-lg">
-          <p className="text-sm font-body text-concrete mb-2">{partnerBName}</p>
+          <p className="text-sm font-body text-concrete mb-2">
+            {partnerBName}
+            {myPartnerSlot === 'partner-b' && (
+              <span className="ml-1 text-xs bg-partner-b text-paper px-1.5 py-0.5 rounded-full font-bold">
+                {t('game.you', 'You')}
+              </span>
+            )}
+          </p>
           <p className="text-2xl font-display font-bold text-partner-b">{partnerBCards.length}</p>
           <p className="text-xs text-concrete/70 mt-1">{getTimeCommitment(partnerBCards)}m/{t('game.week')}</p>
         </div>

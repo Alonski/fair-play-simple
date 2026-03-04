@@ -213,3 +213,35 @@ export interface GameBoardProps {
   onDeal?: (mode: DealMode) => void;
   onNegotiate?: (negotiation: Negotiation) => void;
 }
+
+/**
+ * Supabase / Auth Types
+ */
+export interface Profile {
+  id: string;
+  household_id: string | null;
+  partner_slot: PartnerId | null;
+  display_name: string;
+  created_at: string;
+}
+
+export interface Household {
+  id: string;
+  name: string;
+  created_at: string;
+}
+
+export interface DbCard {
+  id: string;
+  household_id: string;
+  category: string;
+  title: LocalizedText;
+  description: LocalizedText;
+  details: LocalizedText;
+  holder: string | null;
+  status: string;
+  metadata: Record<string, unknown>;
+  history: Record<string, unknown>[];
+  updated_at: string;
+  updated_by: string | null;
+}
