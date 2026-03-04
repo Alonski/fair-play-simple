@@ -5,7 +5,7 @@ import { useCardStore, useGameStore } from '@stores/index';
 import Card from '@components/cards/Card';
 import CardModal from '@components/cards/CardModal';
 import PartnerZone from './PartnerZone';
-import type { Card as CardType, Partner, DealMode } from '@types';
+import type { Card as CardType, Partner, DealMode, CardStatus } from '@types';
 
 interface GameBoardProps {
   onDeal?: (mode: DealMode) => void;
@@ -17,12 +17,12 @@ interface GameBoardProps {
  * - Deal mode selection
  * - Partner zones with drag and drop
  * - Card gallery view
- * - Negotiation interface
+ * - Random deal with shuffle
  */
 export default function GameBoard({ onDeal }: GameBoardProps) {
   const { t } = useTranslation();
   const cards = useCardStore((state) => state.getCards());
-  const { currentDealMode, setCurrentDealMode } = useGameStore();
+  const { currentDealMode, setCurrentDealMode, partnerAName, partnerBName, setPartnerAName, setPartnerBName } = useGameStore();
 
   const [unassignedCards, setUnassignedCards] = useState<CardType[]>([]);
   const [partnerACards, setPartnerACards] = useState<CardType[]>([]);
@@ -30,12 +30,13 @@ export default function GameBoard({ onDeal }: GameBoardProps) {
   const [activeTab, setActiveTab] = useState<'deal' | 'gallery'>('deal');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCard, setSelectedCard] = useState<CardType | undefined>();
+  const [unassignedDragOver, setUnassignedDragOver] = useState(false);
 
-  // Initialize sample partners
-  const [partners] = useState<Partner[]>([
+  // Build partner objects from store names
+  const partners: Partner[] = [
     {
       id: 'partner-a',
-      name: t('partners.partnerA'),
+      name: partnerAName,
       avatar: { type: 'avatar-builder', data: 'A' },
       preferences: {
         favoriteCards: [],
@@ -48,7 +49,7 @@ export default function GameBoard({ onDeal }: GameBoardProps) {
     },
     {
       id: 'partner-b',
-      name: t('partners.partnerB'),
+      name: partnerBName,
       avatar: { type: 'avatar-builder', data: 'B' },
       preferences: {
         favoriteCards: [],
@@ -59,7 +60,7 @@ export default function GameBoard({ onDeal }: GameBoardProps) {
       stats: { currentCards: 0, totalTimeCommitment: 0, streaks: [], achievements: [] },
       theme: { color: '#06AED5', pattern: { type: 'solid', color: '#06AED5' }, icon: 'B' },
     },
-  ]);
+  ];
 
   // Update card assignments
   useEffect(() => {
@@ -79,15 +80,69 @@ export default function GameBoard({ onDeal }: GameBoardProps) {
     onDeal?.(mode);
   };
 
+  const handleDealCards = () => {
+    if (currentDealMode !== 'random') return;
+
+    const unassigned = cards.filter((c) => !c.holder);
+    if (unassigned.length === 0) return;
+
+    // Fisher-Yates shuffle
+    const shuffled = [...unassigned];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+
+    // Split between partners
+    const updates: Record<string, CardType['holder']> = {};
+    shuffled.forEach((card, index) => {
+      updates[card.id] = index % 2 === 0 ? 'partner-a' : 'partner-b';
+    });
+
+    useCardStore.setState((state) => ({
+      cards: state.cards.map((c) =>
+        updates[c.id]
+          ? { ...c, holder: updates[c.id], status: 'held' as CardStatus }
+          : c
+      ),
+    }));
+  };
+
+  const handleResetDeal = () => {
+    useCardStore.setState((state) => ({
+      cards: state.cards.map((c) => ({
+        ...c,
+        holder: null,
+        status: 'unassigned' as CardStatus,
+      })),
+    }));
+  };
+
   const handleCardDrop = (cardId: string, holderId: string | null) => {
     const card = cards.find((c) => c.id === cardId);
     if (card) {
       useCardStore.setState((state) => ({
         cards: state.cards.map((c) =>
-          c.id === cardId ? { ...c, holder: holderId as CardType['holder'] } : c
+          c.id === cardId
+            ? {
+                ...c,
+                holder: holderId as CardType['holder'],
+                status: (holderId ? 'held' : 'unassigned') as CardStatus,
+              }
+            : c
         ),
       }));
     }
+  };
+
+  const handleToggleComplete = (cardId: string) => {
+    useCardStore.setState((state) => ({
+      cards: state.cards.map((c) =>
+        c.id === cardId
+          ? { ...c, status: (c.status === 'completed' ? 'held' : 'completed') as CardStatus }
+          : c
+      ),
+    }));
   };
 
   const handleOpenCreateModal = () => {
@@ -128,23 +183,47 @@ export default function GameBoard({ onDeal }: GameBoardProps) {
           </motion.button>
         </div>
 
-        {/* Deal mode selector */}
-        <div className="flex gap-3 flex-wrap mb-6">
+        {/* Deal mode selector + action buttons */}
+        <div className="flex gap-3 flex-wrap mb-4">
           {dealModes.map((mode) => (
             <motion.button
               key={mode}
               onClick={() => handleDealMode(mode)}
+              disabled={mode !== 'random'}
               className={`px-4 py-2 rounded-lg font-display font-bold transition-all ${
                 currentDealMode === mode
                   ? 'bg-partner-a text-paper shadow-brutal'
+                  : mode !== 'random'
+                  ? 'bg-concrete/10 text-concrete/50 cursor-not-allowed'
                   : 'bg-concrete/20 text-ink hover:bg-concrete/30'
               }`}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={mode === 'random' ? { scale: 1.05 } : {}}
+              whileTap={mode === 'random' ? { scale: 0.95 } : {}}
             >
               {t(`game.dealModes.${mode}`)}
+              {mode !== 'random' && <span className="ml-1 text-xs">(soon)</span>}
             </motion.button>
           ))}
+        </div>
+
+        {/* Deal action buttons */}
+        <div className="flex gap-3 mb-6">
+          <motion.button
+            onClick={handleDealCards}
+            className="px-6 py-2 bg-ink text-paper font-display font-bold rounded-lg hover:shadow-brutal transition-all"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            Deal Cards
+          </motion.button>
+          <motion.button
+            onClick={handleResetDeal}
+            className="px-6 py-2 bg-concrete/20 text-ink font-display font-bold rounded-lg hover:bg-concrete/30 transition-all"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            Reset
+          </motion.button>
         </div>
 
         {/* Tab selector */}
@@ -181,6 +260,12 @@ export default function GameBoard({ onDeal }: GameBoardProps) {
                     : partnerBCards
                 }
                 onCardDrop={(cardId) => handleCardDrop(cardId, partner.id)}
+                onNameChange={(name) =>
+                  partner.id === 'partner-a'
+                    ? setPartnerAName(name)
+                    : setPartnerBName(name)
+                }
+                onToggleComplete={handleToggleComplete}
                 isActive={true}
                 totalTime={getTimeCommitment(
                   partner.id === 'partner-a' ? partnerACards : partnerBCards
@@ -189,11 +274,24 @@ export default function GameBoard({ onDeal }: GameBoardProps) {
             ))}
           </div>
 
-          {/* Unassigned Cards Section */}
+          {/* Unassigned Cards Section (also a drop target) */}
           <motion.div
-            className="bg-unassigned/10 border-3 border-unassigned rounded-lg p-6"
+            className={`bg-unassigned/10 border-3 border-unassigned rounded-lg p-6 transition-all ${
+              unassignedDragOver ? 'ring-2 ring-offset-2 ring-unassigned shadow-brutal' : ''
+            }`}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
+            onDragOver={(e) => {
+              e.preventDefault();
+              setUnassignedDragOver(true);
+            }}
+            onDragLeave={() => setUnassignedDragOver(false)}
+            onDrop={(e) => {
+              e.preventDefault();
+              setUnassignedDragOver(false);
+              const cardId = e.dataTransfer.getData('cardId');
+              if (cardId) handleCardDrop(cardId, null);
+            }}
           >
             <h3 className="font-display text-lg font-bold text-ink mb-4">
               {t('cards.unassigned')} ({unassignedCards.length})
@@ -209,7 +307,13 @@ export default function GameBoard({ onDeal }: GameBoardProps) {
                     transition={{ delay: index * 0.05 }}
                     className="group relative"
                   >
-                    <Card card={card} draggable={true} />
+                    <Card
+                      card={card}
+                      draggable={true}
+                      onDragStart={(e) => {
+                        e.dataTransfer.setData('cardId', card.id);
+                      }}
+                    />
                     <button
                       onClick={() => handleOpenEditModal(card)}
                       className="absolute top-2 right-2 p-1 bg-white/90 text-ink rounded opacity-0 group-hover:opacity-100 transition-opacity"
@@ -296,7 +400,7 @@ export default function GameBoard({ onDeal }: GameBoardProps) {
         transition={{ delay: 0.3 }}
       >
         <div className="text-center p-4 bg-partner-a/10 rounded-lg">
-          <p className="text-sm font-body text-concrete mb-2">Partner A</p>
+          <p className="text-sm font-body text-concrete mb-2">{partnerAName}</p>
           <p className="text-2xl font-display font-bold text-partner-a">
             {partnerACards.length}
           </p>
@@ -314,7 +418,7 @@ export default function GameBoard({ onDeal }: GameBoardProps) {
           </p>
         </div>
         <div className="text-center p-4 bg-partner-b/10 rounded-lg">
-          <p className="text-sm font-body text-concrete mb-2">Partner B</p>
+          <p className="text-sm font-body text-concrete mb-2">{partnerBName}</p>
           <p className="text-2xl font-display font-bold text-partner-b">
             {partnerBCards.length}
           </p>

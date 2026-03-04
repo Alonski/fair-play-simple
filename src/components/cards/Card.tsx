@@ -108,7 +108,7 @@ export default function Card({
       >
         {/* Front side */}
         <div
-          className={`absolute w-full h-full ${getCardColor()} border-4 ${getCategoryColor()} rounded-lg p-6 flex flex-col justify-between torn-paper grain`}
+          className={`absolute w-full h-full ${getCardColor()} border-4 ${getCategoryColor()} rounded-lg p-6 flex flex-col justify-between torn-paper grain ${card.status === 'completed' ? 'opacity-60' : ''}`}
           style={{ backfaceVisibility: 'hidden' } as { [key: string]: string }}
         >
           <div>

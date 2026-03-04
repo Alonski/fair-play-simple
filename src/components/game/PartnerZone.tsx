@@ -7,22 +7,28 @@ interface PartnerZoneProps {
   partner: Partner;
   cards: CardType[];
   onCardDrop?: (cardId: string) => void;
+  onNameChange?: (name: string) => void;
+  onToggleComplete?: (cardId: string) => void;
   isActive?: boolean;
   totalTime?: number;
 }
 
 /**
  * PartnerZone component - displays cards assigned to a partner
- * with area for drag and drop
+ * with drag-and-drop, inline name editing, and completion toggle
  */
 export default function PartnerZone({
   partner,
   cards,
   onCardDrop,
+  onNameChange,
+  onToggleComplete,
   isActive = true,
   totalTime = 0,
 }: PartnerZoneProps) {
   const [dragOver, setDragOver] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [nameInput, setNameInput] = useState(partner.name);
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -40,10 +46,22 @@ export default function PartnerZone({
     onCardDrop?.(cardId);
   };
 
+  const handleNameSave = () => {
+    const trimmed = nameInput.trim();
+    if (trimmed && trimmed !== partner.name) {
+      onNameChange?.(trimmed);
+    } else {
+      setNameInput(partner.name);
+    }
+    setEditing(false);
+  };
+
   const partnerBg =
     partner.id === 'partner-a' ? 'bg-partner-a' : 'bg-partner-b';
   const partnerBorder =
     partner.id === 'partner-a' ? 'border-partner-a' : 'border-partner-b';
+
+  const completedCount = cards.filter((c) => c.status === 'completed').length;
 
   return (
     <motion.div
@@ -70,9 +88,34 @@ export default function PartnerZone({
           </div>
 
           <div>
-            <h3 className={`font-display text-lg font-bold text-ink`}>
-              {partner.name}
-            </h3>
+            {editing ? (
+              <input
+                type="text"
+                value={nameInput}
+                onChange={(e) => setNameInput(e.target.value)}
+                onBlur={handleNameSave}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleNameSave();
+                  if (e.key === 'Escape') {
+                    setNameInput(partner.name);
+                    setEditing(false);
+                  }
+                }}
+                autoFocus
+                className="font-display text-lg font-bold text-ink bg-paper/80 border-2 border-ink rounded px-2 py-1 outline-none focus:ring-2 focus:ring-partner-a"
+              />
+            ) : (
+              <h3
+                className="font-display text-lg font-bold text-ink cursor-pointer hover:underline"
+                onClick={() => {
+                  setNameInput(partner.name);
+                  setEditing(true);
+                }}
+                title="Click to edit name"
+              >
+                {partner.name}
+              </h3>
+            )}
             <p className="text-xs font-body text-concrete">
               {cards.length} card{cards.length !== 1 ? 's' : ''}
             </p>
@@ -107,8 +150,27 @@ export default function PartnerZone({
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.05 }}
+              className="relative"
             >
-              <Card card={card} draggable={true} />
+              <Card
+                card={card}
+                draggable={true}
+                onDragStart={(e) => {
+                  e.dataTransfer.setData('cardId', card.id);
+                }}
+              />
+              {/* Done toggle button */}
+              <button
+                onClick={() => onToggleComplete?.(card.id)}
+                className={`absolute top-2 right-2 w-8 h-8 rounded-full border-2 flex items-center justify-center text-sm transition-all z-10 ${
+                  card.status === 'completed'
+                    ? 'bg-green-500 text-white border-green-500'
+                    : 'bg-white/80 border-concrete hover:border-ink'
+                }`}
+                title={card.status === 'completed' ? 'Mark as not done' : 'Mark as done'}
+              >
+                {card.status === 'completed' ? '✓' : ''}
+              </button>
             </motion.div>
           ))
         ) : (
@@ -141,7 +203,7 @@ export default function PartnerZone({
         <div>
           <span className="block text-concrete font-bold mb-1">Completed</span>
           <span className="text-ink font-bold">
-            {cards.filter((c) => c.status === 'paused').length}/{cards.length}
+            {completedCount}/{cards.length}
           </span>
         </div>
         <div>

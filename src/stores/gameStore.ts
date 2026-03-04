@@ -7,6 +7,8 @@ interface GameStoreState {
   currentDealMode: DealMode;
   isDealing: boolean;
   dealHistory: string[];
+  partnerAName: string;
+  partnerBName: string;
 
   // Actions
   initializeGame: (gameState: GameState) => void;
@@ -18,6 +20,8 @@ interface GameStoreState {
   clearDealHistory: () => void;
   endGame: () => void;
   resetGame: () => void;
+  setPartnerAName: (name: string) => void;
+  setPartnerBName: (name: string) => void;
 }
 
 export const useGameStore = create<GameStoreState>()(
@@ -27,6 +31,8 @@ export const useGameStore = create<GameStoreState>()(
       currentDealMode: 'random',
       isDealing: false,
       dealHistory: [],
+      partnerAName: 'Partner A',
+      partnerBName: 'Partner B',
 
       initializeGame: (gameState) =>
         set(() => ({
@@ -84,6 +90,12 @@ export const useGameStore = create<GameStoreState>()(
           isDealing: false,
           dealHistory: [],
         })),
+
+      setPartnerAName: (name) =>
+        set(() => ({ partnerAName: name })),
+
+      setPartnerBName: (name) =>
+        set(() => ({ partnerBName: name })),
     }),
     {
       name: 'game-store',
