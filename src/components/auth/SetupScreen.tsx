@@ -23,24 +23,24 @@ export default function SetupScreen() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          <div className="text-center mb-8">
-            <h1 className="text-display-md font-display font-bold text-ink mb-2">
+          <div className="text-center mb-6">
+            <h1 className="text-display-md font-display font-bold text-ink mb-1">
               {t('setup.welcome', 'Welcome!')}
             </h1>
-            <p className="font-body text-concrete">
+            <p className="font-body text-concrete text-sm">
               {t('setup.chooseSlot', 'Which partner are you?')}
             </p>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-3">
             <motion.button
               onClick={() => handleChoose('partner-a')}
               disabled={choosing}
-              className="w-full p-6 bg-partner-a/10 border-3 border-partner-a rounded-lg text-center hover:shadow-brutal transition-all disabled:opacity-50"
+              className="w-full p-5 bg-partner-a-light border border-partner-a/30 rounded-2xl text-center hover:shadow-soft-lg transition-all disabled:opacity-50"
               whileHover={!choosing ? { scale: 1.02 } : {}}
               whileTap={!choosing ? { scale: 0.98 } : {}}
             >
-              <span className="text-2xl font-display font-bold text-partner-a">
+              <span className="text-xl font-display font-bold text-partner-a">
                 {t('partners.partnerA', 'Partner A')}
               </span>
             </motion.button>
@@ -48,11 +48,11 @@ export default function SetupScreen() {
             <motion.button
               onClick={() => handleChoose('partner-b')}
               disabled={choosing}
-              className="w-full p-6 bg-partner-b/10 border-3 border-partner-b rounded-lg text-center hover:shadow-brutal transition-all disabled:opacity-50"
+              className="w-full p-5 bg-partner-b-light border border-partner-b/30 rounded-2xl text-center hover:shadow-soft-lg transition-all disabled:opacity-50"
               whileHover={!choosing ? { scale: 1.02 } : {}}
               whileTap={!choosing ? { scale: 0.98 } : {}}
             >
-              <span className="text-2xl font-display font-bold text-partner-b">
+              <span className="text-xl font-display font-bold text-partner-b">
                 {t('partners.partnerB', 'Partner B')}
               </span>
             </motion.button>

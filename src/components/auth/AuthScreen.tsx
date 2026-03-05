@@ -34,17 +34,17 @@ export default function AuthScreen() {
         transition={{ duration: 0.4 }}
       >
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-display-lg font-display font-bold text-ink mb-2">
+        <div className="text-center mb-6">
+          <h1 className="text-display-lg font-display font-bold text-ink mb-1">
             {t('common.appName')}
           </h1>
-          <p className="text-lg font-body text-concrete">
+          <p className="text-sm font-body text-concrete">
             {t('auth.subtitle', 'Fair division starts here')}
           </p>
         </div>
 
         {/* Card */}
-        <div className="bg-paper border-3 border-ink rounded-lg p-6 shadow-brutal">
+        <div className="bg-white border border-gray-200 rounded-2xl p-7 shadow-soft-lg">
           {sent ? (
             // Success state
             <motion.div
@@ -56,7 +56,7 @@ export default function AuthScreen() {
               <h2 className="text-xl font-display font-bold text-ink mb-2">
                 {t('auth.checkEmail', 'Check your email')}
               </h2>
-              <p className="font-body text-concrete mb-4">
+              <p className="font-body text-concrete text-sm mb-4">
                 {t('auth.magicLinkSent', 'We sent a sign-in link to')}
               </p>
               <p className="font-display font-bold text-partner-a mb-6">{email}</p>
@@ -70,11 +70,11 @@ export default function AuthScreen() {
           ) : (
             // Sign in form
             <form onSubmit={handleSubmit}>
-              <h2 className="text-xl font-display font-bold text-ink mb-4">
+              <h2 className="text-lg font-display font-bold text-ink mb-4">
                 {t('auth.signIn', 'Sign In')}
               </h2>
 
-              <label className="block mb-2 text-sm font-display font-bold text-ink">
+              <label className="block mb-1.5 text-xs font-display font-semibold text-ink">
                 {t('auth.email', 'Email')}
               </label>
               <input
@@ -82,7 +82,7 @@ export default function AuthScreen() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder={t('auth.emailPlaceholder', 'your@email.com')}
-                className="w-full px-4 py-3 border-2 border-ink rounded-lg font-body text-ink bg-paper focus:outline-none focus:ring-2 focus:ring-partner-a focus:border-partner-a placeholder:text-concrete/50"
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl font-body text-ink bg-white focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent placeholder:text-concrete/50 transition-all"
                 required
                 autoFocus
                 disabled={sending}
@@ -101,7 +101,7 @@ export default function AuthScreen() {
               <motion.button
                 type="submit"
                 disabled={sending || !email.trim()}
-                className="mt-4 w-full px-6 py-3 bg-ink text-paper font-display font-bold rounded-lg hover:shadow-brutal transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="mt-4 w-full px-6 py-3 bg-partner-a text-white font-display font-bold rounded-xl hover:shadow-soft transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 whileHover={!sending ? { scale: 1.02 } : {}}
                 whileTap={!sending ? { scale: 0.98 } : {}}
               >

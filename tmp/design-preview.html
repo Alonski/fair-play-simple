@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Our Home — Design Preview v2</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Noto+Sans+Hebrew:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --paper: #FAFAF8;
+      --ink: #2D3142;
+      --muted: #9CA3AF;
+      --accent: #A78BFA;
+      --partner-a: #E07A8E;
+      --partner-b: #7FB69E;
+      --unassigned: #F5D89A;
+      /* Stronger tints */
+      --partner-a-light: #FAE0E6;
+      --partner-b-light: #DFF0E8;
+      --unassigned-light: #FFF5DC;
+      --shadow-soft: 0 4px 12px rgba(0,0,0,0.06);
+      --shadow-soft-sm: 0 1px 3px rgba(0,0,0,0.04);
+      --shadow-soft-lg: 0 8px 24px rgba(0,0,0,0.08);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--paper);
+      color: var(--ink);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+    h1, h2, h3, h4 { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; }
+
+    /* Background blobs */
+    .bg-blobs { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+    .blob { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.08; }
+    .blob-1 { top: -5%; right: -5%; width: 400px; height: 400px; background: var(--unassigned); }
+    .blob-2 { bottom: -5%; left: -5%; width: 400px; height: 400px; background: var(--partner-a); }
+    .blob-3 { top: 40%; left: 20%; width: 300px; height: 300px; background: var(--partner-b); }
+
+    .content { position: relative; z-index: 1; max-width: 800px; margin: 0 auto; padding: 0 16px; }
+
+    /* ===== NAV with hamburger ===== */
+    nav {
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid #e5e7eb;
+      padding: 12px 16px;
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    nav h1 { font-size: 1.15rem; margin: 0; }
+    .hamburger {
+      width: 36px; height: 36px; border-radius: 10px; border: 1px solid #e5e7eb;
+      background: white; cursor: pointer; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 4px;
+    }
+    .hamburger span { display: block; width: 16px; height: 2px; background: var(--ink); border-radius: 1px; }
+
+    /* Slide-out menu */
+    .menu-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.25); backdrop-filter: blur(2px);
+      z-index: 200; opacity: 0; pointer-events: none; transition: opacity 0.2s;
+    }
+    .menu-overlay.open { opacity: 1; pointer-events: auto; }
+    .menu-panel {
+      position: fixed; top: 0; right: -280px; width: 280px; height: 100%;
+      background: white; z-index: 201; padding: 24px;
+      box-shadow: -4px 0 24px rgba(0,0,0,0.1);
+      transition: right 0.25s ease;
+      display: flex; flex-direction: column;
+    }
+    .menu-panel.open { right: 0; }
+    .menu-close {
+      align-self: flex-end; width: 32px; height: 32px; border: none; background: #f3f4f6;
+      border-radius: 8px; font-size: 18px; cursor: pointer; color: var(--muted);
+      margin-bottom: 24px;
+    }
+    .menu-item {
+      display: flex; align-items: center; gap: 12px; padding: 14px 0;
+      border-bottom: 1px solid #f3f4f6; font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 600; font-size: 15px; color: var(--ink); cursor: pointer;
+      text-decoration: none;
+    }
+    .menu-item:last-child { border-bottom: none; }
+    .menu-item.active { color: var(--partner-a); }
+    .menu-icon { width: 20px; text-align: center; font-size: 16px; }
+
+    /* Section spacing */
+    section { padding: 24px 0; }
+    .section-title { font-size: 1rem; color: var(--muted); margin-bottom: 12px; font-weight: 600; }
+
+    /* ===== AUTH SCREEN ===== */
+    .auth-screen {
+      display: flex; align-items: center; justify-content: center;
+      padding: 24px 16px; position: relative; z-index: 1;
+    }
+    .auth-card {
+      background: white; border: 1px solid #e5e7eb; border-radius: 16px;
+      box-shadow: var(--shadow-soft-lg); padding: 28px; width: 100%; max-width: 380px;
+    }
+    .auth-card h2 { margin-bottom: 4px; font-size: 1.5rem; }
+    .auth-subtitle { color: var(--muted); font-size: 14px; margin-bottom: 20px; }
+    .input-label { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 600; font-size: 13px; margin-bottom: 6px; display: block; }
+    .input-field {
+      width: 100%; padding: 11px 14px; border: 1px solid #d1d5db; border-radius: 12px;
+      font-family: 'Inter', sans-serif; font-size: 15px; outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s; background: white;
+    }
+    .input-field:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(167,139,250,0.15); }
+    .btn-primary {
+      width: 100%; padding: 12px; border-radius: 12px; font-size: 15px; font-weight: 700;
+      font-family: 'Plus Jakarta Sans', sans-serif; border: none; cursor: pointer;
+      background: var(--partner-a); color: white; margin-top: 16px;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: var(--shadow-soft); }
+    .auth-hint { text-align: center; font-size: 12px; color: var(--muted); margin-top: 12px; }
+
+    /* ===== CARDS ===== */
+    .cards-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+    @media (min-width: 480px) { .cards-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (min-width: 768px) { .cards-grid { grid-template-columns: repeat(3, 1fr); } }
+    .card {
+      border: 1px solid #e5e7eb; border-radius: 16px; padding: 16px;
+      box-shadow: var(--shadow-soft-sm); transition: transform 0.2s, box-shadow 0.2s;
+      cursor: grab; position: relative; min-height: 150px;
+      display: flex; flex-direction: column; justify-content: space-between;
+    }
+    .card:hover { transform: translateY(-4px); box-shadow: var(--shadow-soft-lg); }
+    .card.partner-a { background: var(--partner-a-light); border-left: 4px solid var(--partner-a); }
+    .card.partner-b { background: var(--partner-b-light); border-left: 4px solid var(--partner-b); }
+    .card.unassigned { background: var(--unassigned-light); border-left: 4px solid var(--unassigned); }
+    .card-category {
+      font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+      padding: 2px 7px; border-radius: 6px; display: inline-block; margin-bottom: 6px;
+    }
+    .card.partner-a .card-category { background: rgba(224,122,142,0.2); color: #c4576a; }
+    .card.partner-b .card-category { background: rgba(127,182,158,0.2); color: #4d8a6e; }
+    .card.unassigned .card-category { background: rgba(245,216,154,0.4); color: #9a7a08; }
+    .card-title { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 15px; margin-bottom: 4px; color: var(--ink); }
+    .card-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+    .card-meta { display: flex; gap: 8px; align-items: center; font-size: 11px; color: var(--muted); margin-top: 10px; }
+    .card-holder {
+      font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 8px;
+      position: absolute; top: 12px; right: 12px;
+    }
+    .card-holder.a { background: var(--partner-a); color: white; }
+    .card-holder.b { background: var(--partner-b); color: white; }
+
+    /* ===== PARTNER ZONES ===== */
+    .zones-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+    @media (min-width: 768px) { .zones-grid { grid-template-columns: 1fr 1fr; gap: 20px; } }
+    .zone {
+      background: white; border: 1px solid #e5e7eb; border-radius: 16px;
+      padding: 16px; box-shadow: var(--shadow-soft);
+    }
+    .zone.zone-a { border-color: rgba(224,122,142,0.3); }
+    .zone.zone-b { border-color: rgba(127,182,158,0.3); }
+    .zone-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid #f3f4f6; }
+    .zone-avatar {
+      width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center;
+      justify-content: center; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700;
+      font-size: 16px; color: white; box-shadow: var(--shadow-soft-sm); flex-shrink: 0;
+    }
+    .zone-a .zone-avatar { background: var(--partner-a); }
+    .zone-b .zone-avatar { background: var(--partner-b); }
+    .zone-name { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 15px; }
+    .zone-count { font-size: 12px; color: var(--muted); }
+    .zone-cards { display: flex; flex-direction: column; gap: 6px; min-height: 60px; }
+    /* No checkboxes — cards show ownership only */
+    .zone-card-mini {
+      padding: 10px 14px; border-radius: 10px; font-size: 13px; font-weight: 500;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .zone-a .zone-card-mini { background: var(--partner-a-light); }
+    .zone-b .zone-card-mini { background: var(--partner-b-light); }
+    .zone-card-suit { font-size: 10px; color: var(--muted); font-weight: 600; text-transform: uppercase; }
+
+    /* ===== UNASSIGNED ZONE ===== */
+    .unassigned-zone {
+      background: var(--unassigned-light); border: 1px solid rgba(245,216,154,0.4);
+      border-radius: 16px; padding: 16px; margin-top: 16px;
+    }
+
+    /* ===== SUMMARY FOOTER ===== */
+    .summary {
+      display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;
+      margin-top: 20px; padding-top: 16px; border-top: 1px solid #e5e7eb;
+    }
+    .summary-item { text-align: center; padding: 12px 8px; border-radius: 14px; }
+    .summary-item.a { background: var(--partner-a-light); }
+    .summary-item.b { background: var(--partner-b-light); }
+    .summary-item.u { background: var(--unassigned-light); }
+    .summary-label { font-size: 12px; color: var(--muted); margin-bottom: 2px; }
+    .summary-value { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 22px; }
+    .summary-item.a .summary-value { color: var(--partner-a); }
+    .summary-item.b .summary-value { color: var(--partner-b); }
+    .summary-item.u .summary-value { color: #9a7a08; }
+    .summary-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+    /* ===== BUTTONS ===== */
+    .btn {
+      padding: 9px 16px; border-radius: 12px; font-size: 13px; font-weight: 700;
+      font-family: 'Plus Jakarta Sans', sans-serif; border: none; cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .btn:hover { transform: translateY(-1px); box-shadow: var(--shadow-soft); }
+    .btn-dark { background: var(--ink); color: white; }
+    .btn-rose { background: var(--partner-a); color: white; }
+    .btn-ghost { background: #f3f4f6; color: var(--ink); }
+    .btn-group { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+
+    /* ===== SETUP SCREEN ===== */
+    .setup-btn {
+      width: 100%; padding: 20px; border-radius: 16px; border: 1px solid;
+      cursor: pointer; text-align: center; font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700; font-size: 18px; transition: transform 0.15s, box-shadow 0.15s;
+      background: none;
+    }
+    .setup-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-soft-lg); }
+    .setup-btn.a { background: var(--partner-a-light); border-color: rgba(224,122,142,0.3); color: var(--partner-a); }
+    .setup-btn.b { background: var(--partner-b-light); border-color: rgba(127,182,158,0.3); color: var(--partner-b); }
+
+    hr { border: none; border-top: 1px solid #e5e7eb; margin: 24px 0; }
+
+    /* ===== MODAL ===== */
+    .modal-backdrop { background: rgba(0,0,0,0.3); backdrop-filter: blur(4px); padding: 16px; border-radius: 16px; margin-top: 12px; }
+    .modal {
+      background: white; border: 1px solid #e5e7eb; border-radius: 16px;
+      box-shadow: var(--shadow-soft-lg); padding: 20px; max-width: 500px; margin: 0 auto;
+    }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; border-bottom: 1px solid #e5e7eb; margin-bottom: 16px; }
+    .modal-close { font-size: 20px; cursor: pointer; color: var(--muted); border: none; background: none; }
+
+    .you-badge {
+      display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 7px;
+      border-radius: 10px; margin-left: 4px; vertical-align: middle;
+    }
+    .you-badge.a { background: var(--partner-a); color: white; }
+
+    .board-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 12px; gap: 8px;
+    }
+    .board-header h2 { font-size: 1.15rem; margin: 0; white-space: nowrap; }
+
+    .meta-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+    @media (max-width: 400px) { .meta-grid { grid-template-columns: 1fr; } }
+
+    /* ===== PROFILE PREVIEW ===== */
+    .profile-card {
+      background: white; border: 1px solid #e5e7eb; border-radius: 16px;
+      box-shadow: var(--shadow-soft); padding: 24px; max-width: 400px; margin: 0 auto;
+    }
+    .profile-avatar-lg {
+      width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center;
+      justify-content: center; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700;
+      font-size: 24px; color: white; margin: 0 auto 16px;
+    }
+    .color-picker { display: flex; gap: 8px; justify-content: center; margin: 12px 0; }
+    .color-swatch {
+      width: 32px; height: 32px; border-radius: 50%; border: 3px solid transparent;
+      cursor: pointer; transition: border-color 0.15s;
+    }
+    .color-swatch.selected { border-color: var(--ink); }
+  </style>
+</head>
+<body>
+
+<div class="bg-blobs">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+</div>
+
+<!-- ========== AUTH SCREEN (full screen, no nav) ========== -->
+<section>
+  <div class="section-title" style="padding:0 16px;">Auth Screen</div>
+  <div class="auth-screen">
+    <div class="auth-card">
+      <div style="text-align:center;margin-bottom:20px;">
+        <h2>Our Home</h2>
+        <div class="auth-subtitle">Fair division starts here</div>
+      </div>
+      <h3 style="font-size:16px;margin-bottom:14px;">Sign In</h3>
+      <label class="input-label">Email</label>
+      <input class="input-field" type="email" placeholder="your@email.com" />
+      <button class="btn-primary">Send magic link</button>
+      <div class="auth-hint">We'll email you a sign-in link. No password needed.</div>
+    </div>
+  </div>
+</section>
+
+<hr>
+
+<!-- ========== SETUP SCREEN (first login only) ========== -->
+<section>
+  <div class="section-title" style="padding:0 16px;">Setup Screen (first login)</div>
+  <div class="auth-screen">
+    <div class="auth-card">
+      <div style="text-align:center;margin-bottom:20px;">
+        <h2 style="font-size:1.35rem;">Welcome!</h2>
+        <p style="color:var(--muted);font-size:14px;">What should we call you?</p>
+      </div>
+      <label class="input-label">Your Name</label>
+      <input class="input-field" type="text" placeholder="e.g., Alon" autofocus />
+      <button class="btn-primary">Let's go</button>
+    </div>
+  </div>
+</section>
+
+<hr>
+
+<!-- ========== MAIN APP with hamburger nav ========== -->
+<section style="padding-top:0;">
+  <div class="section-title" style="padding:16px 16px 0;">Main App</div>
+</section>
+
+<nav>
+  <h1>Our Home</h1>
+  <button class="hamburger" onclick="document.querySelector('.menu-overlay').classList.toggle('open');document.querySelector('.menu-panel').classList.toggle('open');">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- Slide-out menu -->
+<div class="menu-overlay" onclick="this.classList.remove('open');document.querySelector('.menu-panel').classList.remove('open');"></div>
+<div class="menu-panel">
+  <button class="menu-close" onclick="document.querySelector('.menu-overlay').classList.remove('open');this.parentElement.classList.remove('open');">&times;</button>
+  <a class="menu-item active">
+    <span class="menu-icon">&#9776;</span> My Cards
+  </a>
+  <a class="menu-item">
+    <span class="menu-icon">&#9883;</span> All Cards
+  </a>
+  <a class="menu-item">
+    <span class="menu-icon">&#9786;</span> Profile
+  </a>
+  <a class="menu-item">
+    <span class="menu-icon">&#9881;</span> Settings
+  </a>
+</div>
+
+<div class="content">
+
+  <!-- ===== ALL CARDS VIEW ===== -->
+  <section>
+    <div class="board-header">
+      <h2>All Cards</h2>
+      <button class="btn btn-rose">+ New Card</button>
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-dark">Deal</button>
+      <button class="btn btn-ghost">Re-deal</button>
+      <button class="btn btn-ghost">Reset</button>
+    </div>
+
+    <!-- Partner Zones — no checkboxes -->
+    <div class="zones-grid">
+      <div class="zone zone-a">
+        <div class="zone-header">
+          <div class="zone-avatar">A</div>
+          <div>
+            <div class="zone-name">Alon <span class="you-badge a">You</span></div>
+            <div class="zone-count">4 cards held</div>
+          </div>
+        </div>
+        <div class="zone-cards">
+          <div class="zone-card-mini">
+            <span>Dishes</span>
+            <span class="zone-card-suit">Home</span>
+          </div>
+          <div class="zone-card-mini">
+            <span>Grocery Shopping</span>
+            <span class="zone-card-suit">Home</span>
+          </div>
+          <div class="zone-card-mini">
+            <span>Bedtime Routine</span>
+            <span class="zone-card-suit">Caregiving</span>
+          </div>
+          <div class="zone-card-mini">
+            <span>Auto</span>
+            <span class="zone-card-suit">Out</span>
+          </div>
+        </div>
+      </div>
+      <div class="zone zone-b">
+        <div class="zone-header">
+          <div class="zone-avatar">M</div>
+          <div>
+            <div class="zone-name">Moral</div>
+            <div class="zone-count">3 cards held</div>
+          </div>
+        </div>
+        <div class="zone-cards">
+          <div class="zone-card-mini">
+            <span>School Logistics</span>
+            <span class="zone-card-suit">Caregiving</span>
+          </div>
+          <div class="zone-card-mini">
+            <span>Meals (Weekday)</span>
+            <span class="zone-card-suit">Home</span>
+          </div>
+          <div class="zone-card-mini">
+            <span>Calendar Keeper</span>
+            <span class="zone-card-suit">Out</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Unassigned -->
+    <div class="unassigned-zone">
+      <h3 style="font-size:15px;margin-bottom:10px;">Unassigned (3)</h3>
+      <div class="cards-grid">
+        <div class="card unassigned">
+          <div>
+            <span class="card-category">Home</span>
+            <div class="card-title">Laundry</div>
+            <div class="card-desc">Wash, dry, fold, and put away clothes</div>
+          </div>
+          <div class="card-meta">
+            <span>CPE: Full ownership</span>
+          </div>
+        </div>
+        <div class="card unassigned">
+          <div>
+            <span class="card-category">Home</span>
+            <div class="card-title">Garbage & Recycling</div>
+            <div class="card-desc">Take out trash on collection days</div>
+          </div>
+          <div class="card-meta">
+            <span>CPE: Full ownership</span>
+          </div>
+        </div>
+        <div class="card unassigned">
+          <div>
+            <span class="card-category">Caregiving</span>
+            <div class="card-title">Homework</div>
+            <div class="card-desc">Supervise daily homework</div>
+          </div>
+          <div class="card-meta">
+            <span>CPE: Full ownership</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Assigned Cards (expanded view) -->
+    <div style="margin-top:16px;">
+      <h3 style="font-size:15px;margin-bottom:10px;">Held Cards</h3>
+      <div class="cards-grid">
+        <div class="card partner-a">
+          <span class="card-holder a">Alon</span>
+          <div>
+            <span class="card-category">Home</span>
+            <div class="card-title">Dishes</div>
+            <div class="card-desc">All dishes, loading/unloading dishwasher</div>
+          </div>
+          <div class="card-meta">
+            <span>CPE: Full ownership</span>
+          </div>
+        </div>
+        <div class="card partner-b">
+          <span class="card-holder b">Moral</span>
+          <div>
+            <span class="card-category">Caregiving</span>
+            <div class="card-title">School Logistics</div>
+            <div class="card-desc">Drop-off, pickup, forms, communication</div>
+          </div>
+          <div class="card-meta">
+            <span>CPE: Full ownership</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Summary -->
+    <div class="summary">
+      <div class="summary-item a">
+        <div class="summary-label">Alon</div>
+        <div class="summary-value">4</div>
+        <div class="summary-sub">cards held</div>
+      </div>
+      <div class="summary-item u">
+        <div class="summary-label">Unassigned</div>
+        <div class="summary-value">3</div>
+        <div class="summary-sub">need owner</div>
+      </div>
+      <div class="summary-item b">
+        <div class="summary-label">Moral</div>
+        <div class="summary-value">3</div>
+        <div class="summary-sub">cards held</div>
+      </div>
+    </div>
+  </section>
+
+  <hr>
+
+  <!-- ===== PROFILE PAGE ===== -->
+  <section>
+    <div class="section-title">Profile</div>
+    <div class="profile-card">
+      <div class="profile-avatar-lg" style="background:var(--partner-a);">A</div>
+      <div style="text-align:center;margin-bottom:20px;">
+        <h3 style="font-size:18px;margin-bottom:4px;">Alon</h3>
+        <p style="color:var(--muted);font-size:13px;margin:0;">Partner A &middot; 4 cards held</p>
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <label class="input-label">Display Name</label>
+        <input class="input-field" type="text" value="Alon" />
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <label class="input-label">Your Color</label>
+        <div class="color-picker">
+          <div class="color-swatch selected" style="background:#E07A8E;"></div>
+          <div class="color-swatch" style="background:#F4845F;"></div>
+          <div class="color-swatch" style="background:#7B68EE;"></div>
+          <div class="color-swatch" style="background:#4ECDC4;"></div>
+          <div class="color-swatch" style="background:#F7B32B;"></div>
+        </div>
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <label class="input-label">Language</label>
+        <select class="input-field" style="cursor:pointer;">
+          <option>English</option>
+          <option>&#1506;&#1489;&#1512;&#1497;&#1514; (Hebrew)</option>
+        </select>
+      </div>
+
+      <div style="padding-top:16px;border-top:1px solid #e5e7eb;">
+        <button class="btn btn-ghost" style="width:100%;color:var(--muted);">Sign out</button>
+      </div>
+    </div>
+  </section>
+
+  <hr>
+
+  <!-- ===== MODAL ===== -->
+  <section>
+    <div class="section-title">Card Modal</div>
+    <div class="modal-backdrop">
+      <div class="modal">
+        <div class="modal-header">
+          <h3 style="margin:0;font-size:16px;">Create New Card</h3>
+          <button class="modal-close">&times;</button>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div>
+            <label class="input-label">Category</label>
+            <select class="input-field" style="cursor:pointer;">
+              <option>Home</option>
+              <option>Out</option>
+              <option>Caregiving</option>
+              <option>Magic</option>
+              <option>Wild</option>
+            </select>
+          </div>
+          <div>
+            <label class="input-label">English Title</label>
+            <input class="input-field" type="text" placeholder="e.g., Dishes" />
+          </div>
+          <div>
+            <label class="input-label">Hebrew Title</label>
+            <input class="input-field" type="text" placeholder="&#1499;&#1493;&#1514;&#1512;&#1514; &#1489;&#1506;&#1489;&#1512;&#1497;&#1514;" dir="rtl" style="text-align:right;" />
+          </div>
+          <div>
+            <label class="input-label">MSC Notes (Minimum Standard of Care)</label>
+            <textarea class="input-field" rows="2" placeholder="What does 'done well' look like for this card?" style="resize:vertical;"></textarea>
+          </div>
+          <div style="display:flex;gap:8px;padding-top:12px;border-top:1px solid #e5e7eb;">
+            <button class="btn btn-rose" style="flex:1;">Create Card</button>
+            <button class="btn btn-ghost" style="flex:1;">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div style="height:60px;"></div>
+</div>
+
+</body>
+</html>

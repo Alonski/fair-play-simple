@@ -7,21 +7,26 @@ export default {
   theme: {
     extend: {
       colors: {
-        ink: '#0A0908',
-        paper: '#FBF5F3',
-        concrete: '#8B8680',
-        'partner-a': '#E63946',
-        'partner-b': '#06AED5',
-        unassigned: '#F1C453',
+        ink: '#2D3142',
+        paper: '#FAFAF8',
+        concrete: '#9CA3AF',
+        accent: '#A78BFA',
+        'partner-a': '#E07A8E',
+        'partner-b': '#7FB69E',
+        unassigned: '#F5D89A',
+        'partner-a-light': '#FAE0E6',
+        'partner-b-light': '#DFF0E8',
+        'unassigned-light': '#FFF5DC',
       },
       fontFamily: {
-        display: ['Bricolage Grotesque', 'sans-serif'],
-        body: ['Crimson Pro', 'serif'],
-        hebrew: ['Frank Ruhl Libre', 'serif'],
+        display: ['Plus Jakarta Sans', 'sans-serif'],
+        body: ['Inter', 'sans-serif'],
+        hebrew: ['Noto Sans Hebrew', 'sans-serif'],
       },
       boxShadow: {
-        brutal: 'rgba(10,9,8,0.15) 0 8px 16px',
-        'brutal-sm': 'rgba(10,9,8,0.1) 0 2px 4px',
+        soft: '0 4px 12px rgba(0,0,0,0.06)',
+        'soft-sm': '0 1px 3px rgba(0,0,0,0.04)',
+        'soft-lg': '0 8px 24px rgba(0,0,0,0.08)',
       },
       animation: {
         'card-flip': 'cardFlip 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55)',
