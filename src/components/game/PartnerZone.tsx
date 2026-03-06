@@ -103,7 +103,7 @@ export default function PartnerZone({
                 }}
                 autoFocus
                 maxLength={30}
-                className="font-display text-lg font-bold text-ink bg-white border border-gray-300 rounded-xl px-3 py-1 outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent"
+                className="font-display text-lg font-bold text-ink bg-white border border-gray-300 rounded-xl px-3 py-1 outline-hidden focus:ring-2 focus:ring-accent/20 focus:border-accent"
                 onClick={(e) => e.stopPropagation()}
               />
             ) : (

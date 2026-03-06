@@ -5,23 +5,15 @@ import { useAuthStore } from '@stores/authStore';
 
 export default function AuthScreen() {
   const { t } = useTranslation();
-  const { signInWithMagicLink, error, clearError } = useAuthStore();
-  const [email, setEmail] = useState('');
-  const [sent, setSent] = useState(false);
-  const [sending, setSending] = useState(false);
+  const { signInWithGoogle, error, clearError } = useAuthStore();
+  const [signingIn, setSigningIn] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email.trim()) return;
-
-    setSending(true);
+  const handleSignIn = async () => {
+    setSigningIn(true);
     clearError();
-
-    const result = await signInWithMagicLink(email.trim());
-    setSending(false);
-
-    if (!result.error) {
-      setSent(true);
+    const result = await signInWithGoogle();
+    if (result.error) {
+      setSigningIn(false);
     }
   };
 
@@ -45,76 +37,53 @@ export default function AuthScreen() {
 
         {/* Card */}
         <div className="bg-white border border-gray-200 rounded-2xl p-7 shadow-soft-lg">
-          {sent ? (
-            // Success state
-            <motion.div
-              className="text-center py-4"
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
+          <h2 className="text-lg font-display font-bold text-ink mb-4 text-center">
+            {t('auth.signIn', 'Sign In')}
+          </h2>
+
+          {error && (
+            <motion.p
+              className="mb-4 text-sm font-body text-partner-a text-center"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
             >
-              <div className="text-4xl mb-4">&#9993;</div>
-              <h2 className="text-xl font-display font-bold text-ink mb-2">
-                {t('auth.checkEmail', 'Check your email')}
-              </h2>
-              <p className="font-body text-concrete text-sm mb-4">
-                {t('auth.magicLinkSent', 'We sent a sign-in link to')}
-              </p>
-              <p className="font-display font-bold text-partner-a mb-6">{email}</p>
-              <button
-                onClick={() => { setSent(false); setEmail(''); }}
-                className="text-sm font-body text-concrete underline hover:text-ink"
-              >
-                {t('auth.tryDifferentEmail', 'Try a different email')}
-              </button>
-            </motion.div>
-          ) : (
-            // Sign in form
-            <form onSubmit={handleSubmit}>
-              <h2 className="text-lg font-display font-bold text-ink mb-4">
-                {t('auth.signIn', 'Sign In')}
-              </h2>
-
-              <label className="block mb-1.5 text-xs font-display font-semibold text-ink">
-                {t('auth.email', 'Email')}
-              </label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder={t('auth.emailPlaceholder', 'your@email.com')}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl font-body text-ink bg-white focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent placeholder:text-concrete/50 transition-all"
-                required
-                autoFocus
-                disabled={sending}
-              />
-
-              {error && (
-                <motion.p
-                  className="mt-2 text-sm font-body text-partner-a"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                >
-                  {error}
-                </motion.p>
-              )}
-
-              <motion.button
-                type="submit"
-                disabled={sending || !email.trim()}
-                className="mt-4 w-full px-6 py-3 bg-partner-a text-white font-display font-bold rounded-xl hover:shadow-soft transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                whileHover={!sending ? { scale: 1.02 } : {}}
-                whileTap={!sending ? { scale: 0.98 } : {}}
-              >
-                {sending
-                  ? t('auth.sending', 'Sending...')
-                  : t('auth.sendMagicLink', 'Send magic link')}
-              </motion.button>
-
-              <p className="mt-4 text-xs font-body text-concrete text-center">
-                {t('auth.magicLinkDesc', "We'll email you a sign-in link. No password needed.")}
-              </p>
-            </form>
+              {error}
+            </motion.p>
           )}
+
+          <motion.button
+            onClick={handleSignIn}
+            disabled={signingIn}
+            className="w-full px-6 py-3 bg-partner-a text-white font-display font-bold rounded-xl hover:shadow-soft transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            whileHover={!signingIn ? { scale: 1.02 } : {}}
+            whileTap={!signingIn ? { scale: 0.98 } : {}}
+          >
+            <svg className="w-5 h-5" viewBox="0 0 24 24">
+              <path
+                fill="currentColor"
+                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"
+              />
+              <path
+                fill="currentColor"
+                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+              />
+              <path
+                fill="currentColor"
+                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+              />
+              <path
+                fill="currentColor"
+                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+              />
+            </svg>
+            {signingIn
+              ? t('auth.signingIn', 'Signing in...')
+              : t('auth.signInWithGoogle', 'Sign in with Google')}
+          </motion.button>
+
+          <p className="mt-4 text-xs font-body text-concrete text-center">
+            {t('auth.googleDesc', 'Sign in with your Google account to get started.')}
+          </p>
         </div>
       </motion.div>
     </div>

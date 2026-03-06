@@ -16,7 +16,7 @@ export default function GameBoard({ onDeal }: GameBoardProps) {
   const { t } = useTranslation();
   const cards = useCardStore((state) => state.getCards());
   const { currentDealMode, setCurrentDealMode, partnerAName, partnerBName, setPartnerAName, setPartnerBName } = useGameStore();
-  const myPartnerSlot = useAuthStore((state) => state.profile?.partner_slot);
+  const myPartnerSlot = useAuthStore((state) => state.profile?.partnerSlot);
 
   const [unassignedCards, setUnassignedCards] = useState<CardType[]>([]);
   const [partnerACards, setPartnerACards] = useState<CardType[]>([]);

@@ -1,0 +1,51 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Only these two emails can use the app
+    function isAllowedUser() {
+      return request.auth != null
+        && request.auth.token.email in ['alonzorz@gmail.com', 'swaddlesnaps@gmail.com'];
+    }
+
+    // Helper: is the caller a member of this household?
+    function isMember(householdId) {
+      return isAllowedUser()
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.householdId == householdId;
+    }
+
+    // Deny everything by default — only allowed users can do anything
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // User documents — each user can only read/write their own
+    match /users/{uid} {
+      allow read, write: if isAllowedUser() && request.auth.uid == uid;
+    }
+
+    // Household document
+    match /households/{householdId} {
+      // Any allowlisted user can read — needed for the join-or-create transaction
+      // (user doc has householdId: null before first join, so isMember() would fail)
+      allow read: if isAllowedUser();
+
+      allow create: if isAllowedUser()
+        && request.resource.data.partnerAUid == request.auth.uid;
+
+      allow update: if isMember(householdId)
+        || (isAllowedUser()
+            && resource.data.partnerBUid == null
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['partnerBUid'])
+            && request.resource.data.partnerBUid == request.auth.uid);
+
+      // Cards — max 200 cards per household, only members
+      match /cards/{cardId} {
+        allow read: if isMember(householdId);
+        allow create: if isMember(householdId);
+        allow update: if isMember(householdId);
+        allow delete: if isMember(householdId);
+      }
+    }
+  }
+}

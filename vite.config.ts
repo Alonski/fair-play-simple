@@ -20,6 +20,9 @@ export default defineConfig({
   server: {
     port: 5173,
     open: true,
+    headers: {
+      'Cross-Origin-Opener-Policy': 'same-origin-allow-popups',
+    },
   },
   build: {
     outDir: 'dist',
@@ -28,6 +31,7 @@ export default defineConfig({
       output: {
         manualChunks: {
           'vendor': ['react', 'react-dom'],
+          'firebase': ['firebase/app', 'firebase/auth', 'firebase/firestore'],
         }
       }
     }

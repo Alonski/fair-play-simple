@@ -3,12 +3,12 @@
 A digital Fair Play card game for couples to divide household responsibilities fairly. Based on Eve Rodsky's Fair Play method.
 
 ## Quick Reference
-- **Stack**: React 18 + TypeScript + Vite + Tailwind CSS + Zustand + Supabase
+- **Stack**: React 18 + TypeScript + Vite + Tailwind CSS + Zustand + Firebase
 - **Package manager**: bun (not npm)
 - **Linter**: oxlint (`bun run lint`)
 - **Build**: `bun run build` (runs tsc then vite build)
 - **Dev**: `bun run dev`
-- **Local Supabase**: `supabase start` (requires Docker/Rancher Desktop, analytics disabled)
+- **Deploy**: Firebase Hosting via GitHub Actions (push to main)
 
 ## Project Documentation
 - See `.claude/agents/fair-play-agent.md` for detailed project context, conventions, and decision log
@@ -16,9 +16,9 @@ A digital Fair Play card game for couples to divide household responsibilities f
 - See `research/work-log.md` for session-by-session progress
 
 ## Key Decisions
-- Magic link auth (no passwords), restricted to two emails
-- Supabase for real-time sync between two phones (Android + iPhone)
-- Vercel deployment (replacing GitHub Pages)
+- Google sign-in auth, restricted to two emails (Alon + Moral)
+- Firebase for auth, Firestore for real-time sync, Firebase Hosting for deployment
+- Firestore data model: `households/shared` doc + `cards` subcollection + `users/{uid}` collection
 - Warm/light/family design aesthetic (not the original "Organic Brutalism")
 - Fair Play cards are **responsibilities** (held), not tasks (completed)
 

@@ -15,7 +15,7 @@ export default function SetupScreen() {
   };
 
   // If profile has household but no partner slot, show slot picker
-  if (profile?.household_id && !profile?.partner_slot) {
+  if (profile?.householdId && !profile?.partnerSlot) {
     return (
       <div className="min-h-screen bg-paper flex items-center justify-center px-4">
         <motion.div
@@ -62,13 +62,16 @@ export default function SetupScreen() {
     );
   }
 
-  // Loading / fallback
+  // Loading / fallback — household assignment may still be in progress
   return (
     <div className="min-h-screen bg-paper flex items-center justify-center">
       <div className="text-center">
-        <div className="animate-pulse text-xl font-display font-bold text-concrete">
+        <div className="animate-pulse text-xl font-display font-bold text-concrete mb-4">
           {t('common.loading', 'Loading...')}
         </div>
+        <p className="text-sm font-body text-concrete">
+          {t('setup.settingUp', 'Setting up your household...')}
+        </p>
       </div>
     </div>
   );

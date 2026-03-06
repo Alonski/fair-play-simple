@@ -137,7 +137,7 @@ export default function CardModal({
   };
 
   const inputClasses = (field?: string) =>
-    `w-full px-4 py-2.5 border rounded-xl font-body bg-white focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all ${
+    `w-full px-4 py-2.5 border rounded-xl font-body bg-white focus:outline-hidden focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all ${
       field && errors[field]
         ? 'border-partner-a'
         : 'border-gray-300'
@@ -153,7 +153,7 @@ export default function CardModal({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40"
+            className="fixed inset-0 bg-black/30 backdrop-blur-xs z-40"
           />
 
           {/* Modal */}

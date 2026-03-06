@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '@stores/authStore';
-import { isSupabaseConfigured } from '@services/supabase';
+import { isFirebaseConfigured } from '@services/firebase';
 
 interface NavigationProps {
   activeTab: string;
@@ -48,14 +48,14 @@ export default function Navigation({ activeTab, onTabChange }: NavigationProps) 
       {/* Overlay */}
       {menuOpen && (
         <div
-          className="fixed inset-0 bg-black/25 backdrop-blur-sm z-[200] transition-opacity"
+          className="fixed inset-0 bg-black/25 backdrop-blur-xs z-200 transition-opacity"
           onClick={() => setMenuOpen(false)}
         />
       )}
 
       {/* Slide-out menu */}
       <div
-        className={`fixed top-0 right-0 w-72 h-full bg-white z-[201] shadow-soft-lg transform transition-transform duration-250 ease-out ${
+        className={`fixed top-0 right-0 w-72 h-full bg-white z-201 shadow-soft-lg transform transition-transform duration-250 ease-out ${
           menuOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
@@ -88,7 +88,7 @@ export default function Navigation({ activeTab, onTabChange }: NavigationProps) 
           </div>
 
           {/* Sign out */}
-          {isSupabaseConfigured && isAuthenticated && (
+          {isFirebaseConfigured && isAuthenticated && (
             <button
               onClick={() => { signOut(); setMenuOpen(false); }}
               className="w-full py-3 text-center text-sm text-concrete font-body hover:text-ink transition-colors border-t border-gray-100"

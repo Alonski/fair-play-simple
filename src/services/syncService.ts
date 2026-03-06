@@ -1,14 +1,18 @@
-import { supabase } from './supabase';
+import { db } from './firebase';
 import { useCardStore } from '@stores/cardStore';
 import { useGameStore } from '@stores/gameStore';
-import type { Card, CardMetadata, CardHistory, DbCard, LocalizedText } from '@types';
-import type { RealtimeChannel } from '@supabase/supabase-js';
+import type { Card, CardMetadata, CardHistory, FirestoreCard, LocalizedText } from '@types';
+import {
+  collection,
+  doc,
+  onSnapshot,
+  setDoc,
+  getDocs,
+  type Unsubscribe,
+} from 'firebase/firestore';
 
-// Convert local Card to DB row
-function localCardToDb(card: Card, householdId: string, userId: string): DbCard {
+function localCardToFirestore(card: Card, userId: string): FirestoreCard {
   return {
-    id: card.id,
-    household_id: householdId,
     category: card.category,
     title: card.title,
     description: card.description,
@@ -17,36 +21,37 @@ function localCardToDb(card: Card, householdId: string, userId: string): DbCard 
     status: card.status,
     metadata: card.metadata as unknown as Record<string, unknown>,
     history: card.history as unknown as Record<string, unknown>[],
-    updated_at: new Date().toISOString(),
-    updated_by: userId,
+    updatedAt: new Date().toISOString(),
+    updatedBy: userId,
   };
 }
 
-// Convert DB row to local Card
-function dbCardToLocal(dbCard: DbCard): Card {
+function firestoreCardToLocal(id: string, data: FirestoreCard): Card {
   return {
-    id: dbCard.id,
-    category: dbCard.category as Card['category'],
-    title: dbCard.title as LocalizedText,
-    description: dbCard.description as LocalizedText,
-    details: dbCard.details as LocalizedText,
-    holder: (dbCard.holder as Card['holder']) || null,
-    status: (dbCard.status as Card['status']) || 'unassigned',
-    metadata: dbCard.metadata as unknown as CardMetadata,
-    history: (dbCard.history || []) as unknown as CardHistory[],
+    id,
+    category: data.category as Card['category'],
+    title: data.title as LocalizedText,
+    description: data.description as LocalizedText,
+    details: data.details as LocalizedText,
+    holder: (data.holder as Card['holder']) || null,
+    status: (data.status as Card['status']) || 'unassigned',
+    metadata: data.metadata as unknown as CardMetadata,
+    history: (data.history || []) as unknown as CardHistory[],
   };
 }
 
 export class SyncService {
   private isRemoteUpdate = false;
-  private offlineQueue: Array<{ table: string; data: Record<string, unknown> }> = [];
-  private channel: RealtimeChannel | null = null;
   private unsubscribeCards: (() => void) | null = null;
   private unsubscribeGame: (() => void) | null = null;
+  private unsubscribeFirestoreCards: Unsubscribe | null = null;
+  private unsubscribeFirestoreHousehold: Unsubscribe | null = null;
   private householdId: string;
   private userId: string;
   private _status: 'connected' | 'syncing' | 'offline' = 'offline';
   private statusListeners: Set<(status: string) => void> = new Set();
+  private initialCardLoadComplete = false;
+  private resolveInitialLoad: (() => void) | null = null;
 
   constructor(householdId: string, userId: string) {
     this.householdId = householdId;
@@ -68,151 +73,92 @@ export class SyncService {
   }
 
   async start() {
+    if (!db) return;
+
     this.setStatus('syncing');
-    await this.pullInitialData();
-    this.subscribeToRealtime();
+
+    // Wait for the first Firestore snapshot before resolving
+    const initialLoadPromise = new Promise<void>((resolve) => {
+      this.resolveInitialLoad = resolve;
+    });
+
+    this.subscribeToFirestore();
     this.subscribeToLocalChanges();
+
+    // Wait for first cards snapshot to arrive
+    await initialLoadPromise;
+
     this.setStatus('connected');
 
-    // Flush offline queue when coming back online
-    window.addEventListener('online', () => this.flushOfflineQueue());
+    window.addEventListener('online', () => this.setStatus('connected'));
     window.addEventListener('offline', () => this.setStatus('offline'));
   }
 
   stop() {
-    if (this.channel) {
-      supabase.removeChannel(this.channel);
-      this.channel = null;
-    }
+    this.unsubscribeFirestoreCards?.();
+    this.unsubscribeFirestoreHousehold?.();
     this.unsubscribeCards?.();
     this.unsubscribeGame?.();
+    this.unsubscribeFirestoreCards = null;
+    this.unsubscribeFirestoreHousehold = null;
     this.unsubscribeCards = null;
     this.unsubscribeGame = null;
   }
 
-  // Pull all data from Supabase into Zustand
-  async pullInitialData() {
-    const { data: cards, error: cardsError } = await supabase
-      .from('cards')
-      .select('*')
-      .eq('household_id', this.householdId);
+  private subscribeToFirestore() {
+    if (!db) return;
 
-    if (cardsError) {
-      console.error('Error pulling cards:', cardsError);
-      return;
-    }
+    // Listen to cards subcollection
+    const cardsRef = collection(db, 'households', this.householdId, 'cards');
+    this.unsubscribeFirestoreCards = onSnapshot(cardsRef, (snapshot) => {
+      // Resolve the initial load promise on first snapshot
+      if (!this.initialCardLoadComplete) {
+        this.initialCardLoadComplete = true;
+        this.resolveInitialLoad?.();
+      }
 
-    const { data: gameState, error: gameError } = await supabase
-      .from('game_state')
-      .select('*')
-      .eq('household_id', this.householdId)
-      .single();
+      this.isRemoteUpdate = true;
 
-    // Apply to stores
-    this.isRemoteUpdate = true;
+      // Process only changes not authored by this user
+      const currentCards = [...useCardStore.getState().cards];
+      const currentMap = new Map(currentCards.map((c) => [c.id, c]));
 
-    if (cards && cards.length > 0) {
-      const localCards = cards.map((c) => dbCardToLocal(c as DbCard));
-      useCardStore.setState({ cards: localCards });
-    }
+      for (const change of snapshot.docChanges()) {
+        const data = change.doc.data() as FirestoreCard;
 
-    if (gameState && !gameError) {
-      useGameStore.setState({
-        partnerAName: gameState.partner_a_name || 'Partner A',
-        partnerBName: gameState.partner_b_name || 'Partner B',
-        currentDealMode: gameState.deal_mode || 'random',
-      });
-    }
-
-    this.isRemoteUpdate = false;
-  }
-
-  // Subscribe to Supabase Realtime changes
-  private subscribeToRealtime() {
-    this.channel = supabase
-      .channel(`household:${this.householdId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'cards',
-          filter: `household_id=eq.${this.householdId}`,
-        },
-        (payload) => this.handleRemoteCardChange(payload)
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'game_state',
-          filter: `household_id=eq.${this.householdId}`,
-        },
-        (payload) => this.handleRemoteGameStateChange(payload)
-      )
-      .subscribe((status) => {
-        if (status === 'SUBSCRIBED') {
-          this.setStatus('connected');
-        } else if (status === 'CLOSED' || status === 'CHANNEL_ERROR') {
-          this.setStatus('offline');
+        if (change.type === 'removed') {
+          currentMap.delete(change.doc.id);
+        } else {
+          // Skip echoes of our own writes
+          if (data.updatedBy === this.userId && !snapshot.metadata.fromCache) {
+            // Our write confirmed by server — keep our local version
+            continue;
+          }
+          currentMap.set(change.doc.id, firestoreCardToLocal(change.doc.id, data));
         }
-      });
-  }
-
-  // Handle remote card changes
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private handleRemoteCardChange(payload: any) {
-    // Skip if this change was made by us
-    if (payload.new?.updated_by === this.userId) return;
-
-    this.isRemoteUpdate = true;
-
-    const eventType = payload.eventType;
-    if (eventType === 'INSERT' || eventType === 'UPDATE') {
-      const card = dbCardToLocal(payload.new as DbCard);
-      const existingCards = useCardStore.getState().cards;
-      const exists = existingCards.some((c) => c.id === card.id);
-
-      if (exists) {
-        useCardStore.setState({
-          cards: existingCards.map((c) => (c.id === card.id ? card : c)),
-        });
-      } else {
-        useCardStore.setState({
-          cards: [...existingCards, card],
-        });
       }
-    } else if (eventType === 'DELETE') {
-      const deletedId = payload.old?.id;
-      if (deletedId) {
-        useCardStore.setState({
-          cards: useCardStore.getState().cards.filter((c) => c.id !== deletedId),
-        });
-      }
-    }
 
-    this.isRemoteUpdate = false;
-  }
-
-  // Handle remote game state changes
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private handleRemoteGameStateChange(payload: any) {
-    if (!payload.new) return;
-
-    this.isRemoteUpdate = true;
-
-    const gs = payload.new;
-    useGameStore.setState({
-      partnerAName: gs.partner_a_name || 'Partner A',
-      partnerBName: gs.partner_b_name || 'Partner B',
-      currentDealMode: gs.deal_mode || 'random',
+      useCardStore.setState({ cards: Array.from(currentMap.values()) });
+      this.isRemoteUpdate = false;
     });
 
-    this.isRemoteUpdate = false;
+    // Listen to household document (for game state: partner names, deal mode)
+    const householdRef = doc(db, 'households', this.householdId);
+    this.unsubscribeFirestoreHousehold = onSnapshot(householdRef, (snapshot) => {
+      if (snapshot.metadata.hasPendingWrites) return;
+      if (!snapshot.exists()) return;
+
+      const data = snapshot.data();
+      this.isRemoteUpdate = true;
+      useGameStore.setState({
+        partnerAName: data.partnerAName || 'Partner A',
+        partnerBName: data.partnerBName || 'Partner B',
+        currentDealMode: data.dealMode || 'random',
+      });
+      this.isRemoteUpdate = false;
+    });
   }
 
-  // Watch Zustand stores for local changes and push to Supabase
   private subscribeToLocalChanges() {
     let prevCards = useCardStore.getState().cards;
 
@@ -226,7 +172,7 @@ export class SyncService {
       prevCards = state.cards;
 
       for (const card of changed) {
-        this.pushCardToSupabase(card);
+        this.pushCardToFirestore(card);
       }
     });
 
@@ -250,12 +196,11 @@ export class SyncService {
         prevPartnerAName = state.partnerAName;
         prevPartnerBName = state.partnerBName;
         prevDealMode = state.currentDealMode;
-        this.pushGameStateToSupabase(state);
+        this.pushGameStateToFirestore(state);
       }
     });
   }
 
-  // Find cards that changed between two snapshots
   private diffCards(prev: Card[], curr: Card[]): Card[] {
     const changed: Card[] = [];
     const prevMap = new Map(prev.map((c) => [c.id, c]));
@@ -270,72 +215,58 @@ export class SyncService {
     return changed;
   }
 
-  // Push a single card to Supabase
-  private async pushCardToSupabase(card: Card) {
-    const dbCard = localCardToDb(card, this.householdId, this.userId);
-    const { error } = await supabase.from('cards').upsert(dbCard);
+  private async pushCardToFirestore(card: Card) {
+    if (!db) return;
+    const cardRef = doc(db, 'households', this.householdId, 'cards', card.id);
+    const firestoreCard = localCardToFirestore(card, this.userId);
 
-    if (error) {
-      console.error('Error pushing card:', error);
-      this.offlineQueue.push({ table: 'cards', data: dbCard as unknown as Record<string, unknown> });
+    try {
+      await setDoc(cardRef, firestoreCard, { merge: true });
+    } catch (err) {
+      console.error('Error pushing card:', err);
     }
   }
 
-  // Push game state to Supabase
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private async pushGameStateToSupabase(state: any) {
-    const data = {
-      household_id: this.householdId,
-      deal_mode: state.currentDealMode,
-      partner_a_name: state.partnerAName,
-      partner_b_name: state.partnerBName,
-      updated_at: new Date().toISOString(),
-    };
+  private async pushGameStateToFirestore(state: any) {
+    if (!db) return;
+    const householdRef = doc(db, 'households', this.householdId);
 
-    const { error } = await supabase.from('game_state').upsert(data);
-
-    if (error) {
-      console.error('Error pushing game state:', error);
-      this.offlineQueue.push({ table: 'game_state', data });
+    try {
+      await setDoc(householdRef, {
+        dealMode: state.currentDealMode,
+        partnerAName: state.partnerAName,
+        partnerBName: state.partnerBName,
+        updatedAt: new Date().toISOString(),
+      }, { merge: true });
+    } catch (err) {
+      console.error('Error pushing game state:', err);
     }
   }
 
-  // Flush queued operations that failed while offline
-  async flushOfflineQueue() {
-    this.setStatus('syncing');
-
-    while (this.offlineQueue.length > 0) {
-      const op = this.offlineQueue[0];
-      const { error } = await supabase.from(op.table).upsert(op.data);
-
-      if (error) {
-        // Still offline, stop flushing
-        this.setStatus('offline');
-        return;
-      }
-
-      this.offlineQueue.shift();
-    }
-
-    this.setStatus('connected');
-  }
-
-  // Seed cards from local sampleCards to Supabase (first-time only)
   async seedCards(cards: Card[]) {
-    const dbCards = cards.map((c) => localCardToDb(c, this.householdId, this.userId));
+    if (!db) return;
 
-    const { error } = await supabase.from('cards').upsert(dbCards);
-    if (error) {
-      console.error('Error seeding cards:', error);
+    // Check if cards already exist in Firestore before seeding
+    const cardsRef = collection(db, 'households', this.householdId, 'cards');
+    const existing = await getDocs(cardsRef);
+    if (!existing.empty) return;
+
+    for (const card of cards) {
+      const cardRef = doc(db, 'households', this.householdId, 'cards', card.id);
+      const firestoreCard = localCardToFirestore(card, this.userId);
+      await setDoc(cardRef, firestoreCard).catch((err) =>
+        console.error('Error seeding card:', err)
+      );
     }
 
-    // Also ensure game_state row exists
-    await supabase.from('game_state').upsert({
-      household_id: this.householdId,
-      deal_mode: 'random',
-      partner_a_name: useGameStore.getState().partnerAName,
-      partner_b_name: useGameStore.getState().partnerBName,
-      updated_at: new Date().toISOString(),
-    });
+    // Ensure household has game state fields
+    const householdRef = doc(db, 'households', this.householdId);
+    await setDoc(householdRef, {
+      dealMode: useGameStore.getState().currentDealMode,
+      partnerAName: useGameStore.getState().partnerAName,
+      partnerBName: useGameStore.getState().partnerBName,
+      updatedAt: new Date().toISOString(),
+    }, { merge: true }).catch((err) => console.error('Error seeding game state:', err));
   }
 }

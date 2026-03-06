@@ -215,25 +215,30 @@ export interface GameBoardProps {
 }
 
 /**
- * Supabase / Auth Types
+ * Firebase / Auth Types
  */
-export interface Profile {
-  id: string;
-  household_id: string | null;
-  partner_slot: PartnerId | null;
-  display_name: string;
-  created_at: string;
+export interface UserProfile {
+  uid: string;
+  displayName: string;
+  email: string;
+  householdId: string | null;
+  partnerSlot: PartnerId | null;
+  createdAt: string;
 }
 
 export interface Household {
   id: string;
   name: string;
-  created_at: string;
+  partnerAUid: string | null;
+  partnerBUid: string | null;
+  partnerAName: string;
+  partnerBName: string;
+  dealMode: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
-export interface DbCard {
-  id: string;
-  household_id: string;
+export interface FirestoreCard {
   category: string;
   title: LocalizedText;
   description: LocalizedText;
@@ -242,6 +247,6 @@ export interface DbCard {
   status: string;
   metadata: Record<string, unknown>;
   history: Record<string, unknown>[];
-  updated_at: string;
-  updated_by: string | null;
+  updatedAt: string;
+  updatedBy: string;
 }

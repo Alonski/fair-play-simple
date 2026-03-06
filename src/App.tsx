@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useSettingsStore } from '@stores/index';
 import { useCardStore } from '@stores/index';
 import { useAuthStore } from '@stores/authStore';
-import { isSupabaseConfigured } from '@services/supabase';
+import { isFirebaseConfigured } from '@services/firebase';
 import { SyncService } from '@services/syncService';
 import { sampleCards } from '@utils/sampleCards';
 
@@ -12,7 +12,6 @@ import Navigation from '@components/layout/Navigation';
 import Background from '@components/layout/Background';
 import GameBoard from '@components/game/GameBoard';
 import AuthScreen from '@components/auth/AuthScreen';
-import SetupScreen from '@components/auth/SetupScreen';
 
 // Styles
 import '@styles/globals.css';
@@ -28,28 +27,28 @@ export default function App() {
 
   // Initialize auth on mount
   useEffect(() => {
-    if (isSupabaseConfigured) {
+    if (isFirebaseConfigured) {
       initialize();
     }
   }, [initialize]);
 
   // Start sync service when authenticated with a household
   useEffect(() => {
-    if (!isSupabaseConfigured || !isAuthenticated || !profile?.household_id) {
+    if (!isFirebaseConfigured || !isAuthenticated || !profile?.householdId) {
       return;
     }
 
     const user = useAuthStore.getState().user;
     if (!user) return;
 
-    const sync = new SyncService(profile.household_id, user.id);
+    const sync = new SyncService(profile.householdId, user.uid);
     syncRef.current = sync;
 
     // Start sync, then seed cards if this is the first user in the household
     sync.start().then(async () => {
       const currentCards = useCardStore.getState().getCards();
       if (currentCards.length === 0) {
-        // No cards in Supabase yet — seed the sample cards
+        // No cards yet — seed the sample cards
         useCardStore.getState().bulkAddCards(sampleCards);
         await sync.seedCards(sampleCards);
       }
@@ -59,7 +58,7 @@ export default function App() {
       sync.stop();
       syncRef.current = null;
     };
-  }, [isAuthenticated, profile?.household_id]);
+  }, [isAuthenticated, profile?.householdId]);
 
   useEffect(() => {
     if (i18n.language !== language) {
@@ -88,8 +87,8 @@ export default function App() {
     }
   }, [animations]);
 
-  // Auth gate (only when Supabase is configured)
-  if (isSupabaseConfigured) {
+  // Auth gate (only when Firebase is configured)
+  if (isFirebaseConfigured) {
     if (isLoading) {
       return (
         <div className="min-h-screen bg-paper flex items-center justify-center">
@@ -104,11 +103,8 @@ export default function App() {
       return <AuthScreen />;
     }
 
-    if (!profile?.partner_slot) {
-      return <SetupScreen />;
-    }
   } else {
-    // No Supabase configured — load sample cards locally (original behavior)
+    // No Firebase configured — load sample cards locally (original behavior)
     // This effect is handled below
   }
 
