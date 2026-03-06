@@ -141,7 +141,6 @@ export default function App() {
         <Navigation
           activeTab={activeTab}
           onTabChange={setActiveTab}
-          syncService={syncRef.current}
         />
         <main className="flex-1 overflow-y-auto">
           {renderContent()}

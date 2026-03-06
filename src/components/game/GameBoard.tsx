@@ -12,10 +12,6 @@ interface GameBoardProps {
   onDeal?: (mode: DealMode) => void;
 }
 
-/**
- * GameBoard component - main game interface
- * Supports both desktop drag-drop and mobile tap-to-assign
- */
 export default function GameBoard({ onDeal }: GameBoardProps) {
   const { t } = useTranslation();
   const cards = useCardStore((state) => state.getCards());
@@ -29,10 +25,8 @@ export default function GameBoard({ onDeal }: GameBoardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editCard, setEditCard] = useState<CardType | undefined>();
   const [unassignedDragOver, setUnassignedDragOver] = useState(false);
-  // Tap-to-assign: selected card for mobile
   const [tappedCardId, setTappedCardId] = useState<string | null>(null);
 
-  // Build partner objects from store names
   const partners: Partner[] = [
     {
       id: 'partner-a',
@@ -40,7 +34,7 @@ export default function GameBoard({ onDeal }: GameBoardProps) {
       avatar: { type: 'avatar-builder', data: 'A' },
       preferences: { favoriteCards: [], avoidCards: [], strongSuits: ['home'], availability: {} },
       stats: { currentCards: 0, totalTimeCommitment: 0, streaks: [], achievements: [] },
-      theme: { color: '#E63946', pattern: { type: 'solid', color: '#E63946' }, icon: 'A' },
+      theme: { color: '#E07A8E', pattern: { type: 'solid', color: '#E07A8E' }, icon: 'A' },
     },
     {
       id: 'partner-b',
@@ -48,11 +42,10 @@ export default function GameBoard({ onDeal }: GameBoardProps) {
       avatar: { type: 'avatar-builder', data: 'B' },
       preferences: { favoriteCards: [], avoidCards: [], strongSuits: ['kids'], availability: {} },
       stats: { currentCards: 0, totalTimeCommitment: 0, streaks: [], achievements: [] },
-      theme: { color: '#06AED5', pattern: { type: 'solid', color: '#06AED5' }, icon: 'B' },
+      theme: { color: '#7FB69E', pattern: { type: 'solid', color: '#7FB69E' }, icon: 'B' },
     },
   ];
 
-  // Update card assignments
   useEffect(() => {
     setUnassignedCards(cards.filter((c) => !c.holder || c.holder === null));
     setPartnerACards(cards.filter((c) => c.holder === 'partner-a'));
@@ -71,7 +64,6 @@ export default function GameBoard({ onDeal }: GameBoardProps) {
     const unassigned = cards.filter((c) => !c.holder);
     if (unassigned.length === 0) return;
 
-    // Fisher-Yates shuffle
     const shuffled = [...unassigned];
     for (let i = shuffled.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -110,17 +102,6 @@ export default function GameBoard({ onDeal }: GameBoardProps) {
     }
   };
 
-  const handleToggleComplete = (cardId: string) => {
-    useCardStore.setState((state) => ({
-      cards: state.cards.map((c) =>
-        c.id === cardId
-          ? { ...c, status: (c.status === 'completed' ? 'held' : 'completed') as CardStatus }
-          : c
-      ),
-    }));
-  };
-
-  // Tap-to-assign: tap a card to select it, then tap a zone to assign
   const handleCardTap = (cardId: string) => {
     setTappedCardId(tappedCardId === cardId ? null : cardId);
   };
@@ -163,9 +144,9 @@ export default function GameBoard({ onDeal }: GameBoardProps) {
           </h2>
           <motion.button
             onClick={handleOpenCreateModal}
-            className="px-4 py-2 bg-partner-a text-paper font-display font-bold rounded-lg hover:shadow-brutal transition-all"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            className="px-4 py-2 bg-partner-a text-white font-display font-bold rounded-xl hover:shadow-soft-lg transition-all"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
           >
             + {t('game.newCard')}
           </motion.button>
@@ -178,15 +159,15 @@ export default function GameBoard({ onDeal }: GameBoardProps) {
               key={mode}
               onClick={() => handleDealMode(mode)}
               disabled={mode !== 'random'}
-              className={`px-4 py-2 rounded-lg font-display font-bold transition-all ${
+              className={`px-4 py-2 rounded-xl font-display font-bold transition-all ${
                 currentDealMode === mode
-                  ? 'bg-partner-a text-paper shadow-brutal'
+                  ? 'bg-partner-a text-white shadow-soft'
                   : mode !== 'random'
-                  ? 'bg-concrete/10 text-concrete/50 cursor-not-allowed'
-                  : 'bg-concrete/20 text-ink hover:bg-concrete/30'
+                  ? 'bg-gray-100 text-concrete/50 cursor-not-allowed'
+                  : 'bg-gray-100 text-ink hover:bg-gray-200'
               }`}
-              whileHover={mode === 'random' ? { scale: 1.05 } : {}}
-              whileTap={mode === 'random' ? { scale: 0.95 } : {}}
+              whileHover={mode === 'random' ? { scale: 1.02 } : {}}
+              whileTap={mode === 'random' ? { scale: 0.98 } : {}}
             >
               {t(`game.dealModes.${mode}`)}
               {mode !== 'random' && <span className="ml-1 text-xs">({t('game.comingSoon')})</span>}
@@ -198,24 +179,24 @@ export default function GameBoard({ onDeal }: GameBoardProps) {
         <div className="flex gap-3 mb-6">
           <motion.button
             onClick={handleDealCards}
-            className="px-6 py-2 bg-ink text-paper font-display font-bold rounded-lg hover:shadow-brutal transition-all"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            className="px-6 py-2.5 bg-ink text-white font-display font-bold rounded-xl hover:shadow-soft-lg transition-all"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
           >
             {t('game.deal')}
           </motion.button>
           <motion.button
             onClick={handleResetDeal}
-            className="px-6 py-2 bg-concrete/20 text-ink font-display font-bold rounded-lg hover:bg-concrete/30 transition-all"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            className="px-6 py-2.5 bg-gray-100 text-ink font-display font-bold rounded-xl hover:bg-gray-200 transition-all"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
           >
             {t('game.reset')}
           </motion.button>
         </div>
 
         {/* Tab selector */}
-        <div className="flex gap-2 border-b-2 border-ink">
+        <div className="flex gap-2 border-b border-gray-200">
           {(['deal', 'gallery'] as const).map((tab) => (
             <button
               key={tab}
@@ -235,7 +216,7 @@ export default function GameBoard({ onDeal }: GameBoardProps) {
       {/* Tap-to-assign banner (mobile) */}
       {tappedCard && (
         <motion.div
-          className="mb-4 p-3 bg-ink text-paper rounded-lg flex items-center justify-between"
+          className="mb-4 p-3 bg-accent/10 text-ink border border-accent/20 rounded-xl flex items-center justify-between"
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
         >
@@ -244,7 +225,7 @@ export default function GameBoard({ onDeal }: GameBoardProps) {
           </span>
           <button
             onClick={() => setTappedCardId(null)}
-            className="ml-4 px-3 py-1 bg-paper/20 rounded text-xs font-bold"
+            className="ml-4 px-3 py-1 bg-gray-100 rounded-lg text-xs font-bold hover:bg-gray-200 transition-colors"
           >
             {t('common.cancel')}
           </button>
@@ -265,7 +246,6 @@ export default function GameBoard({ onDeal }: GameBoardProps) {
                 onNameChange={(name) =>
                   partner.id === 'partner-a' ? setPartnerAName(name) : setPartnerBName(name)
                 }
-                onToggleComplete={handleToggleComplete}
                 onTapAssign={() => handleZoneTapAssign(partner.id)}
                 onCardTap={handleCardTap}
                 tappedCardId={tappedCardId}
@@ -279,8 +259,8 @@ export default function GameBoard({ onDeal }: GameBoardProps) {
 
           {/* Unassigned Cards Section */}
           <motion.div
-            className={`bg-unassigned/10 border-3 border-unassigned rounded-lg p-6 transition-all ${
-              unassignedDragOver ? 'ring-2 ring-offset-2 ring-unassigned shadow-brutal' : ''
+            className={`bg-unassigned-light border border-unassigned/20 rounded-2xl p-6 transition-all ${
+              unassignedDragOver ? 'ring-2 ring-accent/30 shadow-soft-lg' : ''
             } ${tappedCardId ? 'cursor-pointer' : ''}`}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -315,7 +295,7 @@ export default function GameBoard({ onDeal }: GameBoardProps) {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.05 }}
-                    className={`group relative ${tappedCardId === card.id ? 'ring-3 ring-ink rounded-lg' : ''}`}
+                    className={`group relative ${tappedCardId === card.id ? 'ring-2 ring-accent rounded-2xl' : ''}`}
                   >
                     <Card
                       card={card}
@@ -329,10 +309,10 @@ export default function GameBoard({ onDeal }: GameBoardProps) {
                     />
                     <button
                       onClick={(e) => { e.stopPropagation(); handleOpenEditModal(card); }}
-                      className="absolute top-2 right-2 p-1 bg-white/90 text-ink rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="absolute top-2 right-2 p-1.5 bg-white/90 text-concrete rounded-lg opacity-0 group-hover:opacity-100 transition-opacity shadow-soft-sm hover:text-ink"
                       title={t('common.edit')}
                     >
-                      ✏️
+                      Edit
                     </button>
                   </motion.div>
                 ))}
@@ -379,10 +359,10 @@ export default function GameBoard({ onDeal }: GameBoardProps) {
                 />
                 <button
                   onClick={() => handleOpenEditModal(card)}
-                  className="absolute top-2 right-2 p-1 bg-white/90 text-ink rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute top-2 right-2 p-1.5 bg-white/90 text-concrete rounded-lg opacity-0 group-hover:opacity-100 transition-opacity shadow-soft-sm hover:text-ink"
                   title={t('common.edit')}
                 >
-                  ✏️
+                  Edit
                 </button>
               </motion.div>
             ))
@@ -406,16 +386,16 @@ export default function GameBoard({ onDeal }: GameBoardProps) {
 
       {/* Summary Footer */}
       <motion.div
-        className="mt-8 pt-6 border-t-2 border-ink grid grid-cols-3 gap-4"
+        className="mt-8 pt-6 border-t border-gray-200 grid grid-cols-3 gap-4"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.3 }}
       >
-        <div className="text-center p-4 bg-partner-a/10 rounded-lg">
+        <div className="text-center p-4 bg-partner-a-light rounded-2xl">
           <p className="text-sm font-body text-concrete mb-2">
             {partnerAName}
             {myPartnerSlot === 'partner-a' && (
-              <span className="ml-1 text-xs bg-partner-a text-paper px-1.5 py-0.5 rounded-full font-bold">
+              <span className="ml-1 text-xs bg-partner-a text-white px-1.5 py-0.5 rounded-full font-bold">
                 {t('game.you', 'You')}
               </span>
             )}
@@ -423,16 +403,16 @@ export default function GameBoard({ onDeal }: GameBoardProps) {
           <p className="text-2xl font-display font-bold text-partner-a">{partnerACards.length}</p>
           <p className="text-xs text-concrete/70 mt-1">{getTimeCommitment(partnerACards)}m/{t('game.week')}</p>
         </div>
-        <div className="text-center p-4 bg-unassigned/10 rounded-lg">
+        <div className="text-center p-4 bg-unassigned-light rounded-2xl">
           <p className="text-sm font-body text-concrete mb-2">{t('cards.unassigned')}</p>
           <p className="text-2xl font-display font-bold text-unassigned">{unassignedCards.length}</p>
           <p className="text-xs text-concrete/70 mt-1">{getTimeCommitment(unassignedCards)}m</p>
         </div>
-        <div className="text-center p-4 bg-partner-b/10 rounded-lg">
+        <div className="text-center p-4 bg-partner-b-light rounded-2xl">
           <p className="text-sm font-body text-concrete mb-2">
             {partnerBName}
             {myPartnerSlot === 'partner-b' && (
-              <span className="ml-1 text-xs bg-partner-b text-paper px-1.5 py-0.5 rounded-full font-bold">
+              <span className="ml-1 text-xs bg-partner-b text-white px-1.5 py-0.5 rounded-full font-bold">
                 {t('game.you', 'You')}
               </span>
             )}

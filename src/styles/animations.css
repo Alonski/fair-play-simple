@@ -74,11 +74,11 @@
 @keyframes cardLift {
   0% {
     transform: translateY(0) scale(1);
-    box-shadow: 0 2px 4px rgba(10, 9, 8, 0.1);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   }
   100% {
-    transform: translateY(-8px) scale(1.02);
-    box-shadow: 0 12px 24px rgba(10, 9, 8, 0.15);
+    transform: translateY(-4px) scale(1.01);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
   }
 }
 
@@ -159,10 +159,10 @@
 @keyframes glow {
   0%,
   100% {
-    box-shadow: 0 0 5px rgba(230, 57, 70, 0.3);
+    box-shadow: 0 0 5px rgba(167, 139, 250, 0.3);
   }
   50% {
-    box-shadow: 0 0 15px rgba(230, 57, 70, 0.6);
+    box-shadow: 0 0 15px rgba(167, 139, 250, 0.5);
   }
 }
 

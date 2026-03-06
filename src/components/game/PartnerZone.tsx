@@ -9,7 +9,6 @@ interface PartnerZoneProps {
   cards: CardType[];
   onCardDrop?: (cardId: string) => void;
   onNameChange?: (name: string) => void;
-  onToggleComplete?: (cardId: string) => void;
   onTapAssign?: () => void;
   onCardTap?: (cardId: string) => void;
   tappedCardId?: string | null;
@@ -17,16 +16,11 @@ interface PartnerZoneProps {
   totalTime?: number;
 }
 
-/**
- * PartnerZone component - displays cards assigned to a partner
- * Supports drag-drop (desktop) and tap-to-assign (mobile)
- */
 export default function PartnerZone({
   partner,
   cards,
   onCardDrop,
   onNameChange,
-  onToggleComplete,
   onTapAssign,
   onCardTap,
   tappedCardId,
@@ -64,14 +58,15 @@ export default function PartnerZone({
     setEditing(false);
   };
 
-  const partnerBg = partner.id === 'partner-a' ? 'bg-partner-a' : 'bg-partner-b';
-  const partnerBorder = partner.id === 'partner-a' ? 'border-partner-a' : 'border-partner-b';
-  const completedCount = cards.filter((c) => c.status === 'completed').length;
+  const isA = partner.id === 'partner-a';
+  const partnerColor = isA ? 'bg-partner-a' : 'bg-partner-b';
+  const partnerBorderColor = isA ? 'border-partner-a/20' : 'border-partner-b/20';
+  const partnerLightBg = isA ? 'bg-partner-a-light' : 'bg-partner-b-light';
 
   return (
     <motion.div
-      className={`flex-1 rounded-lg border-3 ${partnerBorder} p-6 transition-all ${
-        dragOver ? 'ring-2 ring-offset-2 ring-ink shadow-brutal' : 'shadow-brutal-sm'
+      className={`flex-1 rounded-2xl border ${partnerBorderColor} bg-white p-6 transition-all ${
+        dragOver ? 'ring-2 ring-accent/30 shadow-soft-lg' : 'shadow-soft'
       } ${isActive ? 'opacity-100' : 'opacity-70'} ${tappedCardId ? 'cursor-pointer' : ''}`}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
@@ -84,10 +79,10 @@ export default function PartnerZone({
       transition={{ duration: 0.3 }}
     >
       {/* Partner Header */}
-      <div className="mb-6 pb-4 border-b-2 border-ink">
+      <div className="mb-6 pb-4 border-b border-gray-100">
         <div className="flex items-center gap-4 mb-3">
           <div
-            className={`w-12 h-12 ${partnerBg} rounded-full flex items-center justify-center text-paper font-display font-bold text-lg shadow-brutal-sm`}
+            className={`w-12 h-12 ${partnerColor} rounded-full flex items-center justify-center text-white font-display font-bold text-lg shadow-soft-sm`}
           >
             {partner.name.charAt(0).toUpperCase()}
           </div>
@@ -108,12 +103,12 @@ export default function PartnerZone({
                 }}
                 autoFocus
                 maxLength={30}
-                className="font-display text-lg font-bold text-ink bg-paper/80 border-2 border-ink rounded px-2 py-1 outline-none focus:ring-2 focus:ring-partner-a"
+                className="font-display text-lg font-bold text-ink bg-white border border-gray-300 rounded-xl px-3 py-1 outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent"
                 onClick={(e) => e.stopPropagation()}
               />
             ) : (
               <h3
-                className="font-display text-lg font-bold text-ink cursor-pointer hover:underline"
+                className="font-display text-lg font-bold text-ink cursor-pointer hover:text-accent transition-colors"
                 onClick={(e) => {
                   e.stopPropagation();
                   setNameInput(partner.name);
@@ -132,7 +127,7 @@ export default function PartnerZone({
 
         {/* Tap-to-assign hint */}
         {tappedCardId && (
-          <p className="text-xs font-bold text-partner-a animate-pulse mt-2">
+          <p className={`text-xs font-bold ${isA ? 'text-partner-a' : 'text-partner-b'} animate-pulse mt-2`}>
             {t('game.tapHereToAssign')}
           </p>
         )}
@@ -143,7 +138,7 @@ export default function PartnerZone({
             <span className="text-xs font-bold font-display text-concrete">
               {t('game.timeCommitment')}:
             </span>
-            <span className={`px-2 py-1 rounded text-xs font-bold ${partnerBg} text-paper`}>
+            <span className={`px-2 py-1 rounded-lg text-xs font-bold ${partnerLightBg} ${isA ? 'text-partner-a' : 'text-partner-b'}`}>
               {totalTime} {t('game.minutesPerWeek')}
             </span>
           </div>
@@ -152,8 +147,8 @@ export default function PartnerZone({
 
       {/* Cards Grid */}
       <div
-        className={`grid grid-cols-1 md:grid-cols-2 gap-4 min-h-64 p-4 rounded ${
-          dragOver ? 'bg-unassigned/10 border-2 border-dashed border-ink' : 'bg-paper/50'
+        className={`grid grid-cols-1 md:grid-cols-2 gap-4 min-h-64 p-4 rounded-xl ${
+          dragOver ? 'bg-accent/5 border-2 border-dashed border-accent/30' : 'bg-gray-50/50'
         } transition-colors`}
       >
         {cards.length > 0 ? (
@@ -176,18 +171,6 @@ export default function PartnerZone({
                   e.dataTransfer.setData('cardId', card.id);
                 }}
               />
-              {/* Done toggle button */}
-              <button
-                onClick={(e) => { e.stopPropagation(); onToggleComplete?.(card.id); }}
-                className={`absolute top-2 right-2 w-8 h-8 rounded-full border-2 flex items-center justify-center text-sm transition-all z-10 ${
-                  card.status === 'completed'
-                    ? 'bg-green-500 text-white border-green-500'
-                    : 'bg-white/80 border-concrete hover:border-ink'
-                }`}
-                title={card.status === 'completed' ? t('game.markNotDone') : t('game.markDone')}
-              >
-                {card.status === 'completed' ? '✓' : ''}
-              </button>
             </motion.div>
           ))
         ) : (
@@ -209,7 +192,7 @@ export default function PartnerZone({
       </div>
 
       {/* Partner stats */}
-      <div className="mt-4 pt-4 border-t-2 border-ink/20 flex gap-4 justify-between text-xs font-body">
+      <div className="mt-4 pt-4 border-t border-gray-100 flex gap-4 justify-between text-xs font-body">
         <div>
           <span className="block text-concrete font-bold mb-1">{t('game.difficulty')}</span>
           <span className="text-ink font-bold">
@@ -217,12 +200,8 @@ export default function PartnerZone({
           </span>
         </div>
         <div>
-          <span className="block text-concrete font-bold mb-1">{t('cards.completed')}</span>
-          <span className="text-ink font-bold">{completedCount}/{cards.length}</span>
-        </div>
-        <div>
           <span className="block text-concrete font-bold mb-1">{t('game.status')}</span>
-          <span className={`${partnerBg} text-paper px-2 py-1 rounded font-bold`}>
+          <span className={`${partnerLightBg} ${isA ? 'text-partner-a' : 'text-partner-b'} px-2 py-1 rounded-lg font-bold`}>
             {isActive ? t('game.active') : t('game.paused')}
           </span>
         </div>

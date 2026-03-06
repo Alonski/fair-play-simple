@@ -12,15 +12,6 @@ interface CardProps {
   draggable?: boolean;
 }
 
-/**
- * Card component representing a Fair Play card
- * Features:
- * - 3D flip animation
- * - Drag and drop support
- * - Partner color indication
- * - Animated hover states
- * - Torn paper edge effect
- */
 export default function Card({
   card,
   isSelected = false,
@@ -36,32 +27,39 @@ export default function Card({
   const text = isRTL ? card.title.he : card.title.en;
   const description = isRTL ? card.description.he : card.description.en;
 
-  // Determine card color based on holder
-  const getCardColor = () => {
+  // Light tinted background based on holder
+  const getCardBg = () => {
     switch (card.holder) {
       case 'partner-a':
-        return 'bg-partner-a';
+        return 'bg-partner-a-light';
       case 'partner-b':
-        return 'bg-partner-b';
+        return 'bg-partner-b-light';
       default:
-        return 'bg-unassigned';
+        return 'bg-unassigned-light';
     }
   };
 
-  const getCategoryColor = () => {
-    switch (card.category) {
-      case 'daily-grind':
-        return 'border-partner-a';
-      case 'kids':
-        return 'border-partner-b';
-      case 'home':
-        return 'border-concrete';
-      case 'magic':
-        return 'border-unassigned';
-      case 'wild':
-        return 'border-ink';
+  // Left accent border color based on holder
+  const getAccentBorder = () => {
+    switch (card.holder) {
+      case 'partner-a':
+        return 'border-l-partner-a';
+      case 'partner-b':
+        return 'border-l-partner-b';
       default:
-        return 'border-concrete';
+        return 'border-l-unassigned';
+    }
+  };
+
+  // Text color for category label
+  const getCategoryColor = () => {
+    switch (card.holder) {
+      case 'partner-a':
+        return 'text-partner-a';
+      case 'partner-b':
+        return 'text-partner-b';
+      default:
+        return 'text-concrete';
     }
   };
 
@@ -69,11 +67,11 @@ export default function Card({
     initial: { opacity: 0, y: 20 },
     animate: { opacity: 1, y: 0 },
     hover: {
-      y: -12,
-      boxShadow: '0 12px 24px rgba(10, 9, 8, 0.15)',
+      y: -4,
+      boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
     },
     selected: {
-      boxShadow: '0 0 0 3px rgba(230, 57, 70, 0.5)',
+      boxShadow: '0 0 0 2px rgba(167, 139, 250, 0.5)',
     },
   };
 
@@ -86,7 +84,7 @@ export default function Card({
     >
       <motion.div
         className={`relative w-full h-64 cursor-grab active:cursor-grabbing ${
-          draggable ? 'hover:shadow-brutal' : ''
+          draggable ? 'hover:shadow-soft-lg' : ''
         }`}
         variants={containerVariants}
         initial="initial"
@@ -106,24 +104,24 @@ export default function Card({
         transition={{ duration: 0.6, type: 'spring', stiffness: 100 }}
         style={{ transformStyle: 'preserve-3d' } as { [key: string]: string }}
       >
-        {/* Front side */}
+        {/* Front side — light tinted bg with dark text */}
         <div
-          className={`absolute w-full h-full ${getCardColor()} border-4 ${getCategoryColor()} rounded-lg p-6 flex flex-col justify-between torn-paper grain ${card.status === 'completed' ? 'opacity-60' : ''}`}
+          className={`absolute w-full h-full ${getCardBg()} border border-gray-200 border-l-4 ${getAccentBorder()} rounded-2xl p-6 flex flex-col justify-between shadow-soft`}
           style={{ backfaceVisibility: 'hidden' } as { [key: string]: string }}
         >
           <div>
-            <div className="text-xs font-display font-bold text-paper mb-2 opacity-80 uppercase tracking-wider">
+            <div className={`text-xs font-display font-bold ${getCategoryColor()} mb-2 uppercase tracking-wider`}>
               {card.category}
             </div>
             <h3
-              className={`font-display text-xl font-bold text-paper mb-3 ${
+              className={`font-display text-xl font-bold text-ink mb-3 ${
                 isRTL ? 'text-right' : 'text-left'
               }`}
             >
               {text}
             </h3>
             <p
-              className={`text-sm font-body text-paper/90 line-clamp-3 ${
+              className={`text-sm font-body text-ink/70 line-clamp-3 ${
                 isRTL ? 'text-right' : 'text-left'
               }`}
             >
@@ -132,7 +130,7 @@ export default function Card({
           </div>
 
           {/* Card metadata */}
-          <div className="flex justify-between items-center text-xs text-paper/70 mt-4">
+          <div className="flex justify-between items-center text-xs text-concrete mt-4">
             <div className="flex gap-2">
               {card.metadata.difficulty > 0 && (
                 <span className="font-bold">
@@ -142,14 +140,14 @@ export default function Card({
               <span className="opacity-75">{card.metadata.timeEstimate}m</span>
             </div>
             {isHovered && draggable && (
-              <span className="text-paper/50 text-xs italic">drag</span>
+              <span className="text-concrete/50 text-xs italic">drag</span>
             )}
           </div>
         </div>
 
         {/* Back side */}
         <div
-          className="absolute w-full h-full bg-paper border-4 border-ink rounded-lg p-6 flex flex-col justify-between torn-paper grain"
+          className="absolute w-full h-full bg-white border border-gray-200 rounded-2xl p-6 flex flex-col justify-between shadow-soft"
           style={{
             backfaceVisibility: 'hidden',
             transform: 'rotateY(180deg)',
@@ -160,7 +158,7 @@ export default function Card({
               Details
             </h4>
             <p
-              className={`text-sm font-body text-ink/80 ${
+              className={`text-sm font-body text-ink/70 ${
                 isRTL ? 'text-right' : 'text-left'
               }`}
             >
@@ -170,11 +168,11 @@ export default function Card({
 
           {/* Tags and status */}
           <div className="flex flex-wrap gap-2 mt-4">
-            <span className="text-xs px-2 py-1 bg-unassigned text-ink rounded font-bold">
+            <span className="text-xs px-2 py-1 bg-unassigned-light text-ink rounded-lg font-bold">
               {card.status}
             </span>
             {card.metadata.isCustom && (
-              <span className="text-xs px-2 py-1 bg-concrete/20 text-ink rounded">
+              <span className="text-xs px-2 py-1 bg-gray-100 text-ink rounded-lg">
                 Custom
               </span>
             )}
@@ -184,7 +182,7 @@ export default function Card({
 
       {/* Selection indicator */}
       {isSelected && (
-        <div className="absolute -inset-2 border-3 border-partner-a rounded-lg pointer-events-none animate-pulse" />
+        <div className="absolute -inset-2 border-2 border-accent rounded-2xl pointer-events-none animate-pulse" />
       )}
       </motion.div>
     </div>

@@ -14,16 +14,6 @@ const CATEGORIES: Category[] = ['daily-grind', 'kids', 'home', 'magic', 'wild'];
 const FREQUENCIES: Frequency[] = ['daily', 'weekly', 'monthly', 'occasional'];
 const DIFFICULTIES: DifficultyLevel[] = [1, 2, 3];
 
-/**
- * CardModal component for adding/editing cards
- * Features:
- * - Form for card title, description, details
- * - Category, frequency, difficulty selection
- * - English and Hebrew translations
- * - Time estimate input
- * - Delete functionality
- * - Form validation
- */
 export default function CardModal({
   isOpen,
   card,
@@ -48,7 +38,6 @@ export default function CardModal({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // Initialize form with card data if editing
   useEffect(() => {
     if (card) {
       setFormData({
@@ -65,7 +54,6 @@ export default function CardModal({
       });
       setErrors({});
     } else {
-      // Reset form for new card
       setFormData({
         titleEn: '',
         titleHe: '',
@@ -148,6 +136,13 @@ export default function CardModal({
     }
   };
 
+  const inputClasses = (field?: string) =>
+    `w-full px-4 py-2.5 border rounded-xl font-body bg-white focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all ${
+      field && errors[field]
+        ? 'border-partner-a'
+        : 'border-gray-300'
+    }`;
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -158,7 +153,7 @@ export default function CardModal({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-ink/50 z-40"
+            className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40"
           />
 
           {/* Modal */}
@@ -166,27 +161,27 @@ export default function CardModal({
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="fixed inset-4 md:inset-auto md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-full md:max-w-2xl bg-paper border-4 border-ink rounded-lg z-50 shadow-brutal overflow-y-auto max-h-[90vh]"
+            className="fixed inset-4 md:inset-auto md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-full md:max-w-2xl bg-white border border-gray-200 rounded-2xl z-50 shadow-soft-lg overflow-y-auto max-h-[90vh]"
           >
             {/* Header */}
-            <div className="sticky top-0 bg-paper border-b-4 border-ink p-6 flex justify-between items-center">
-              <h2 className="font-display text-2xl font-bold text-ink">
+            <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex justify-between items-center rounded-t-2xl">
+              <h2 className="font-display text-xl font-bold text-ink">
                 {card ? 'Edit Card' : 'Create New Card'}
               </h2>
               <button
                 onClick={onClose}
-                className="text-2xl font-bold text-ink hover:text-partner-a transition-colors"
+                className="w-8 h-8 bg-gray-100 rounded-lg text-concrete text-lg flex items-center justify-center hover:bg-gray-200 transition-colors"
                 aria-label="Close modal"
               >
-                ✕
+                &times;
               </button>
             </div>
 
             {/* Form */}
-            <form onSubmit={handleSubmit} className="p-6 space-y-6">
+            <form onSubmit={handleSubmit} className="p-6 space-y-5">
               {/* Category Selection */}
               <div>
-                <label className="block font-display font-bold text-ink mb-2">
+                <label className="block font-display font-semibold text-ink mb-1.5 text-sm">
                   Category
                 </label>
                 <select
@@ -197,7 +192,7 @@ export default function CardModal({
                       category: e.target.value as Category,
                     })
                   }
-                  className="w-full px-4 py-2 border-2 border-concrete rounded-lg font-body focus:outline-none focus:border-partner-a"
+                  className={inputClasses()}
                 >
                   {CATEGORIES.map((cat) => (
                     <option key={cat} value={cat}>
@@ -209,7 +204,7 @@ export default function CardModal({
 
               {/* English Title */}
               <div>
-                <label className="block font-display font-bold text-ink mb-2">
+                <label className="block font-display font-semibold text-ink mb-1.5 text-sm">
                   English Title *
                 </label>
                 <input
@@ -219,11 +214,7 @@ export default function CardModal({
                     setFormData({ ...formData, titleEn: e.target.value })
                   }
                   placeholder="e.g., Morning Dishes"
-                  className={`w-full px-4 py-2 border-2 rounded-lg font-body focus:outline-none ${
-                    errors.titleEn
-                      ? 'border-partner-a focus:border-partner-a'
-                      : 'border-concrete focus:border-partner-a'
-                  }`}
+                  className={inputClasses('titleEn')}
                 />
                 {errors.titleEn && (
                   <p className="text-partner-a text-sm mt-1">{errors.titleEn}</p>
@@ -232,7 +223,7 @@ export default function CardModal({
 
               {/* Hebrew Title */}
               <div>
-                <label className="block font-display font-bold text-ink mb-2">
+                <label className="block font-display font-semibold text-ink mb-1.5 text-sm">
                   Hebrew Title *
                 </label>
                 <input
@@ -242,11 +233,7 @@ export default function CardModal({
                     setFormData({ ...formData, titleHe: e.target.value })
                   }
                   placeholder="כותרת בעברית"
-                  className={`w-full px-4 py-2 border-2 rounded-lg font-body focus:outline-none text-right ${
-                    errors.titleHe
-                      ? 'border-partner-a focus:border-partner-a'
-                      : 'border-concrete focus:border-partner-a'
-                  }`}
+                  className={`${inputClasses('titleHe')} text-right`}
                   dir="rtl"
                 />
                 {errors.titleHe && (
@@ -256,7 +243,7 @@ export default function CardModal({
 
               {/* English Description */}
               <div>
-                <label className="block font-display font-bold text-ink mb-2">
+                <label className="block font-display font-semibold text-ink mb-1.5 text-sm">
                   English Description *
                 </label>
                 <textarea
@@ -266,11 +253,7 @@ export default function CardModal({
                   }
                   placeholder="Brief description of the task"
                   rows={3}
-                  className={`w-full px-4 py-2 border-2 rounded-lg font-body focus:outline-none resize-none ${
-                    errors.descEn
-                      ? 'border-partner-a focus:border-partner-a'
-                      : 'border-concrete focus:border-partner-a'
-                  }`}
+                  className={`${inputClasses('descEn')} resize-none`}
                 />
                 {errors.descEn && (
                   <p className="text-partner-a text-sm mt-1">{errors.descEn}</p>
@@ -279,7 +262,7 @@ export default function CardModal({
 
               {/* Hebrew Description */}
               <div>
-                <label className="block font-display font-bold text-ink mb-2">
+                <label className="block font-display font-semibold text-ink mb-1.5 text-sm">
                   Hebrew Description *
                 </label>
                 <textarea
@@ -290,11 +273,7 @@ export default function CardModal({
                   placeholder="תיאור קצר של המשימה"
                   rows={3}
                   dir="rtl"
-                  className={`w-full px-4 py-2 border-2 rounded-lg font-body focus:outline-none resize-none text-right ${
-                    errors.descHe
-                      ? 'border-partner-a focus:border-partner-a'
-                      : 'border-concrete focus:border-partner-a'
-                  }`}
+                  className={`${inputClasses('descHe')} resize-none text-right`}
                 />
                 {errors.descHe && (
                   <p className="text-partner-a text-sm mt-1">{errors.descHe}</p>
@@ -303,7 +282,7 @@ export default function CardModal({
 
               {/* English Details */}
               <div>
-                <label className="block font-display font-bold text-ink mb-2">
+                <label className="block font-display font-semibold text-ink mb-1.5 text-sm">
                   English Details *
                 </label>
                 <textarea
@@ -313,11 +292,7 @@ export default function CardModal({
                   }
                   placeholder="Additional details (frequency, notes, etc.)"
                   rows={2}
-                  className={`w-full px-4 py-2 border-2 rounded-lg font-body focus:outline-none resize-none ${
-                    errors.detailsEn
-                      ? 'border-partner-a focus:border-partner-a'
-                      : 'border-concrete focus:border-partner-a'
-                  }`}
+                  className={`${inputClasses('detailsEn')} resize-none`}
                 />
                 {errors.detailsEn && (
                   <p className="text-partner-a text-sm mt-1">{errors.detailsEn}</p>
@@ -326,7 +301,7 @@ export default function CardModal({
 
               {/* Hebrew Details */}
               <div>
-                <label className="block font-display font-bold text-ink mb-2">
+                <label className="block font-display font-semibold text-ink mb-1.5 text-sm">
                   Hebrew Details *
                 </label>
                 <textarea
@@ -337,11 +312,7 @@ export default function CardModal({
                   placeholder="פרטים נוספים"
                   rows={2}
                   dir="rtl"
-                  className={`w-full px-4 py-2 border-2 rounded-lg font-body focus:outline-none resize-none text-right ${
-                    errors.detailsHe
-                      ? 'border-partner-a focus:border-partner-a'
-                      : 'border-concrete focus:border-partner-a'
-                  }`}
+                  className={`${inputClasses('detailsHe')} resize-none text-right`}
                 />
                 {errors.detailsHe && (
                   <p className="text-partner-a text-sm mt-1">{errors.detailsHe}</p>
@@ -352,7 +323,7 @@ export default function CardModal({
               <div className="grid grid-cols-3 gap-4">
                 {/* Frequency */}
                 <div>
-                  <label className="block font-display font-bold text-ink mb-2 text-sm">
+                  <label className="block font-display font-semibold text-ink mb-1.5 text-xs">
                     Frequency
                   </label>
                   <select
@@ -363,7 +334,7 @@ export default function CardModal({
                         frequency: e.target.value as Frequency,
                       })
                     }
-                    className="w-full px-3 py-2 border-2 border-concrete rounded-lg font-body text-sm focus:outline-none focus:border-partner-a"
+                    className={`${inputClasses()} text-sm`}
                   >
                     {FREQUENCIES.map((freq) => (
                       <option key={freq} value={freq}>
@@ -375,7 +346,7 @@ export default function CardModal({
 
                 {/* Difficulty */}
                 <div>
-                  <label className="block font-display font-bold text-ink mb-2 text-sm">
+                  <label className="block font-display font-semibold text-ink mb-1.5 text-xs">
                     Difficulty
                   </label>
                   <select
@@ -386,7 +357,7 @@ export default function CardModal({
                         difficulty: parseInt(e.target.value) as DifficultyLevel,
                       })
                     }
-                    className="w-full px-3 py-2 border-2 border-concrete rounded-lg font-body text-sm focus:outline-none focus:border-partner-a"
+                    className={`${inputClasses()} text-sm`}
                   >
                     {DIFFICULTIES.map((diff) => (
                       <option key={diff} value={diff}>
@@ -398,7 +369,7 @@ export default function CardModal({
 
                 {/* Time Estimate */}
                 <div>
-                  <label className="block font-display font-bold text-ink mb-2 text-sm">
+                  <label className="block font-display font-semibold text-ink mb-1.5 text-xs">
                     Time (min) *
                   </label>
                   <input
@@ -412,11 +383,7 @@ export default function CardModal({
                     }
                     min="5"
                     max="480"
-                    className={`w-full px-3 py-2 border-2 rounded-lg font-body text-sm focus:outline-none ${
-                      errors.timeEstimate
-                        ? 'border-partner-a focus:border-partner-a'
-                        : 'border-concrete focus:border-partner-a'
-                    }`}
+                    className={`${inputClasses('timeEstimate')} text-sm`}
                   />
                   {errors.timeEstimate && (
                     <p className="text-partner-a text-xs mt-1">
@@ -427,18 +394,20 @@ export default function CardModal({
               </div>
 
               {/* Action Buttons */}
-              <div className="flex gap-3 pt-6 border-t-2 border-concrete">
-                <button
+              <div className="flex gap-3 pt-6 border-t border-gray-200">
+                <motion.button
                   type="submit"
-                  className="flex-1 px-6 py-3 bg-partner-a text-paper font-display font-bold rounded-lg hover:shadow-brutal transition-all"
+                  className="flex-1 px-6 py-3 bg-partner-a text-white font-display font-bold rounded-xl hover:shadow-soft-lg transition-all"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                 >
                   {card ? 'Update Card' : 'Create Card'}
-                </button>
+                </motion.button>
 
                 <button
                   type="button"
                   onClick={onClose}
-                  className="flex-1 px-6 py-3 bg-concrete/20 text-ink font-display font-bold rounded-lg hover:bg-concrete/30 transition-all"
+                  className="flex-1 px-6 py-3 bg-gray-100 text-ink font-display font-bold rounded-xl hover:bg-gray-200 transition-all"
                 >
                   Cancel
                 </button>
@@ -448,10 +417,10 @@ export default function CardModal({
                     type="button"
                     onClick={handleDelete}
                     disabled={isDeleting}
-                    className="px-6 py-3 bg-partner-a/30 text-partner-a font-display font-bold rounded-lg hover:bg-partner-a/50 disabled:opacity-50 transition-all"
+                    className="px-6 py-3 bg-partner-a/10 text-partner-a font-display font-bold rounded-xl hover:bg-partner-a/20 disabled:opacity-50 transition-all"
                     title="Delete this card"
                   >
-                    🗑️
+                    Delete
                   </button>
                 )}
               </div>
