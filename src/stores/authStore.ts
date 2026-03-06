@@ -22,6 +22,11 @@ const ALLOWED_EMAILS = [
   'swaddlesnaps@gmail.com',
 ];
 
+const EMAIL_TO_NAME: Record<string, string> = {
+  'alonzorz@gmail.com': 'Alon',
+  'swaddlesnaps@gmail.com': 'Moral',
+};
+
 const HOUSEHOLD_ID = 'shared';
 
 interface AuthStoreState {
@@ -69,6 +74,8 @@ async function joinOrCreateHousehold(user: User, profile: UserProfile): Promise<
   if (!db || profile.householdId) return profile;
 
   const updatedProfile = { ...profile };
+  const realName = EMAIL_TO_NAME[user.email ?? ''] ?? user.displayName ?? 'Partner';
+  const otherName = Object.entries(EMAIL_TO_NAME).find(([email]) => email !== user.email)?.[1] ?? 'Partner';
 
   await runTransaction(db, async (transaction) => {
     const householdRef = doc(db!, 'households', HOUSEHOLD_ID);
@@ -79,7 +86,7 @@ async function joinOrCreateHousehold(user: User, profile: UserProfile): Promise<
       const data = householdSnap.data();
       slot = 'partner-b';
       if (!data.partnerBUid) {
-        transaction.update(householdRef, { partnerBUid: user.uid });
+        transaction.update(householdRef, { partnerBUid: user.uid, partnerBName: realName });
       }
     } else {
       slot = 'partner-a';
@@ -87,8 +94,8 @@ async function joinOrCreateHousehold(user: User, profile: UserProfile): Promise<
         name: 'Our Home',
         partnerAUid: user.uid,
         partnerBUid: null,
-        partnerAName: 'Partner A',
-        partnerBName: 'Partner B',
+        partnerAName: realName,
+        partnerBName: otherName,
         dealMode: 'random',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -159,6 +166,18 @@ export const useAuthStore = create<AuthStoreState>()((set, get) => ({
                 : 'partner-b';
               await updateDoc(doc(db, 'users', user.uid), { partnerSlot: slot });
               profile = { ...profile, partnerSlot: slot };
+            }
+
+            // Backfill real names if household still has generic placeholders
+            const h = household as { partnerAName?: string; partnerBName?: string } | null;
+            if (db && h && (h.partnerAName === 'Partner A' || h.partnerBName === 'Partner B')) {
+              const realName = EMAIL_TO_NAME[user.email ?? ''] ?? user.displayName ?? 'Partner';
+              const otherName = Object.entries(EMAIL_TO_NAME).find(([email]) => email !== user.email)?.[1] ?? 'Partner';
+              const isA = (h as { partnerAUid?: string }).partnerAUid === user.uid;
+              await updateDoc(doc(db, 'households', profile.householdId!), {
+                partnerAName: isA ? realName : otherName,
+                partnerBName: isA ? otherName : realName,
+              });
             }
           }
 

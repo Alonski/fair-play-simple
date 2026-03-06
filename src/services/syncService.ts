@@ -11,7 +11,7 @@ import {
   type Unsubscribe,
 } from 'firebase/firestore';
 
-function localCardToFirestore(card: Card, userId: string): FirestoreCard {
+export function localCardToFirestore(card: Card, userId: string): FirestoreCard {
   return {
     category: card.category,
     title: card.title,
@@ -26,7 +26,7 @@ function localCardToFirestore(card: Card, userId: string): FirestoreCard {
   };
 }
 
-function firestoreCardToLocal(id: string, data: FirestoreCard): Card {
+export function firestoreCardToLocal(id: string, data: FirestoreCard): Card {
   return {
     id,
     category: data.category as Card['category'],
@@ -201,7 +201,7 @@ export class SyncService {
     });
   }
 
-  private diffCards(prev: Card[], curr: Card[]): Card[] {
+  diffCards(prev: Card[], curr: Card[]): Card[] {
     const changed: Card[] = [];
     const prevMap = new Map(prev.map((c) => [c.id, c]));
 
