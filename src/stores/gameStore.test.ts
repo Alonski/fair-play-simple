@@ -4,15 +4,19 @@ import type { GameState } from '@types';
 
 const makeGameState = (overrides: Partial<GameState> = {}): GameState => ({
   id: 'game-1',
-  householdId: 'household-1',
   partners: [],
   cards: [],
-  currentRound: 1,
-  totalRounds: 1,
+  negotiations: [],
   isActive: true,
   dealMode: 'random',
-  createdAt: new Date().toISOString(),
-  updatedAt: new Date().toISOString(),
+  rules: {
+    minCardsPerPartner: 0,
+    categoryBalanceRequired: false,
+    checkDependencies: false,
+    trackTime: false,
+  },
+  createdAt: new Date(),
+  modifiedAt: new Date(),
   ...overrides,
 });
 
@@ -39,9 +43,9 @@ describe('gameStore', () => {
 
   describe('setGameState', () => {
     it('updates gameState', () => {
-      const gs = makeGameState({ currentRound: 3 });
+      const gs = makeGameState({ isActive: false });
       useGameStore.getState().setGameState(gs);
-      expect(useGameStore.getState().getGameState()?.currentRound).toBe(3);
+      expect(useGameStore.getState().getGameState()?.isActive).toBe(false);
     });
   });
 
