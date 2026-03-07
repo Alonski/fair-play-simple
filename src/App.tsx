@@ -1,5 +1,6 @@
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Outlet } from '@tanstack/react-router';
 import { useSettingsStore } from '@stores/index';
 import { useCardStore } from '@stores/index';
 import { useAuthStore } from '@stores/authStore';
@@ -10,7 +11,6 @@ import { sampleCards } from '@utils/sampleCards';
 // Components
 import Navigation from '@components/layout/Navigation';
 import Background from '@components/layout/Background';
-import GameBoard from '@components/game/GameBoard';
 import AuthScreen from '@components/auth/AuthScreen';
 
 // Styles
@@ -22,7 +22,6 @@ export default function App() {
   const { t, i18n } = useTranslation();
   const { language, theme, animations } = useSettingsStore();
   const { isLoading, isAuthenticated, profile, initialize } = useAuthStore();
-  const [activeTab, setActiveTab] = useState('gameBoard');
   const syncRef = useRef<SyncService | null>(null);
 
   // Initialize auth on mount
@@ -44,11 +43,9 @@ export default function App() {
     const sync = new SyncService(profile.householdId, user.uid);
     syncRef.current = sync;
 
-    // Start sync, then seed cards if this is the first user in the household
     sync.start().then(async () => {
       const currentCards = useCardStore.getState().getCards();
       if (currentCards.length === 0) {
-        // No cards yet — seed the sample cards
         useCardStore.getState().bulkAddCards(sampleCards);
         await sync.seedCards(sampleCards);
       }
@@ -102,45 +99,16 @@ export default function App() {
     if (!isAuthenticated) {
       return <AuthScreen />;
     }
-
-  } else {
-    // No Firebase configured — load sample cards locally (original behavior)
-    // This effect is handled below
   }
-
-  const renderContent = () => {
-    switch (activeTab) {
-      case 'gameBoard':
-        return <GameBoard />;
-      case 'cardGallery':
-        return <GameBoard />;
-      case 'settings':
-        return (
-          <div className="relative z-10 max-w-7xl mx-auto px-4 py-12 text-center">
-            <h2 className="text-display-md font-display font-bold text-ink mb-4">
-              {t('settings.title')}
-            </h2>
-            <p className="text-lg font-body text-concrete">
-              {t('game.comingSoon')}
-            </p>
-          </div>
-        );
-      default:
-        return <GameBoard />;
-    }
-  };
 
   return (
     <div className="min-h-screen bg-paper text-ink overflow-x-hidden">
       <Background />
       <div className="flex flex-col h-screen">
-        <Navigation
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-        />
-        <main className="flex-1 overflow-y-auto">
-          {renderContent()}
+        <main className="flex-1 overflow-y-auto pb-16">
+          <Outlet />
         </main>
+        <Navigation />
       </div>
     </div>
   );
