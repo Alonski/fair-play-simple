@@ -4,7 +4,7 @@ import type { Card } from '@types';
 
 const makeCard = (id: string, overrides: Partial<Card> = {}): Card => ({
   id,
-  category: 'daily-grind',
+  category: 'home',
   title: { en: `Card ${id}`, he: `כרטיס ${id}` },
   description: { en: 'desc', he: 'תיאור' },
   details: { en: 'details', he: 'פרטים' },
@@ -95,9 +95,9 @@ describe('cardStore', () => {
 
   describe('getCardsByCategory', () => {
     it('filters by category', () => {
-      useCardStore.getState().addCard(makeCard('1', { category: 'daily-grind' }));
-      useCardStore.getState().addCard(makeCard('2', { category: 'kids' }));
-      const result = useCardStore.getState().getCardsByCategory('kids');
+      useCardStore.getState().addCard(makeCard('1', { category: 'home' }));
+      useCardStore.getState().addCard(makeCard('2', { category: 'caregiving' }));
+      const result = useCardStore.getState().getCardsByCategory('caregiving');
       expect(result).toHaveLength(1);
       expect(result[0].id).toBe('2');
     });
@@ -164,13 +164,13 @@ describe('cardStore', () => {
   describe('search and filter', () => {
     beforeEach(() => {
       useCardStore.getState().addCard(makeCard('1', {
-        category: 'daily-grind',
+        category: 'home',
         status: 'unassigned',
         title: { en: 'Morning Dishes', he: 'כלים' },
         description: { en: 'Wash dishes', he: 'לשטוף' },
       }));
       useCardStore.getState().addCard(makeCard('2', {
-        category: 'kids',
+        category: 'caregiving',
         status: 'held',
         title: { en: 'School Run', he: 'הסעות' },
         description: { en: 'Drop kids off', he: 'לקחת ילדים' },
@@ -193,7 +193,7 @@ describe('cardStore', () => {
     });
 
     it('setFilterCategory filters results', () => {
-      useCardStore.getState().setFilterCategory('kids');
+      useCardStore.getState().setFilterCategory('caregiving');
       expect(useCardStore.getState().getFilteredCards()).toHaveLength(1);
     });
 
@@ -232,7 +232,7 @@ describe('cardStore', () => {
       useCardStore.getState().bulkAddCards([makeCard('1'), makeCard('2')]);
       useCardStore.getState().selectCard('1');
       useCardStore.getState().setSearchQuery('hello');
-      useCardStore.getState().setFilterCategory('kids');
+      useCardStore.getState().setFilterCategory('caregiving');
       useCardStore.getState().clearAll();
       const s = useCardStore.getState();
       expect(s.cards).toHaveLength(0);

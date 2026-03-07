@@ -38,7 +38,7 @@ vi.mock('@stores/gameStore', () => ({
 
 const makeCard = (id: string, overrides: Partial<Card> = {}): Card => ({
   id,
-  category: 'daily-grind',
+  category: 'home',
   title: { en: `Card ${id}`, he: `כרטיס ${id}` },
   description: { en: 'desc', he: 'תיאור' },
   details: { en: 'details', he: 'פרטים' },
@@ -63,7 +63,7 @@ describe('localCardToFirestore', () => {
     const card = makeCard('test-1', { holder: 'partner-a', status: 'held' });
     const result = localCardToFirestore(card, 'user-123');
 
-    expect(result.category).toBe('daily-grind');
+    expect(result.category).toBe('home');
     expect(result.title).toEqual({ en: 'Card test-1', he: 'כרטיס test-1' });
     expect(result.holder).toBe('partner-a');
     expect(result.status).toBe('held');

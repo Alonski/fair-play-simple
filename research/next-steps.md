@@ -15,7 +15,7 @@ _Last updated: 2026-03-07_
 | My Cards / Deal / More screens | ✅ Done |
 | CI/CD → Firebase Hosting | ✅ Done |
 | Visual design tokens (foundation) | ✅ Done |
-| Visual polish (components) | 🔄 In progress |
+| Visual polish (components) | ✅ Done |
 | Real card data (official Fair Play deck) | ❌ Not started |
 | Category fix | ❌ Not started |
 | "Not in Play" state | ❌ Not started |

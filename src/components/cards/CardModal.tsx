@@ -10,7 +10,7 @@ interface CardModalProps {
   onSuccess?: () => void;
 }
 
-const CATEGORIES: Category[] = ['daily-grind', 'kids', 'home', 'magic', 'wild'];
+const CATEGORIES: Category[] = ['home', 'out', 'caregiving', 'magic', 'wild', 'unicorn-space', 'custom'];
 const FREQUENCIES: Frequency[] = ['daily', 'weekly', 'monthly', 'occasional'];
 const DIFFICULTIES: DifficultyLevel[] = [1, 2, 3];
 
@@ -29,7 +29,7 @@ export default function CardModal({
     descHe: '',
     detailsEn: '',
     detailsHe: '',
-    category: 'daily-grind' as Category,
+    category: 'home' as Category,
     frequency: 'weekly' as Frequency,
     difficulty: 1 as DifficultyLevel,
     timeEstimate: 30,
@@ -61,7 +61,7 @@ export default function CardModal({
         descHe: '',
         detailsEn: '',
         detailsHe: '',
-        category: 'daily-grind',
+        category: 'home',
         frequency: 'weekly',
         difficulty: 1,
         timeEstimate: 30,

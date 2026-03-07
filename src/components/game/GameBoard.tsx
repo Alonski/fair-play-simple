@@ -40,7 +40,7 @@ export default function GameBoard({ onDeal }: GameBoardProps) {
       id: 'partner-b',
       name: partnerBName,
       avatar: { type: 'avatar-builder', data: 'B' },
-      preferences: { favoriteCards: [], avoidCards: [], strongSuits: ['kids'], availability: {} },
+      preferences: { favoriteCards: [], avoidCards: [], strongSuits: ['caregiving'], availability: {} },
       stats: { currentCards: 0, totalTimeCommitment: 0, streaks: [], achievements: [] },
       theme: { color: '#7FB69E', pattern: { type: 'solid', color: '#7FB69E' }, icon: 'B' },
     },
