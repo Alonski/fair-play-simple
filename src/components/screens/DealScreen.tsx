@@ -20,9 +20,7 @@ export default function DealScreen() {
   const partnerBCards = cards.filter((c) => c.holder === 'partner-b');
   const unassignedCards = cards.filter((c) => !c.holder);
 
-  // Auto-switch segment to unassigned if there are unassigned cards, else partner-a
   useEffect(() => {
-    if (unassignedCards.length > 0 && segment === 'unassigned') return;
     if (unassignedCards.length === 0 && segment === 'unassigned') {
       setSegment('partner-a');
     }
@@ -66,41 +64,39 @@ export default function DealScreen() {
     }));
   };
 
-  const visibleCards: CardType[] =
-    segment === 'partner-a'
-      ? partnerACards
-      : segment === 'partner-b'
-      ? partnerBCards
-      : unassignedCards;
+  const total = cards.length;
+  const aFrac = total > 0 ? partnerACards.length / total : 0;
+  const bFrac = total > 0 ? partnerBCards.length / total : 0;
+  const uFrac = total > 0 ? unassignedCards.length / total : 0;
 
-  const segmentLabel = (seg: Segment) => {
-    if (seg === 'partner-a') return partnerAName;
-    if (seg === 'partner-b') return partnerBName;
-    return t('cards.unassigned', 'Unassigned');
-  };
+  const segments: { id: Segment; label: string; count: number }[] = [
+    { id: 'partner-a', label: partnerAName, count: partnerACards.length },
+    { id: 'partner-b', label: partnerBName, count: partnerBCards.length },
+    { id: 'unassigned', label: t('cards.unassigned', 'Unassigned'), count: unassignedCards.length },
+  ];
 
-  const segmentCount = (seg: Segment) => {
-    if (seg === 'partner-a') return partnerACards.length;
-    if (seg === 'partner-b') return partnerBCards.length;
-    return unassignedCards.length;
-  };
-
-  const segments: Segment[] = ['partner-a', 'partner-b', 'unassigned'];
+  const visibleCards =
+    segment === 'partner-a' ? partnerACards :
+    segment === 'partner-b' ? partnerBCards :
+    unassignedCards;
 
   return (
     <div className="flex flex-col h-full">
-      {/* Screen header */}
-      <div className="px-4 pt-5 pb-2">
-        <h1 className="text-display-sm font-display font-bold text-ink mb-3">
+      {/* Header */}
+      <div className="px-5 pt-10 pb-4 bg-paper/80">
+        <p className="text-xs font-display font-bold uppercase tracking-widest text-concrete mb-1">
           {t('navigation.deal', 'Deal')}
+        </p>
+        <h1 className="text-3xl font-display font-bold text-ink leading-tight mb-4">
+          Fair Play
         </h1>
 
-        {/* Deal controls row */}
-        <div className="flex items-center gap-2 mb-3">
+        {/* Action row */}
+        <div className="flex items-center gap-2 mb-4">
           <select
             value={currentDealMode}
             onChange={(e) => setCurrentDealMode(e.target.value as typeof currentDealMode)}
-            className="flex-1 px-3 py-2 rounded-xl border border-gray-200 bg-white font-display font-bold text-sm text-ink focus:outline-none focus:ring-2 focus:ring-partner-a/30"
+            className="flex-1 px-3 py-2 rounded-xl border border-gray-200 bg-white font-display font-bold text-sm text-ink focus:outline-none focus:ring-2 focus:ring-partner-a/20 shadow-soft-sm"
           >
             <option value="random">{t('game.dealModes.random', 'Random')}</option>
             <option value="weighted" disabled>{t('game.dealModes.weighted', 'Weighted')}</option>
@@ -109,70 +105,82 @@ export default function DealScreen() {
           <button
             onClick={handleDeal}
             disabled={unassignedCards.length === 0}
-            className="px-4 py-2 bg-ink text-white font-display font-bold rounded-xl text-sm disabled:opacity-40"
+            className="px-4 py-2 bg-ink text-white font-display font-bold rounded-xl text-sm shadow-soft-sm disabled:opacity-40 active:scale-95 transition-transform"
           >
             {t('game.deal', 'Deal')}
           </button>
           <button
             onClick={handleReset}
-            className="px-4 py-2 bg-gray-100 text-ink font-display font-bold rounded-xl text-sm"
+            className="px-4 py-2 bg-white border border-gray-200 text-ink font-display font-bold rounded-xl text-sm shadow-soft-sm active:scale-95 transition-transform"
           >
             {t('game.reset', 'Reset')}
           </button>
           <button
             onClick={() => { setEditCard(undefined); setIsModalOpen(true); }}
-            className="px-4 py-2 bg-partner-a text-white font-display font-bold rounded-xl text-sm"
+            className="w-9 h-9 bg-partner-a text-white font-display font-bold rounded-xl text-lg shadow-soft-sm active:scale-95 transition-transform flex items-center justify-center"
           >
             +
           </button>
         </div>
 
         {/* Balance bar */}
-        <div className="flex items-center gap-3 mb-3 text-sm font-body">
-          <span className="flex items-center gap-1">
-            <span className="w-2 h-2 rounded-full bg-partner-a" />
-            <span className="font-bold text-partner-a">{partnerACards.length}</span>
-            <span className="text-concrete">{partnerAName}</span>
-          </span>
-          <span className="text-concrete/40">&middot;</span>
-          <span className="flex items-center gap-1">
-            <span className="w-2 h-2 rounded-full bg-partner-b" />
-            <span className="font-bold text-partner-b">{partnerBCards.length}</span>
-            <span className="text-concrete">{partnerBName}</span>
-          </span>
-          <span className="text-concrete/40">&middot;</span>
-          <span className="flex items-center gap-1">
-            <span className="w-2 h-2 rounded-full bg-unassigned" />
-            <span className="font-bold text-unassigned">{unassignedCards.length}</span>
-            <span className="text-concrete">{t('cards.unassigned', 'Unassigned')}</span>
-          </span>
-        </div>
+        {total > 0 && (
+          <div className="mb-4">
+            <div className="flex h-2 rounded-full overflow-hidden bg-gray-100 mb-2">
+              <div className="bg-partner-a transition-all duration-500" style={{ width: `${aFrac * 100}%` }} />
+              <div className="bg-partner-b transition-all duration-500" style={{ width: `${bFrac * 100}%` }} />
+              <div className="bg-unassigned transition-all duration-500" style={{ width: `${uFrac * 100}%` }} />
+            </div>
+            <div className="flex items-center gap-4 text-xs font-body">
+              <span className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-partner-a" />
+                <span className="font-bold text-partner-a">{partnerACards.length}</span>
+                <span className="text-concrete">{partnerAName}</span>
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-partner-b" />
+                <span className="font-bold text-partner-b">{partnerBCards.length}</span>
+                <span className="text-concrete">{partnerBName}</span>
+              </span>
+              <span className="flex items-center gap-1.5 ml-auto">
+                <span className="w-2 h-2 rounded-full bg-unassigned" />
+                <span className="font-bold text-concrete">{unassignedCards.length}</span>
+                <span className="text-concrete">{t('cards.unassigned', 'Unassigned')}</span>
+              </span>
+            </div>
+          </div>
+        )}
 
         {/* Segment control */}
-        <div className="flex bg-gray-100 rounded-xl p-0.5 mb-1">
+        <div className="flex bg-gray-100 rounded-2xl p-1">
           {segments.map((seg) => (
             <button
-              key={seg}
-              onClick={() => setSegment(seg)}
-              className={`flex-1 py-1.5 rounded-[10px] text-xs font-display font-bold transition-all ${
-                segment === seg
+              key={seg.id}
+              onClick={() => setSegment(seg.id)}
+              className={`flex-1 py-2 px-1 rounded-xl text-xs font-display font-bold transition-all ${
+                segment === seg.id
                   ? 'bg-white shadow-soft-sm text-ink'
                   : 'text-concrete'
               }`}
             >
-              {segmentLabel(seg)} {segmentCount(seg) > 0 && `(${segmentCount(seg)})`}
+              {seg.label}
+              {seg.count > 0 && (
+                <span className={`ml-1 ${segment === seg.id ? 'text-concrete' : 'text-concrete/50'}`}>
+                  ({seg.count})
+                </span>
+              )}
             </button>
           ))}
         </div>
       </div>
 
       {/* Card list */}
-      <div className="flex-1 overflow-y-auto px-4 pb-4">
+      <div className="flex-1 overflow-y-auto px-4 pt-3 pb-4">
         {visibleCards.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-32 text-center">
             <p className="text-sm font-body text-concrete">
               {segment === 'unassigned'
-                ? t('game.allAssigned', 'All cards are assigned')
+                ? t('game.allAssigned', 'All cards assigned')
                 : t('cards.noneHere', 'No cards here')}
             </p>
           </div>
