@@ -15,10 +15,12 @@ export default function DealScreen() {
   const [segment, setSegment] = useState<Segment>('unassigned');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editCard, setEditCard] = useState<CardType | undefined>();
+  const [notInPlayExpanded, setNotInPlayExpanded] = useState(false);
 
-  const partnerACards = cards.filter((c) => c.holder === 'partner-a');
-  const partnerBCards = cards.filter((c) => c.holder === 'partner-b');
-  const unassignedCards = cards.filter((c) => !c.holder);
+  const partnerACards = cards.filter((c) => c.holder === 'partner-a' && c.status !== 'not-in-play');
+  const partnerBCards = cards.filter((c) => c.holder === 'partner-b' && c.status !== 'not-in-play');
+  const unassignedCards = cards.filter((c) => !c.holder && c.status !== 'not-in-play');
+  const notInPlayCards = cards.filter((c) => c.status === 'not-in-play');
 
   useEffect(() => {
     if (unassignedCards.length === 0 && segment === 'unassigned') {
@@ -28,7 +30,7 @@ export default function DealScreen() {
 
   const handleDeal = () => {
     if (currentDealMode !== 'random') return;
-    const unassigned = cards.filter((c) => !c.holder);
+    const unassigned = cards.filter((c) => !c.holder && c.status !== 'not-in-play');
     if (unassigned.length === 0) return;
 
     const shuffled = [...unassigned];
@@ -49,7 +51,9 @@ export default function DealScreen() {
 
   const handleReset = () => {
     useCardStore.setState((state) => ({
-      cards: state.cards.map((c) => ({ ...c, holder: null, status: 'unassigned' as CardStatus })),
+      cards: state.cards.map((c) =>
+        c.status === 'not-in-play' ? c : { ...c, holder: null, status: 'unassigned' as CardStatus }
+      ),
     }));
     setSegment('unassigned');
   };
@@ -64,7 +68,20 @@ export default function DealScreen() {
     }));
   };
 
-  const total = cards.length;
+  const handleToggleNotInPlay = (card: CardType) => {
+    useCardStore.setState((state) => ({
+      cards: state.cards.map((c) =>
+        c.id === card.id
+          ? card.status === 'not-in-play'
+            ? { ...c, status: 'unassigned' as CardStatus }
+            : { ...c, status: 'not-in-play' as CardStatus, holder: null }
+          : c
+      ),
+    }));
+  };
+
+  const activeCards = cards.filter((c) => c.status !== 'not-in-play');
+  const total = activeCards.length;
   const aFrac = total > 0 ? partnerACards.length / total : 0;
   const bFrac = total > 0 ? partnerBCards.length / total : 0;
   const uFrac = total > 0 ? unassignedCards.length / total : 0;
@@ -176,29 +193,60 @@ export default function DealScreen() {
 
       {/* Card list */}
       <div className="flex-1 overflow-y-auto px-4 pt-3 pb-4">
-        {visibleCards.length === 0 ? (
+        {visibleCards.length === 0 && segment !== 'unassigned' ? (
           <div className="flex flex-col items-center justify-center h-32 text-center">
             <p className="text-sm font-body text-concrete">
-              {segment === 'unassigned'
-                ? t('game.allAssigned', 'All cards assigned')
-                : t('cards.noneHere', 'No cards here')}
+              {t('cards.noneHere', 'No cards here')}
             </p>
           </div>
         ) : (
-          visibleCards.map((card) => (
-            <CardRow
-              key={card.id}
-              card={card}
-              dealMode={true}
-              draggable={true}
-              onAssign={(holderId) => handleAssign(card.id, holderId)}
-              onEdit={() => { setEditCard(card); setIsModalOpen(true); }}
-              onDragStart={(e) => {
-                e.dataTransfer.effectAllowed = 'move';
-                e.dataTransfer.setData('cardId', card.id);
-              }}
-            />
-          ))
+          <>
+            {visibleCards.map((card) => (
+              <CardRow
+                key={card.id}
+                card={card}
+                dealMode={true}
+                draggable={true}
+                onAssign={(holderId) => handleAssign(card.id, holderId)}
+                onToggleNotInPlay={() => handleToggleNotInPlay(card)}
+                onEdit={() => { setEditCard(card); setIsModalOpen(true); }}
+                onDragStart={(e) => {
+                  e.dataTransfer.effectAllowed = 'move';
+                  e.dataTransfer.setData('cardId', card.id);
+                }}
+              />
+            ))}
+
+            {segment === 'unassigned' && visibleCards.length === 0 && notInPlayCards.length === 0 && (
+              <div className="flex flex-col items-center justify-center h-32 text-center">
+                <p className="text-sm font-body text-concrete">
+                  {t('game.allAssigned', 'All cards assigned')}
+                </p>
+              </div>
+            )}
+
+            {/* Not in Play collapsible section */}
+            {segment === 'unassigned' && notInPlayCards.length > 0 && (
+              <div className="mt-2">
+                <button
+                  onClick={() => setNotInPlayExpanded((v) => !v)}
+                  className="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-display font-bold text-concrete/70 hover:bg-gray-50 transition-colors"
+                >
+                  <span style={{ fontSize: 8, transform: notInPlayExpanded ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform 200ms', display: 'inline-block' }}>▶</span>
+                  Not in Play ({notInPlayCards.length})
+                </button>
+                {notInPlayExpanded && notInPlayCards.map((card) => (
+                  <CardRow
+                    key={card.id}
+                    card={card}
+                    dealMode={true}
+                    onToggleNotInPlay={() => handleToggleNotInPlay(card)}
+                    onEdit={() => { setEditCard(card); setIsModalOpen(true); }}
+                  />
+                ))}
+              </div>
+            )}
+          </>
         )}
       </div>
 

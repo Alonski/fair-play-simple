@@ -10,7 +10,7 @@ export default function MyCardsScreen() {
   const mySlot = useAuthStore((state) => state.profile?.partnerSlot);
   const { partnerAName, partnerBName } = useGameStore();
 
-  const myCards = mySlot ? cards.filter((c) => c.holder === mySlot) : [];
+  const myCards = mySlot ? cards.filter((c) => c.holder === mySlot && c.status !== 'not-in-play') : [];
   const totalTime = myCards.reduce((sum, c) => sum + c.metadata.timeEstimate, 0);
   const myName = mySlot === 'partner-a' ? partnerAName : partnerBName;
   const isA = mySlot === 'partner-a';

@@ -1,6 +1,6 @@
 # Next Steps — Fair Play Simple
 
-_Last updated: 2026-03-07_
+_Last updated: 2026-03-08_
 
 ---
 
@@ -16,61 +16,46 @@ _Last updated: 2026-03-07_
 | CI/CD → Firebase Hosting | ✅ Done |
 | Visual design tokens (foundation) | ✅ Done |
 | Visual polish (components) | ✅ Done |
-| Real card data (official Fair Play deck) | ❌ Not started |
-| Category fix | ❌ Not started |
-| "Not in Play" state | ❌ Not started |
-| Unicorn Space cards | ❌ Not started |
+| Real card data (official Fair Play deck) | ✅ Done |
+| Category fix | ✅ Done |
+| Unicorn Space cards | ✅ Done (in deck) |
+| "Not in Play" state | ❌ Next |
 | MSC notes | ❌ Not started |
 | Two-device sync test | ❌ Not tested |
 | PWA / offline | ❌ Future |
 
 ---
 
-## Phase 1: Visual Polish (CURRENT)
+## Phase 1: Visual Polish ✅ DONE
 
-Foundation tokens already applied (`tailwind.config.js`, `globals.css`, `index.html`).
-Remaining: fully restyle all components with warm/light/family design.
-
-**Components to restyle:**
-- `CardRow.tsx` — compact list row (new, needs full design treatment)
-- `MyCardsScreen.tsx` — header, empty state
-- `DealScreen.tsx` — controls, balance bar, segment control
-- `MoreScreen.tsx` — settings rows
-- `AuthScreen.tsx` — sign-in page
-- `CardModal.tsx` — create/edit card modal
-- `Background.tsx` — decorative background layer
+All components restyled with warm paper aesthetic. TanStack Router added for URL-based navigation.
 
 ---
 
-## Phase 2: UX Model Fix (HIGH PRIORITY)
+## Phase 2: Card Data ✅ DONE
 
-The app has the wrong mental model. Cards are ongoing responsibilities, not completable tasks.
-See `research/fair-play-system.md` for full methodology context.
+- 100 official Fair Play cards from fairplaypolicy.org (extracted via Chrome DevTools)
+- Correct categories: Home(22), Out(22), Caregiving(23), Magic(21), Wild(10), Unicorn Space(2)
+- Raw CPE data saved to `research/official-cards-data.json`
+- Hebrew placeholders use English text (to be translated later)
 
-### 2a. Fix categories
-- Current: `daily-grind`, `kids`, `home`, `magic`, `wild`
-- Should be: `Home`, `Out`, `Caregiving`, `Magic`, `Wild`, `Unicorn Space`
-- Files: `src/types/index.ts`, `src/utils/sampleCards.ts`, display logic
+---
 
-### 2b. Replace card data
-- Replace ~67 invented cards with official Fair Play cards (~100)
-- Full official list in `research/fair-play-system.md`
-- Add CPE descriptions per card
-- Hebrew translations (can add placeholder `""` and translate later)
+## Phase 3: UX Model (CURRENT)
 
-### 2c. Add Unicorn Space cards
-- Both partners hold one — non-negotiable
-- Special card type, not part of the deal shuffle
+### 3a. "Not in Play" state ← NEXT
+- Couples mark cards irrelevant to their household (no kids → most Caregiving cards out)
+- Add `'not-in-play'` to `CardStatus` type
+- UI: toggle per card in Deal screen (long-press or swipe, or button in expanded row)
+- Not-in-play cards hidden from deal shuffle and My Cards
+- Stored in Firestore (persists across devices)
 
-### 2d. Add "Not in Play" state
-- Couples select which cards apply to their household
-- Card status: `held` | `unassigned` | `not-in-play`
-- UI: toggle per card in Deal screen, or onboarding wizard (TBD)
-
-### 2e. Add MSC notes
-- Free-text field per card
-- Both partners can edit
+### 3b. MSC notes
+- Free-text field per card, both partners can edit
 - Stored in Firestore card doc
+- Shown in expanded CardRow
+
+---
 
 ---
 
@@ -91,9 +76,8 @@ See `research/fair-play-system.md` for full methodology context.
 
 ---
 
-## Open Questions (from 2026-03-07 planning session)
+## Open Questions
 
-1. **Card data scope**: Full ~100 official cards, or curated shorter deck for your household?
-2. **Hebrew translations**: Translate now or add placeholders?
-3. **"Not in Play" flow**: Onboarding wizard vs. per-card toggle in Deal screen?
-4. **MSC notes**: Shared single field, or each partner writes their own?
+1. **Hebrew translations**: Translate now or keep English placeholders?
+2. **"Not in Play" flow**: Per-card toggle in Deal screen (decided: yes), or also an onboarding wizard?
+3. **MSC notes**: Shared single field, or each partner writes their own?

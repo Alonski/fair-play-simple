@@ -7,6 +7,7 @@ interface CardRowProps {
   dealMode?: boolean;
   onAssign?: (holderId: 'partner-a' | 'partner-b' | null) => void;
   onEdit?: () => void;
+  onToggleNotInPlay?: () => void;
   draggable?: boolean;
   onDragStart?: (e: React.DragEvent) => void;
 }
@@ -37,6 +38,7 @@ export default function CardRow({
   dealMode = false,
   onAssign,
   onEdit,
+  onToggleNotInPlay,
   draggable = false,
   onDragStart,
 }: CardRowProps) {
@@ -106,29 +108,48 @@ export default function CardRow({
             )}
 
             <div className="flex items-center gap-2 flex-wrap">
-              {dealMode && onAssign && (
-                <>
+              {dealMode && card.status === 'not-in-play' ? (
+                onToggleNotInPlay && (
                   <button
-                    onClick={(e) => { e.stopPropagation(); onAssign('partner-a'); }}
-                    className="text-[11px] px-3 py-1.5 bg-partner-a text-white font-display font-bold rounded-lg tracking-wide"
+                    onClick={(e) => { e.stopPropagation(); onToggleNotInPlay(); }}
+                    className="text-[11px] px-3 py-1.5 bg-ink text-white font-display font-bold rounded-lg tracking-wide"
                   >
-                    Alon
+                    Restore
                   </button>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); onAssign('partner-b'); }}
-                    className="text-[11px] px-3 py-1.5 bg-partner-b text-white font-display font-bold rounded-lg tracking-wide"
-                  >
-                    Moral
-                  </button>
-                  {card.holder && (
+                )
+              ) : (
+                dealMode && onAssign && (
+                  <>
                     <button
-                      onClick={(e) => { e.stopPropagation(); onAssign(null); }}
-                      className="text-[11px] px-3 py-1.5 bg-gray-100 text-concrete font-display font-bold rounded-lg"
+                      onClick={(e) => { e.stopPropagation(); onAssign('partner-a'); }}
+                      className="text-[11px] px-3 py-1.5 bg-partner-a text-white font-display font-bold rounded-lg tracking-wide"
                     >
-                      Unassign
+                      Alon
                     </button>
-                  )}
-                </>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); onAssign('partner-b'); }}
+                      className="text-[11px] px-3 py-1.5 bg-partner-b text-white font-display font-bold rounded-lg tracking-wide"
+                    >
+                      Moral
+                    </button>
+                    {card.holder && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); onAssign(null); }}
+                        className="text-[11px] px-3 py-1.5 bg-gray-100 text-concrete font-display font-bold rounded-lg"
+                      >
+                        Unassign
+                      </button>
+                    )}
+                    {onToggleNotInPlay && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); onToggleNotInPlay(); }}
+                        className="text-[11px] px-3 py-1.5 bg-gray-100 text-concrete/60 font-display font-bold rounded-lg"
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </>
+                )
               )}
               {onEdit && (
                 <button

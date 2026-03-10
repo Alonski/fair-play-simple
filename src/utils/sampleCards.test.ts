@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { sampleCards } from './sampleCards';
 
 const VALID_CATEGORIES = ['home', 'out', 'caregiving', 'magic', 'wild', 'unicorn-space', 'custom'];
-const VALID_STATUSES = ['unassigned', 'held', 'completed'];
+const VALID_STATUSES = ['unassigned', 'held', 'completed', 'not-in-play'];
 const VALID_FREQUENCIES = ['daily', 'weekly', 'monthly', 'occasional'];
 
 describe('sampleCards', () => {
