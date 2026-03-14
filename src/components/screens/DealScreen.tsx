@@ -1,8 +1,11 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useCardStore, useGameStore } from '@stores/index';
+import { useAuthStore } from '@stores/authStore';
+import { saveSnapshot } from '@services/historyService';
 import CardRow from '@components/cards/CardRow';
 import CardModal from '@components/cards/CardModal';
+import ConfirmDialog from '@components/ui/ConfirmDialog';
 import type { Card as CardType, CardStatus } from '@types';
 
 type Segment = 'partner-a' | 'partner-b' | 'unassigned';
@@ -12,20 +15,27 @@ export default function DealScreen() {
   const cards = useCardStore((state) => state.getCards());
   const { currentDealMode, setCurrentDealMode, partnerAName, partnerBName } = useGameStore();
 
+  const userId = useAuthStore((s) => s.user?.uid ?? '');
+  const readOnlyMode = useAuthStore((s) => s.readOnlyMode);
+
   const [segment, setSegment] = useState<Segment>('unassigned');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editCard, setEditCard] = useState<CardType | undefined>();
   const [notInPlayExpanded, setNotInPlayExpanded] = useState(false);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
 
   const partnerACards = cards.filter((c) => c.holder === 'partner-a' && c.status !== 'not-in-play');
   const partnerBCards = cards.filter((c) => c.holder === 'partner-b' && c.status !== 'not-in-play');
   const unassignedCards = cards.filter((c) => !c.holder && c.status !== 'not-in-play');
   const notInPlayCards = cards.filter((c) => c.status === 'not-in-play');
 
-  const handleDeal = () => {
+  const handleDeal = async () => {
     if (currentDealMode !== 'random') return;
     const unassigned = cards.filter((c) => !c.holder && c.status !== 'not-in-play');
     if (unassigned.length === 0) return;
+
+    // Save snapshot before dealing
+    await saveSnapshot('deal', userId).catch(console.error);
 
     const shuffled = [...unassigned];
     for (let i = shuffled.length - 1; i > 0; i--) {
@@ -43,10 +53,13 @@ export default function DealScreen() {
     setSegment('partner-a');
   };
 
-  const handleReset = () => {
+  const handleResetConfirmed = async () => {
+    setShowResetConfirm(false);
+    // Save snapshot before resetting
+    await saveSnapshot('reset', userId).catch(console.error);
     useCardStore.setState((state) => ({
       cards: state.cards.map((c) =>
-        c.status === 'not-in-play' ? c : { ...c, holder: null, status: 'unassigned' as CardStatus }
+        c.status === 'not-in-play' || c.status === 'deleted' ? c : { ...c, holder: null, status: 'unassigned' as CardStatus }
       ),
     }));
     setSegment('unassigned');
@@ -115,14 +128,15 @@ export default function DealScreen() {
           </select>
           <button
             onClick={handleDeal}
-            disabled={unassignedCards.length === 0}
+            disabled={unassignedCards.length === 0 || readOnlyMode}
             className="px-4 py-2 bg-ink text-white font-display font-bold rounded-xl text-sm shadow-soft-sm disabled:opacity-40 active:scale-95 transition-transform"
           >
             {t('game.deal', 'Deal')}
           </button>
           <button
-            onClick={handleReset}
-            className="px-4 py-2 bg-white border border-gray-200 text-ink font-display font-bold rounded-xl text-sm shadow-soft-sm active:scale-95 transition-transform"
+            onClick={() => setShowResetConfirm(true)}
+            disabled={readOnlyMode}
+            className="px-4 py-2 bg-white border border-gray-200 text-ink font-display font-bold rounded-xl text-sm shadow-soft-sm disabled:opacity-40 active:scale-95 transition-transform"
           >
             {t('game.reset', 'Reset')}
           </button>
@@ -249,6 +263,16 @@ export default function DealScreen() {
         card={editCard}
         onClose={() => { setIsModalOpen(false); setEditCard(undefined); }}
         onSuccess={() => {}}
+      />
+
+      <ConfirmDialog
+        isOpen={showResetConfirm}
+        title="Reset all cards?"
+        message="This will unassign all cards and move them back to Unassigned. Your current assignments will be saved in history so you can restore them later."
+        confirmLabel="Reset"
+        variant="destructive"
+        onConfirm={handleResetConfirmed}
+        onCancel={() => setShowResetConfirm(false)}
       />
     </div>
   );

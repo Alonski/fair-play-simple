@@ -27,8 +27,10 @@ test.describe('Deal screen', () => {
   test('Reset moves all cards back to Unassigned', async ({ page }) => {
     // Deal first
     await page.locator('button', { hasText: 'Deal' }).click();
-    // Then reset
+    // Then reset — now shows confirmation dialog
     await page.locator('button', { hasText: 'Reset' }).click();
+    // Confirm the reset in the dialog
+    await page.locator('button', { hasText: 'Reset' }).nth(1).click();
     // Unassigned button with count (6) should be visible
     const unassignedBtn = page.getByRole('button', { name: /unassigned/i });
     await expect(unassignedBtn).toBeVisible();

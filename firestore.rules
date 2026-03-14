@@ -39,12 +39,18 @@ service cloud.firestore {
             && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['partnerBUid'])
             && request.resource.data.partnerBUid == request.auth.uid);
 
-      // Cards — max 200 cards per household, only members
+      // Cards — only members
       match /cards/{cardId} {
         allow read: if isMember(householdId);
         allow create: if isMember(householdId);
         allow update: if isMember(householdId);
         allow delete: if isMember(householdId);
+      }
+
+      // History — append-only, no update or delete
+      match /history/{eventId} {
+        allow read: if isMember(householdId);
+        allow create: if isMember(householdId);
       }
     }
   }

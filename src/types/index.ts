@@ -238,6 +238,24 @@ export interface Household {
   updatedAt: string;
 }
 
+/**
+ * Deal History Types
+ */
+export interface CardSnapshot {
+  id: string;
+  holder: string | null;
+  status: string;
+}
+
+export interface DealHistoryEvent {
+  id: string;
+  type: 'deal' | 'reset' | 'restore';
+  timestamp: string;
+  performedBy: string;
+  label?: string;
+  snapshot: CardSnapshot[];
+}
+
 export interface FirestoreCard {
   category: string;
   title: LocalizedText;
