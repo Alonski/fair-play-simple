@@ -1,8 +1,41 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCardStore } from '@stores/index';
+import { translateText } from '@services/translationService';
 import ConfirmDialog from '@components/ui/ConfirmDialog';
 import type { Card, Category, Frequency, DifficultyLevel } from '@types';
+
+function TranslateButton({ fromField, toField, from, to, formData, setFormData }: {
+  fromField: string;
+  toField: string;
+  from: 'en' | 'he';
+  to: 'en' | 'he';
+  formData: Record<string, unknown>;
+  setFormData: (data: Record<string, unknown>) => void;
+}) {
+  const [loading, setLoading] = useState(false);
+  const sourceText = formData[fromField] as string;
+  if (!sourceText?.trim()) return null;
+
+  const handleTranslate = async () => {
+    setLoading(true);
+    const translated = await translateText(sourceText, from, to);
+    setFormData({ ...formData, [toField]: translated });
+    setLoading(false);
+  };
+
+  const arrow = from === 'en' ? '→ HE' : '→ EN';
+  return (
+    <button
+      type="button"
+      onClick={handleTranslate}
+      disabled={loading}
+      className="text-[10px] px-2.5 py-1 bg-accent/10 text-accent font-display font-bold rounded-lg hover:bg-accent/20 disabled:opacity-50 transition-colors"
+    >
+      {loading ? '...' : `Translate ${arrow}`}
+    </button>
+  );
+}
 
 interface CardModalProps {
   isOpen: boolean;
@@ -217,6 +250,12 @@ export default function CardModal({
                 )}
               </div>
 
+              {/* Title translate */}
+              <div className="flex gap-2 -mt-2 mb-1">
+                <TranslateButton fromField="titleEn" toField="titleHe" from="en" to="he" formData={formData as unknown as Record<string, unknown>} setFormData={(d) => setFormData(d as typeof formData)} />
+                <TranslateButton fromField="titleHe" toField="titleEn" from="he" to="en" formData={formData as unknown as Record<string, unknown>} setFormData={(d) => setFormData(d as typeof formData)} />
+              </div>
+
               {/* Hebrew Title */}
               <div>
                 <label className="block font-display font-semibold text-ink mb-1.5 text-sm">
@@ -256,6 +295,12 @@ export default function CardModal({
                 )}
               </div>
 
+              {/* Description translate */}
+              <div className="flex gap-2 -mt-2 mb-1">
+                <TranslateButton fromField="descEn" toField="descHe" from="en" to="he" formData={formData as unknown as Record<string, unknown>} setFormData={(d) => setFormData(d as typeof formData)} />
+                <TranslateButton fromField="descHe" toField="descEn" from="he" to="en" formData={formData as unknown as Record<string, unknown>} setFormData={(d) => setFormData(d as typeof formData)} />
+              </div>
+
               {/* Hebrew Description */}
               <div>
                 <label className="block font-display font-semibold text-ink mb-1.5 text-sm">
@@ -291,6 +336,12 @@ export default function CardModal({
                   rows={2}
                   className={`${inputClasses()} resize-none`}
                 />
+              </div>
+
+              {/* MSC translate */}
+              <div className="flex gap-2 -mt-2 mb-1">
+                <TranslateButton fromField="detailsEn" toField="detailsHe" from="en" to="he" formData={formData as unknown as Record<string, unknown>} setFormData={(d) => setFormData(d as typeof formData)} />
+                <TranslateButton fromField="detailsHe" toField="detailsEn" from="he" to="en" formData={formData as unknown as Record<string, unknown>} setFormData={(d) => setFormData(d as typeof formData)} />
               </div>
 
               {/* MSC Notes — Hebrew */}
