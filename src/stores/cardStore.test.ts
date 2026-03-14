@@ -49,12 +49,16 @@ describe('cardStore', () => {
   });
 
   describe('removeCard', () => {
-    it('removes a card by id', () => {
+    it('soft-deletes a card by id (sets status to deleted)', () => {
       useCardStore.getState().addCard(makeCard('1'));
       useCardStore.getState().addCard(makeCard('2'));
       useCardStore.getState().removeCard('1');
-      expect(useCardStore.getState().cards).toHaveLength(1);
-      expect(useCardStore.getState().cards[0].id).toBe('2');
+      // Card stays in raw array but with status 'deleted'
+      expect(useCardStore.getState().cards).toHaveLength(2);
+      expect(useCardStore.getState().cards.find((c) => c.id === '1')?.status).toBe('deleted');
+      // getCards() filters out deleted
+      expect(useCardStore.getState().getCards()).toHaveLength(1);
+      expect(useCardStore.getState().getCards()[0].id).toBe('2');
     });
 
     it('also removes card from selectedCards', () => {
@@ -214,11 +218,15 @@ describe('cardStore', () => {
       expect(useCardStore.getState().cards).toHaveLength(3);
     });
 
-    it('bulkRemoveCards removes multiple at once', () => {
+    it('bulkRemoveCards soft-deletes multiple at once', () => {
       useCardStore.getState().bulkAddCards([makeCard('1'), makeCard('2'), makeCard('3')]);
       useCardStore.getState().bulkRemoveCards(['1', '2']);
-      expect(useCardStore.getState().cards).toHaveLength(1);
-      expect(useCardStore.getState().cards[0].id).toBe('3');
+      // Raw array still has all 3, but 2 are deleted
+      expect(useCardStore.getState().cards).toHaveLength(3);
+      expect(useCardStore.getState().cards.filter((c) => c.status === 'deleted')).toHaveLength(2);
+      // getCards() filters out deleted
+      expect(useCardStore.getState().getCards()).toHaveLength(1);
+      expect(useCardStore.getState().getCards()[0].id).toBe('3');
     });
 
     it('bulkRemoveCards also clears selection', () => {

@@ -1,7 +1,21 @@
 import { useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useCardStore } from '@stores/index';
-import type { Card as CardType } from '@types';
+import { useGameStore } from '@stores/gameStore';
+import { useAuthStore } from '@stores/authStore';
+import type { Card as CardType, Category } from '@types';
+
+function formatCategory(category: Category): string {
+  return category.split('-').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+}
+
+function formatTime(minutes: number): string {
+  if (minutes >= 60) {
+    const h = minutes / 60;
+    return h % 1 === 0 ? `${h}h` : `${h.toFixed(1)}h`;
+  }
+  return `${minutes}m`;
+}
 
 interface CardRowProps {
   card: CardType;
@@ -44,6 +58,8 @@ export default function CardRow({
   onDragStart,
 }: CardRowProps) {
   const { i18n } = useTranslation();
+  const { partnerAName, partnerBName } = useGameStore();
+  const readOnlyMode = useAuthStore((s) => s.readOnlyMode);
   const [expanded, setExpanded] = useState(false);
   const [editingMsc, setEditingMsc] = useState(false);
   const [mscDraft, setMscDraft] = useState('');
@@ -58,9 +74,9 @@ export default function CardRow({
 
   const startEditingMsc = (e: React.MouseEvent) => {
     e.stopPropagation();
+    if (readOnlyMode) return;
     setMscDraft(mscNote);
     setEditingMsc(true);
-    // Focus after state update
     setTimeout(() => textareaRef.current?.focus(), 0);
   };
 
@@ -103,10 +119,10 @@ export default function CardRow({
           </p>
           <div className="flex items-center gap-2 mt-0.5">
             <span className="text-[10px] font-bold uppercase tracking-wider text-concrete/70">
-              {card.category}
+              {formatCategory(card.category)}
             </span>
             <span className="text-concrete/40 text-[10px]">·</span>
-            <span className="text-[11px] text-concrete font-medium">{card.metadata.timeEstimate}m</span>
+            <span className="text-[11px] text-concrete font-medium">{formatTime(card.metadata.timeEstimate)}</span>
             {mscNote && (
               <>
                 <span className="text-concrete/40 text-[10px]">·</span>
@@ -194,13 +210,13 @@ export default function CardRow({
                       onClick={(e) => { e.stopPropagation(); onAssign('partner-a'); }}
                       className="text-[11px] px-3 py-1.5 bg-partner-a text-white font-display font-bold rounded-lg tracking-wide"
                     >
-                      Alon
+                      {partnerAName}
                     </button>
                     <button
                       onClick={(e) => { e.stopPropagation(); onAssign('partner-b'); }}
                       className="text-[11px] px-3 py-1.5 bg-partner-b text-white font-display font-bold rounded-lg tracking-wide"
                     >
-                      Moral
+                      {partnerBName}
                     </button>
                     {card.holder && (
                       <button

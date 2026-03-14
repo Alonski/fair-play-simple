@@ -12,6 +12,7 @@ import { sampleCards } from '@utils/sampleCards';
 import Navigation from '@components/layout/Navigation';
 import Background from '@components/layout/Background';
 import AuthScreen from '@components/auth/AuthScreen';
+import ErrorScreen from '@components/auth/ErrorScreen';
 
 // Styles
 import '@styles/globals.css';
@@ -21,7 +22,7 @@ import '@styles/textures.css';
 export default function App() {
   const { t, i18n } = useTranslation();
   const { language, theme, animations } = useSettingsStore();
-  const { isLoading, isAuthenticated, profile, initialize } = useAuthStore();
+  const { isLoading, isAuthenticated, profile, error, readOnlyMode, initialize } = useAuthStore();
   const syncRef = useRef<SyncService | null>(null);
 
   // Initialize auth on mount
@@ -45,7 +46,8 @@ export default function App() {
 
     sync.start().then(async () => {
       const currentCards = useCardStore.getState().getCards();
-      if (currentCards.length === 0) {
+      // Only partner-a seeds to prevent race condition when both partners open simultaneously
+      if (currentCards.length === 0 && profile?.partnerSlot === 'partner-a') {
         useCardStore.getState().bulkAddCards(sampleCards);
         await sync.seedCards(sampleCards);
       }
@@ -96,7 +98,10 @@ export default function App() {
       );
     }
 
-    if (!isAuthenticated) {
+    if (!isAuthenticated && !readOnlyMode) {
+      if (error) {
+        return <ErrorScreen />;
+      }
       return <AuthScreen />;
     }
   }

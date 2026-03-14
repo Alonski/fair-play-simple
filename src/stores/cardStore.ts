@@ -54,7 +54,9 @@ export const useCardStore = create<CardStore>()(
 
       removeCard: (cardId) =>
         set((state) => ({
-          cards: state.cards.filter((c) => c.id !== cardId),
+          cards: state.cards.map((c) =>
+            c.id === cardId ? { ...c, status: 'deleted' as CardStatus, holder: null } : c
+          ),
           selectedCards: state.selectedCards.filter((id) => id !== cardId),
         })),
 
@@ -68,7 +70,7 @@ export const useCardStore = create<CardStore>()(
         return state.cards.find((c) => c.id === cardId);
       },
 
-      getCards: () => get().cards,
+      getCards: () => get().cards.filter((c) => c.status !== 'deleted'),
 
       getCardsByCategory: (category) => {
         const state = get();
@@ -132,7 +134,7 @@ export const useCardStore = create<CardStore>()(
 
       getFilteredCards: () => {
         const state = get();
-        let filtered = state.cards;
+        let filtered = state.cards.filter((c) => c.status !== 'deleted');
 
         if (state.searchQuery) {
           const query = state.searchQuery.toLowerCase();
@@ -163,7 +165,9 @@ export const useCardStore = create<CardStore>()(
 
       bulkRemoveCards: (cardIds) =>
         set((state) => ({
-          cards: state.cards.filter((c) => !cardIds.includes(c.id)),
+          cards: state.cards.map((c) =>
+            cardIds.includes(c.id) ? { ...c, status: 'deleted' as CardStatus, holder: null } : c
+          ),
           selectedCards: state.selectedCards.filter((id) => !cardIds.includes(id)),
         })),
 

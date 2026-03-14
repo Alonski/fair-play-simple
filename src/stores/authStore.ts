@@ -36,17 +36,20 @@ interface AuthStoreState {
   isLoading: boolean;
   isAuthenticated: boolean;
   error: string | null;
+  readOnlyMode: boolean;
 
   initialize: () => Promise<void>;
   signInWithGoogle: () => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
   choosePartnerSlot: (slot: PartnerId) => Promise<void>;
+  enterReadOnlyMode: () => void;
   clearError: () => void;
 }
 
 const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
 let initialized = false;
+let unsubscribeAuth: (() => void) | null = null;
 
 async function ensureUserProfile(user: User): Promise<UserProfile> {
   if (!db) throw new Error('Firestore not initialized');
@@ -123,73 +126,102 @@ export const useAuthStore = create<AuthStoreState>()((set, get) => ({
   isLoading: true,
   isAuthenticated: false,
   error: null,
+  readOnlyMode: false,
 
   initialize: async () => {
-    if (!isFirebaseConfigured || !auth || initialized) {
+    if (!isFirebaseConfigured || !auth) {
       set({ isLoading: false });
       return;
     }
+
+    // Unsubscribe previous listener if retrying
+    if (unsubscribeAuth) {
+      unsubscribeAuth();
+      unsubscribeAuth = null;
+    }
+
+    if (initialized) {
+      // Reset so retry actually works
+      initialized = false;
+    }
     initialized = true;
+    set({ isLoading: true, error: null, readOnlyMode: false });
 
     try {
-      await getRedirectResult(auth).catch(() => {});
-
-      onAuthStateChanged(auth, async (user) => {
-        if (user) {
-          // Email allowlist check
-          if (!ALLOWED_EMAILS.includes(user.email ?? '')) {
-            await auth!.signOut();
-            set({
-              user: null,
-              profile: null,
-              household: null,
-              isAuthenticated: false,
-              isLoading: false,
-              error: 'This app is restricted to authorized accounts.',
-            });
-            return;
-          }
-
-          set({ user, isAuthenticated: true });
-
-          let profile = await ensureUserProfile(user);
-          profile = await joinOrCreateHousehold(user, profile);
-
-          if (profile.householdId) {
-            const household = await fetchHouseholdDoc(profile.householdId);
-            set({ household });
-
-            // Backfill partnerSlot for users who joined before auto-assign
-            if (!profile.partnerSlot && household && db) {
-              const slot: PartnerId = (household as { partnerAUid?: string }).partnerAUid === user.uid
-                ? 'partner-a'
-                : 'partner-b';
-              await updateDoc(doc(db, 'users', user.uid), { partnerSlot: slot });
-              profile = { ...profile, partnerSlot: slot };
-            }
-
-            // Backfill real names if household still has generic placeholders
-            const h = household as { partnerAName?: string; partnerBName?: string } | null;
-            if (db && h && (h.partnerAName === 'Partner A' || h.partnerBName === 'Partner B')) {
-              const realName = EMAIL_TO_NAME[user.email ?? ''] ?? user.displayName ?? 'Partner';
-              const otherName = Object.entries(EMAIL_TO_NAME).find(([email]) => email !== user.email)?.[1] ?? 'Partner';
-              const isA = (h as { partnerAUid?: string }).partnerAUid === user.uid;
-              await updateDoc(doc(db, 'households', profile.householdId!), {
-                partnerAName: isA ? realName : otherName,
-                partnerBName: isA ? otherName : realName,
-              });
-            }
-          }
-
-          set({ profile });
-        } else {
-          set({ user: null, profile: null, household: null, isAuthenticated: false });
+      await getRedirectResult(auth).catch((err) => {
+        const code = (err as { code?: string }).code;
+        // Silently ignore benign redirect errors
+        if (code !== 'auth/popup-closed-by-user' && code !== 'auth/cancelled-popup-request') {
+          console.warn('Redirect result error:', code);
         }
-        set({ isLoading: false });
+      });
+
+      unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
+        try {
+          if (user) {
+            // Email allowlist check
+            if (!ALLOWED_EMAILS.includes(user.email ?? '')) {
+              await auth!.signOut();
+              set({
+                user: null,
+                profile: null,
+                household: null,
+                isAuthenticated: false,
+                isLoading: false,
+                error: 'This app is restricted to authorized accounts.',
+              });
+              return;
+            }
+
+            set({ user, isAuthenticated: true });
+
+            let profile = await ensureUserProfile(user);
+            profile = await joinOrCreateHousehold(user, profile);
+
+            if (profile.householdId) {
+              const household = await fetchHouseholdDoc(profile.householdId);
+              set({ household });
+
+              // Backfill partnerSlot for users who joined before auto-assign
+              if (!profile.partnerSlot && household && db) {
+                const slot: PartnerId = (household as { partnerAUid?: string }).partnerAUid === user.uid
+                  ? 'partner-a'
+                  : 'partner-b';
+                await updateDoc(doc(db, 'users', user.uid), { partnerSlot: slot });
+                profile = { ...profile, partnerSlot: slot };
+              }
+
+              // Backfill real names if household still has generic placeholders
+              const h = household as { partnerAName?: string; partnerBName?: string } | null;
+              if (db && h && (h.partnerAName === 'Partner A' || h.partnerBName === 'Partner B')) {
+                const realName = EMAIL_TO_NAME[user.email ?? ''] ?? user.displayName ?? 'Partner';
+                const otherName = Object.entries(EMAIL_TO_NAME).find(([email]) => email !== user.email)?.[1] ?? 'Partner';
+                const isA = (h as { partnerAUid?: string }).partnerAUid === user.uid;
+                await updateDoc(doc(db, 'households', profile.householdId!), {
+                  partnerAName: isA ? realName : otherName,
+                  partnerBName: isA ? otherName : realName,
+                });
+              }
+            }
+
+            set({ profile, readOnlyMode: false });
+          } else {
+            set({ user: null, profile: null, household: null, isAuthenticated: false });
+          }
+          set({ isLoading: false });
+        } catch (err) {
+          console.error('Auth state change error:', err);
+          initialized = false;
+          set({
+            isLoading: false,
+            error: 'Connection failed. Please try again.',
+          });
+        }
       });
     } catch (err) {
       console.error('Auth initialization error:', err);
-      set({ isLoading: false });
+      initialized = false;
+      set({ isLoading: false, error: 'Failed to initialize. Please try again.' });
     }
   },
 
@@ -239,6 +271,8 @@ export const useAuthStore = create<AuthStoreState>()((set, get) => ({
       set({ error: 'Failed to set partner slot' });
     }
   },
+
+  enterReadOnlyMode: () => set({ readOnlyMode: true, isLoading: false, error: null }),
 
   clearError: () => set({ error: null }),
 }));

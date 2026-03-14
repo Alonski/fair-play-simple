@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useCardStore, useGameStore } from '@stores/index';
 import CardRow from '@components/cards/CardRow';
@@ -21,12 +21,6 @@ export default function DealScreen() {
   const partnerBCards = cards.filter((c) => c.holder === 'partner-b' && c.status !== 'not-in-play');
   const unassignedCards = cards.filter((c) => !c.holder && c.status !== 'not-in-play');
   const notInPlayCards = cards.filter((c) => c.status === 'not-in-play');
-
-  useEffect(() => {
-    if (unassignedCards.length === 0 && segment === 'unassigned') {
-      setSegment('partner-a');
-    }
-  }, [unassignedCards.length]);
 
   const handleDeal = () => {
     if (currentDealMode !== 'random') return;
@@ -217,7 +211,7 @@ export default function DealScreen() {
               />
             ))}
 
-            {segment === 'unassigned' && visibleCards.length === 0 && notInPlayCards.length === 0 && (
+            {segment === 'unassigned' && visibleCards.length === 0 && (
               <div className="flex flex-col items-center justify-center h-32 text-center">
                 <p className="text-sm font-body text-concrete">
                   {t('game.allAssigned', 'All cards assigned')}

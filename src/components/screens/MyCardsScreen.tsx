@@ -1,8 +1,17 @@
 import { useTranslation } from 'react-i18next';
+import { Link } from '@tanstack/react-router';
 import { useCardStore } from '@stores/index';
 import { useAuthStore } from '@stores/authStore';
 import { useGameStore } from '@stores/gameStore';
 import CardRow from '@components/cards/CardRow';
+
+function formatTime(minutes: number): string {
+  if (minutes >= 60) {
+    const h = minutes / 60;
+    return h % 1 === 0 ? `${h}h` : `${h.toFixed(1)}h`;
+  }
+  return `${minutes}m`;
+}
 
 export default function MyCardsScreen() {
   const { t } = useTranslation();
@@ -52,7 +61,7 @@ export default function MyCardsScreen() {
               {myCards.length} {myCards.length === 1 ? 'card' : 'cards'}
             </span>
             <span className="text-xs text-concrete font-body">
-              {totalTime}m / {t('game.week', 'week')}
+              {formatTime(totalTime)} / {t('game.week', 'week')}
             </span>
           </div>
         )}
@@ -66,9 +75,12 @@ export default function MyCardsScreen() {
             <p className="font-display font-bold text-ink text-lg mb-1">
               {t('cards.noMyCards', 'No cards yet')}
             </p>
-            <p className="text-sm font-body text-concrete leading-relaxed">
-              {t('cards.noMyCardsHint', 'Head to Deal to assign cards to yourself.')}
-            </p>
+            <Link
+              to="/deal"
+              className="text-sm font-body text-partner-a font-bold leading-relaxed hover:underline"
+            >
+              {t('cards.noMyCardsHint', 'Head to Deal to assign cards →')}
+            </Link>
           </div>
         ) : (
           myCards.map((card) => (

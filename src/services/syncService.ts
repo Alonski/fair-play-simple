@@ -52,6 +52,8 @@ export class SyncService {
   private statusListeners: Set<(status: string) => void> = new Set();
   private initialCardLoadComplete = false;
   private resolveInitialLoad: (() => void) | null = null;
+  private onOnline = () => this.setStatus('connected');
+  private onOffline = () => this.setStatus('offline');
 
   constructor(householdId: string, userId: string) {
     this.householdId = householdId;
@@ -90,8 +92,8 @@ export class SyncService {
 
     this.setStatus('connected');
 
-    window.addEventListener('online', () => this.setStatus('connected'));
-    window.addEventListener('offline', () => this.setStatus('offline'));
+    window.addEventListener('online', this.onOnline);
+    window.addEventListener('offline', this.onOffline);
   }
 
   stop() {
@@ -103,6 +105,8 @@ export class SyncService {
     this.unsubscribeFirestoreHousehold = null;
     this.unsubscribeCards = null;
     this.unsubscribeGame = null;
+    window.removeEventListener('online', this.onOnline);
+    window.removeEventListener('offline', this.onOffline);
   }
 
   private subscribeToFirestore() {

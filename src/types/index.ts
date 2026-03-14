@@ -2,7 +2,7 @@
  * Card Types
  */
 export type Category = 'home' | 'out' | 'caregiving' | 'magic' | 'wild' | 'unicorn-space' | 'custom';
-export type CardStatus = 'unassigned' | 'held' | 'in-negotiation' | 'shared' | 'paused' | 'completed' | 'not-in-play';
+export type CardStatus = 'unassigned' | 'held' | 'in-negotiation' | 'shared' | 'paused' | 'completed' | 'not-in-play' | 'deleted';
 export type DifficultyLevel = 1 | 2 | 3;
 export type Frequency = 'daily' | 'weekly' | 'monthly' | 'occasional';
 export type PartnerId = 'partner-a' | 'partner-b';
