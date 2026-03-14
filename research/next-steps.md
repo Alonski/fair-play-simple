@@ -13,78 +13,86 @@ _Last updated: 2026-03-14_
 | Mobile-first UI (bottom tabs) | ✅ Done |
 | TanStack Router | ✅ Done |
 | My Cards / Deal / More screens | ✅ Done |
-| CI/CD → Firebase Hosting | ✅ Done |
+| CI/CD → Firebase Hosting + rules | ✅ Done |
 | Visual design tokens (foundation) | ✅ Done |
 | Visual polish (components) | ✅ Done |
 | Real card data (official Fair Play deck) | ✅ Done |
-| Category fix | ✅ Done |
+| Category fix + label formatting | ✅ Done |
 | Unicorn Space cards | ✅ Done (in deck) |
 | "Not in Play" state | ✅ Done |
-| Playwright E2E tests (40 tests) | ✅ Done |
 | MSC notes (inline + modal) | ✅ Done |
+| Soft delete + sync | ✅ Done |
+| Deal/Reset history + undo | ✅ Done |
+| Auth error handling + read-only mode | ✅ Done |
+| Dark mode | ✅ Done |
+| Sync status bar | ✅ Done |
+| Styled confirmation dialogs | ✅ Done |
+| Favicon + PWA manifest | ✅ Done |
+| Gemini EN↔HE translation | ✅ Done (code) |
+| Playwright E2E tests (20 × 2) | ✅ Done |
 | Two-device sync test | ❌ Next |
-| Hebrew translations | ❌ Not started |
-| PWA / offline | ❌ Future |
 
 ---
 
-## Phase 1: Visual Polish ✅ DONE
+## Manual Steps Required
 
-All components restyled with warm paper aesthetic. TanStack Router added for URL-based navigation.
-
----
-
-## Phase 2: Card Data ✅ DONE
-
-- 100 official Fair Play cards from fairplaypolicy.org (extracted via Chrome DevTools)
-- Correct categories: Home(22), Out(22), Caregiving(23), Magic(21), Wild(10), Unicorn Space(2)
-- Raw CPE data saved to `research/official-cards-data.json`
-- Hebrew placeholders use English text (to be translated later)
+### Enable Firebase AI Logic (required for translate buttons)
+1. Go to **console.firebase.google.com** → Fair Play Simple project
+2. Click **AI** in the left sidebar (or search for "AI Logic")
+3. Enable **Gemini Developer API** (free on Spark plan)
+4. The translate buttons in CardModal will start working immediately
 
 ---
 
-## Phase 3: UX Model ✅ DONE
+## Phase 1-3: ✅ DONE
 
-### 3a. "Not in Play" state ✅
-- Toggle per card in Deal screen (Remove / Restore buttons in expanded row)
-- Not-in-play cards hidden from deal shuffle and My Cards
-- Collapsible "Not in Play (n)" section in Unassigned segment
-
-### 3b. MSC Notes ✅
-- Inline editing in expanded CardRow (click placeholder → textarea → auto-save on blur)
-- Also editable in CardModal (relabeled from generic "Details")
-- `details: LocalizedText` field — already on Card type and synced to Firestore
-- MSC indicator dot shown in collapsed card header when note exists
-
-### 3c. E2E Tests ✅
-- Playwright: 40 tests (20 chromium × 2 projects incl. Pixel 7 mobile)
-- Auth bypass via missing Firebase env vars
-- Covers: navigation, deal flow, not-in-play, my cards, MSC notes
+Visual polish, card data, UX model (Not in Play, MSC notes, E2E tests) — all complete.
 
 ---
 
-## Phase 4: Firebase Real-World Testing ← NEXT
+## Phase 4: Production Readiness ✅ DONE
 
-- **Test real-time sync**: both Alon + Moral logged in on separate devices simultaneously
-- Verify card assignment propagates instantly
-- Verify MSC notes sync (write on one device, appear on other)
-- Verify not-in-play toggles sync
-- Check conflict handling (both editing same card)
+All items from the production readiness audit have been addressed:
+
+- **Soft delete**: Cards use `status: 'deleted'` instead of hard removal; syncs to Firestore correctly
+- **Deal/Reset history**: Persistent Firestore subcollection (`households/shared/history`), snapshot before each Deal/Reset, restore from More screen
+- **Auth error handling**: try/catch in onAuthStateChanged, retry button, read-only offline mode
+- **Sync feedback**: SyncStatusBar shows syncing/offline state
+- **Seeding race fix**: Only partner-a seeds cards
+- **Event listener leak fix**: Named listeners cleaned up in SyncService.stop()
+- **Dark mode**: CSS custom properties overridden under `.dark`, inline hex replaced with vars, `dark:` variants on all components
+- **Confirmation dialogs**: Styled ConfirmDialog replaces window.confirm for Reset and card delete
+- **PWA**: favicon.svg, manifest.json, apple-touch-icon, theme-color
+- **CI**: Firestore rules now deployed alongside hosting
+- **Translation**: Gemini 2.5 Flash via Firebase AI Logic, translate buttons between EN/HE fields in CardModal
 
 ---
 
-## Phase 5: Polish & Future
+## Phase 5: Real-World Testing ← NEXT
 
-- **Hebrew translations**: Translate all 100 card titles/descriptions from English placeholders
-- **PWA** — installable on home screen
-- **Offline support** — Firestore persistent cache already enabled, needs UI indicators
+- **Two-device sync test**: Alon + Moral logged in simultaneously on separate devices
+  - Verify card assignments propagate instantly
+  - Verify MSC notes sync
+  - Verify Not in Play toggles sync
+  - Verify Deal/Reset history appears on both devices
+  - Test conflict handling (both editing same card)
+- **Dark mode visual QA**: Check all screens in dark mode on mobile + desktop
+- **Translation QA**: Test Gemini translate buttons work end-to-end
+
+---
+
+## Phase 6: Polish & Future
+
+- **Hebrew translations**: Use Gemini translate buttons to translate all 100 card titles/descriptions
+- **Offline support** — Firestore persistent cache is enabled; add UI indicator for offline state
 - **Push notifications** — reminders for held cards
-- **Onboarding flow** — guided card selection for new households
+- **Onboarding flow** — guided card selection for new households (mark irrelevant cards as Not in Play)
+- **Nav tab translations** — tab labels are currently hardcoded English
 
 ---
 
 ## Open Questions
 
-1. **Hebrew translations**: Translate now or keep English placeholders?
-2. **MSC notes language**: Both `en` and `he` fields are set to the same text by inline edit — is that OK, or do we need separate per-language notes?
-3. **MSC notes for official cards**: Should there be starter MSC suggestions for common cards?
+1. **Hebrew translations**: Use the new translate feature to batch-translate, or translate manually for quality?
+2. **MSC notes language**: Inline edit writes same text to both `en` and `he` — is that OK, or add a language toggle?
+3. **MSC starter suggestions**: Should common cards have pre-written MSC examples?
