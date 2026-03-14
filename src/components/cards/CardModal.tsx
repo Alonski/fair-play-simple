@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCardStore } from '@stores/index';
+import ConfirmDialog from '@components/ui/ConfirmDialog';
 import type { Card, Category, Frequency, DifficultyLevel } from '@types';
 
 interface CardModalProps {
@@ -37,6 +38,7 @@ export default function CardModal({
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   useEffect(() => {
     if (card) {
@@ -120,19 +122,13 @@ export default function CardModal({
     onClose();
   };
 
-  const handleDelete = async () => {
+  const handleDeleteConfirmed = () => {
     if (!card) return;
-
-    if (
-      window.confirm(
-        `Are you sure you want to delete "${formData.titleEn}"? This cannot be undone.`
-      )
-    ) {
-      setIsDeleting(true);
-      removeCard(card.id);
-      onSuccess?.();
-      onClose();
-    }
+    setIsDeleting(true);
+    setShowDeleteConfirm(false);
+    removeCard(card.id);
+    onSuccess?.();
+    onClose();
   };
 
   const inputClasses = (field?: string) =>
@@ -143,6 +139,7 @@ export default function CardModal({
     }`;
 
   return (
+    <>
     <AnimatePresence>
       {isOpen && (
         <>
@@ -410,9 +407,9 @@ export default function CardModal({
                 {card && (
                   <button
                     type="button"
-                    onClick={handleDelete}
+                    onClick={() => setShowDeleteConfirm(true)}
                     disabled={isDeleting}
-                    className="px-6 py-3 bg-partner-a/10 text-partner-a font-display font-bold rounded-xl hover:bg-partner-a/20 disabled:opacity-50 transition-all"
+                    className="px-6 py-3 bg-red-50 text-red-500 font-display font-bold rounded-xl hover:bg-red-100 disabled:opacity-50 transition-all"
                     title="Delete this card"
                   >
                     Delete
@@ -424,5 +421,16 @@ export default function CardModal({
         </>
       )}
     </AnimatePresence>
+
+      <ConfirmDialog
+        isOpen={showDeleteConfirm}
+        title="Delete this card?"
+        message={`"${formData.titleEn}" will be removed. You can find it in the app history if needed.`}
+        confirmLabel="Delete"
+        variant="destructive"
+        onConfirm={handleDeleteConfirmed}
+        onCancel={() => setShowDeleteConfirm(false)}
+      />
+    </>
   );
 }

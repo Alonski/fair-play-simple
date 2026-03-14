@@ -13,6 +13,7 @@ import Navigation from '@components/layout/Navigation';
 import Background from '@components/layout/Background';
 import AuthScreen from '@components/auth/AuthScreen';
 import ErrorScreen from '@components/auth/ErrorScreen';
+import SyncStatusBar from '@components/ui/SyncStatusBar';
 
 // Styles
 import '@styles/globals.css';
@@ -109,6 +110,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-paper text-ink overflow-x-hidden">
       <Background />
+      {isAuthenticated && <SyncStatusBar syncRef={syncRef} />}
       <div className="flex flex-col h-screen">
         <main className="flex-1 overflow-y-auto pb-16">
           <Outlet />
