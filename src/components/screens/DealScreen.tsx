@@ -107,7 +107,7 @@ export default function DealScreen() {
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="px-5 pt-10 pb-4 bg-paper/80">
+      <div className="px-5 pt-10 pb-4 bg-paper/80 dark:bg-paper/90">
         <p className="text-xs font-display font-bold uppercase tracking-widest text-concrete mb-1">
           {t('navigation.deal', 'Deal')}
         </p>
@@ -120,7 +120,7 @@ export default function DealScreen() {
           <select
             value={currentDealMode}
             onChange={(e) => setCurrentDealMode(e.target.value as typeof currentDealMode)}
-            className="flex-1 px-3 py-2 rounded-xl border border-gray-200 bg-white font-display font-bold text-sm text-ink focus:outline-none focus:ring-2 focus:ring-partner-a/20 shadow-soft-sm"
+            className="flex-1 px-3 py-2 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/10 font-display font-bold text-sm text-ink focus:outline-none focus:ring-2 focus:ring-partner-a/20 shadow-soft-sm"
           >
             <option value="random">{t('game.dealModes.random', 'Random')}</option>
             <option value="weighted" disabled>{t('game.dealModes.weighted', 'Weighted')}</option>
@@ -136,7 +136,7 @@ export default function DealScreen() {
           <button
             onClick={() => setShowResetConfirm(true)}
             disabled={readOnlyMode}
-            className="px-4 py-2 bg-white border border-gray-200 text-ink font-display font-bold rounded-xl text-sm shadow-soft-sm disabled:opacity-40 active:scale-95 transition-transform"
+            className="px-4 py-2 bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 text-ink font-display font-bold rounded-xl text-sm shadow-soft-sm disabled:opacity-40 active:scale-95 transition-transform"
           >
             {t('game.reset', 'Reset')}
           </button>
@@ -177,14 +177,14 @@ export default function DealScreen() {
         )}
 
         {/* Segment control */}
-        <div className="flex bg-gray-100 rounded-2xl p-1">
+        <div className="flex bg-gray-100 dark:bg-white/10 rounded-2xl p-1">
           {segments.map((seg) => (
             <button
               key={seg.id}
               onClick={() => setSegment(seg.id)}
               className={`flex-1 py-2 px-1 rounded-xl text-xs font-display font-bold transition-all ${
                 segment === seg.id
-                  ? 'bg-white shadow-soft-sm text-ink'
+                  ? 'bg-white dark:bg-white/15 shadow-soft-sm text-ink'
                   : 'text-concrete'
               }`}
             >

@@ -1,0 +1,12 @@
+{
+  "name": "Fair Play",
+  "short_name": "Fair Play",
+  "description": "Divide household responsibilities fairly",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fafaf8",
+  "theme_color": "#e07a8e",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}

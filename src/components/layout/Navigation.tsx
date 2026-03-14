@@ -12,7 +12,7 @@ export default function Navigation() {
   return (
     <nav
       className="fixed bottom-0 inset-x-0 z-50 pb-safe"
-      style={{ background: 'rgba(250,250,248,0.92)', backdropFilter: 'blur(16px)', borderTop: '1px solid rgba(0,0,0,0.07)' }}
+      style={{ background: 'color-mix(in srgb, var(--color-paper) 92%, transparent)', backdropFilter: 'blur(16px)', borderTop: '1px solid color-mix(in srgb, var(--color-ink) 7%, transparent)' }}
     >
       <div className="flex items-stretch h-16 max-w-lg mx-auto">
         {tabs.map((tab) => {

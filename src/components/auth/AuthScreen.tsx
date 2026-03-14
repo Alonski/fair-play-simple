@@ -23,7 +23,7 @@ export default function AuthScreen() {
       <div
         className="relative flex-1 flex flex-col items-center justify-center px-8 pt-16 pb-10 overflow-hidden"
         style={{
-          background: 'linear-gradient(150deg, #fae0e6 0%, #dff0e8 50%, #fafaf8 100%)',
+          background: 'linear-gradient(150deg, var(--color-partner-a-light) 0%, var(--color-partner-b-light) 50%, var(--color-paper) 100%)',
         }}
       >
         {/* Decorative card shapes */}

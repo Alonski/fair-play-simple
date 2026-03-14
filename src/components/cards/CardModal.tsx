@@ -132,10 +132,10 @@ export default function CardModal({
   };
 
   const inputClasses = (field?: string) =>
-    `w-full px-4 py-2.5 border rounded-xl font-body bg-white focus:outline-hidden focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all ${
+    `w-full px-4 py-2.5 border rounded-xl font-body bg-white dark:bg-white/10 text-ink focus:outline-hidden focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all ${
       field && errors[field]
         ? 'border-partner-a'
-        : 'border-gray-300'
+        : 'border-gray-300 dark:border-white/15'
     }`;
 
   return (
@@ -157,10 +157,10 @@ export default function CardModal({
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="fixed inset-4 md:inset-auto md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-full md:max-w-2xl bg-white border border-gray-200 rounded-2xl z-50 shadow-soft-lg overflow-y-auto max-h-[90vh]"
+            className="fixed inset-4 md:inset-auto md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-full md:max-w-2xl bg-white dark:bg-[#252540] border border-gray-200 dark:border-white/10 rounded-2xl z-50 shadow-soft-lg overflow-y-auto max-h-[90vh]"
           >
             {/* Header */}
-            <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex justify-between items-center rounded-t-2xl">
+            <div className="sticky top-0 bg-white dark:bg-[#252540] border-b border-gray-200 dark:border-white/10 p-6 flex justify-between items-center rounded-t-2xl">
               <h2 className="font-display text-xl font-bold text-ink">
                 {card ? 'Edit Card' : 'Create New Card'}
               </h2>
@@ -386,7 +386,7 @@ export default function CardModal({
               </div>
 
               {/* Action Buttons */}
-              <div className="flex gap-3 pt-6 border-t border-gray-200">
+              <div className="flex gap-3 pt-6 border-t border-gray-200 dark:border-white/10">
                 <motion.button
                   type="submit"
                   className="flex-1 px-6 py-3 bg-partner-a text-white font-display font-bold rounded-xl hover:shadow-soft-lg transition-all"
@@ -399,7 +399,7 @@ export default function CardModal({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="flex-1 px-6 py-3 bg-gray-100 text-ink font-display font-bold rounded-xl hover:bg-gray-200 transition-all"
+                  className="flex-1 px-6 py-3 bg-gray-100 dark:bg-white/10 text-ink font-display font-bold rounded-xl hover:bg-gray-200 dark:hover:bg-white/15 transition-all"
                 >
                   Cancel
                 </button>

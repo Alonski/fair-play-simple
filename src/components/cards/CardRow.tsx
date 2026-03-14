@@ -30,19 +30,19 @@ interface CardRowProps {
 const holderStyles = {
   'partner-a': {
     border: 'border-l-partner-a',
-    bg: 'bg-white',
+    bg: 'bg-white dark:bg-white/10',
     dot: 'bg-partner-a',
     badge: 'bg-partner-a/10 text-partner-a',
   },
   'partner-b': {
     border: 'border-l-partner-b',
-    bg: 'bg-white',
+    bg: 'bg-white dark:bg-white/10',
     dot: 'bg-partner-b',
     badge: 'bg-partner-b/10 text-partner-b',
   },
   unassigned: {
     border: 'border-l-unassigned',
-    bg: 'bg-white',
+    bg: 'bg-white dark:bg-white/10',
     dot: 'bg-unassigned',
     badge: 'bg-unassigned/30 text-ink/60',
   },
@@ -221,7 +221,7 @@ export default function CardRow({
                     {card.holder && (
                       <button
                         onClick={(e) => { e.stopPropagation(); onAssign(null); }}
-                        className="text-[11px] px-3 py-1.5 bg-gray-100 text-concrete font-display font-bold rounded-lg"
+                        className="text-[11px] px-3 py-1.5 bg-gray-100 dark:bg-white/10 text-concrete font-display font-bold rounded-lg"
                       >
                         Unassign
                       </button>
@@ -229,7 +229,7 @@ export default function CardRow({
                     {onToggleNotInPlay && (
                       <button
                         onClick={(e) => { e.stopPropagation(); onToggleNotInPlay(); }}
-                        className="text-[11px] px-3 py-1.5 bg-gray-100 text-concrete/60 font-display font-bold rounded-lg"
+                        className="text-[11px] px-3 py-1.5 bg-gray-100 dark:bg-white/10 text-concrete/60 font-display font-bold rounded-lg"
                       >
                         Remove
                       </button>
@@ -240,7 +240,7 @@ export default function CardRow({
               {onEdit && (
                 <button
                   onClick={(e) => { e.stopPropagation(); onEdit(); }}
-                  className="text-[11px] px-3 py-1.5 bg-gray-50 text-concrete font-display font-bold rounded-lg border border-gray-100 ml-auto"
+                  className="text-[11px] px-3 py-1.5 bg-gray-50 dark:bg-white/5 text-concrete font-display font-bold rounded-lg border border-gray-100 dark:border-white/10 ml-auto"
                 >
                   Edit
                 </button>

@@ -31,14 +31,14 @@ export default function MyCardsScreen() {
         className="relative px-5 pt-10 pb-6 overflow-hidden"
         style={{
           background: isA
-            ? 'linear-gradient(160deg, #fae0e6 0%, #fafaf8 60%)'
-            : 'linear-gradient(160deg, #dff0e8 0%, #fafaf8 60%)',
+            ? 'linear-gradient(160deg, var(--color-partner-a-light) 0%, var(--color-paper) 60%)'
+            : 'linear-gradient(160deg, var(--color-partner-b-light) 0%, var(--color-paper) 60%)',
         }}
       >
         {/* Decorative circle */}
         <div
           className="absolute -top-8 -right-8 w-40 h-40 rounded-full opacity-20"
-          style={{ background: isA ? '#e07a8e' : '#7fb69e' }}
+          style={{ background: isA ? 'var(--color-partner-a)' : 'var(--color-partner-b)' }}
         />
 
         <p className="text-xs font-display font-bold uppercase tracking-widest text-concrete mb-1 relative">
@@ -53,9 +53,9 @@ export default function MyCardsScreen() {
             <span
               className="px-3 py-1 rounded-full text-xs font-display font-bold"
               style={{
-                background: isA ? '#fae0e6' : '#dff0e8',
-                color: isA ? '#e07a8e' : '#7fb69e',
-                border: `1px solid ${isA ? '#e07a8e33' : '#7fb69e33'}`,
+                background: isA ? 'var(--color-partner-a-light)' : 'var(--color-partner-b-light)',
+                color: isA ? 'var(--color-partner-a)' : 'var(--color-partner-b)',
+                border: `1px solid color-mix(in srgb, ${isA ? 'var(--color-partner-a)' : 'var(--color-partner-b)'} 20%, transparent)`,
               }}
             >
               {myCards.length} {myCards.length === 1 ? 'card' : 'cards'}
