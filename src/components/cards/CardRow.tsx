@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useCardStore } from '@stores/index';
 import type { Card as CardType } from '@types';
 
 interface CardRowProps {
@@ -44,12 +45,41 @@ export default function CardRow({
 }: CardRowProps) {
   const { i18n } = useTranslation();
   const [expanded, setExpanded] = useState(false);
+  const [editingMsc, setEditingMsc] = useState(false);
+  const [mscDraft, setMscDraft] = useState('');
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const isRTL = i18n.language === 'he';
   const title = isRTL ? card.title.he : card.title.en;
   const description = isRTL ? card.description.he : card.description.en;
+  const mscNote = card.details.en; // shared household note field
 
   const styles = holderStyles[card.holder ?? 'unassigned'];
+
+  const startEditingMsc = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setMscDraft(mscNote);
+    setEditingMsc(true);
+    // Focus after state update
+    setTimeout(() => textareaRef.current?.focus(), 0);
+  };
+
+  const saveMsc = () => {
+    const trimmed = mscDraft.trim();
+    if (trimmed !== mscNote) {
+      useCardStore.getState().updateCard({
+        ...card,
+        details: { en: trimmed, he: trimmed },
+      });
+    }
+    setEditingMsc(false);
+  };
+
+  const handleMscKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      setEditingMsc(false);
+    }
+  };
 
   return (
     <div
@@ -77,6 +107,12 @@ export default function CardRow({
             </span>
             <span className="text-concrete/40 text-[10px]">·</span>
             <span className="text-[11px] text-concrete font-medium">{card.metadata.timeEstimate}m</span>
+            {mscNote && (
+              <>
+                <span className="text-concrete/40 text-[10px]">·</span>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-600/70">MSC</span>
+              </>
+            )}
           </div>
         </div>
 
@@ -106,6 +142,40 @@ export default function CardRow({
                 {description}
               </p>
             )}
+
+            {/* MSC Notes section */}
+            <div className="mb-3">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-amber-700/60 mb-1">
+                MSC Notes
+              </p>
+              {editingMsc ? (
+                <textarea
+                  ref={textareaRef}
+                  value={mscDraft}
+                  onChange={(e) => setMscDraft(e.target.value)}
+                  onBlur={saveMsc}
+                  onKeyDown={handleMscKeyDown}
+                  onClick={(e) => e.stopPropagation()}
+                  placeholder="What does 'done right' look like for this card?"
+                  rows={3}
+                  className="w-full px-3 py-2 text-sm font-body text-ink bg-amber-50 border border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-300/40 resize-none"
+                />
+              ) : mscNote ? (
+                <button
+                  onClick={startEditingMsc}
+                  className="w-full text-left px-3 py-2 text-sm font-body text-ink/75 bg-amber-50/70 rounded-xl border border-amber-100 hover:bg-amber-50 transition-colors leading-relaxed"
+                >
+                  {mscNote}
+                </button>
+              ) : (
+                <button
+                  onClick={startEditingMsc}
+                  className="w-full text-left px-3 py-2 text-sm font-body text-concrete/50 bg-amber-50/40 rounded-xl border border-dashed border-amber-200/60 hover:bg-amber-50/70 hover:text-concrete/70 transition-colors"
+                >
+                  Add MSC notes…
+                </button>
+              )}
+            </div>
 
             <div className="flex items-center gap-2 flex-wrap">
               {dealMode && card.status === 'not-in-play' ? (

@@ -76,8 +76,7 @@ export default function CardModal({
     if (!formData.titleHe.trim()) newErrors.titleHe = 'Hebrew title required';
     if (!formData.descEn.trim()) newErrors.descEn = 'English description required';
     if (!formData.descHe.trim()) newErrors.descHe = 'Hebrew description required';
-    if (!formData.detailsEn.trim()) newErrors.detailsEn = 'English details required';
-    if (!formData.detailsHe.trim()) newErrors.detailsHe = 'Hebrew details required';
+    // MSC notes are optional — no validation required
     if (formData.timeEstimate < 5 || formData.timeEstimate > 480)
       newErrors.timeEstimate = 'Time estimate must be between 5-480 minutes';
 
@@ -280,43 +279,39 @@ export default function CardModal({
                 )}
               </div>
 
-              {/* English Details */}
+              {/* MSC Notes — English */}
               <div>
-                <label className="block font-display font-semibold text-ink mb-1.5 text-sm">
-                  English Details *
+                <label className="block font-display font-semibold text-ink mb-0.5 text-sm">
+                  MSC Notes (English)
                 </label>
+                <p className="text-xs text-concrete mb-1.5">What does "done right" look like for this card?</p>
                 <textarea
                   value={formData.detailsEn}
                   onChange={(e) =>
                     setFormData({ ...formData, detailsEn: e.target.value })
                   }
-                  placeholder="Additional details (frequency, notes, etc.)"
+                  placeholder="e.g. Whites and darks separated, folded same day"
                   rows={2}
-                  className={`${inputClasses('detailsEn')} resize-none`}
+                  className={`${inputClasses()} resize-none`}
                 />
-                {errors.detailsEn && (
-                  <p className="text-partner-a text-sm mt-1">{errors.detailsEn}</p>
-                )}
               </div>
 
-              {/* Hebrew Details */}
+              {/* MSC Notes — Hebrew */}
               <div>
-                <label className="block font-display font-semibold text-ink mb-1.5 text-sm">
-                  Hebrew Details *
+                <label className="block font-display font-semibold text-ink mb-0.5 text-sm">
+                  MSC Notes (Hebrew)
                 </label>
+                <p className="text-xs text-concrete mb-1.5">מה זה נראה כשהכרטיס מבוצע כמו שצריך?</p>
                 <textarea
                   value={formData.detailsHe}
                   onChange={(e) =>
                     setFormData({ ...formData, detailsHe: e.target.value })
                   }
-                  placeholder="פרטים נוספים"
+                  placeholder="לדוגמה: לבנים ובגדי צבע בנפרד, מקופלים באותו יום"
                   rows={2}
                   dir="rtl"
-                  className={`${inputClasses('detailsHe')} resize-none text-right`}
+                  className={`${inputClasses()} resize-none text-right`}
                 />
-                {errors.detailsHe && (
-                  <p className="text-partner-a text-sm mt-1">{errors.detailsHe}</p>
-                )}
               </div>
 
               {/* Metadata Grid */}

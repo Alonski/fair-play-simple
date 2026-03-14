@@ -53,3 +53,31 @@
 - Routing: **complete**
 - Firebase: **deployed** (CI/CD on push to main)
 - Next: UX model fix (real card data, correct categories, Not in Play, Unicorn Space, MSC notes)
+
+---
+
+## 2026-03-11 / 2026-03-14
+
+### Session 5
+- **Playwright E2E test suite** (40 tests, chromium + Pixel 7 mobile)
+  - Auth bypass via empty Firebase env vars (`isFirebaseConfigured = false`)
+  - `injectStoreData()` helper: sets `card-store` + `game-store` in localStorage via `addInitScript` before navigation
+  - 4 spec files: navigation, deal, not-in-play, my-cards
+  - All 40 pass; screenshots saved to `test-results/`
+  - Added `include: ['src/**/*.{test,spec}.{ts,tsx}']` to `vite.config.ts` so Vitest ignores `e2e/`
+
+- **MSC Notes feature**
+  - Repurposed existing `details: LocalizedText` field (already on Card + FirestoreCard + sync)
+  - `CardRow`: inline MSC notes section in expanded view
+    - Empty → dashed placeholder "Add MSC notes…"
+    - Click → textarea, auto-save on blur via `useCardStore.getState().updateCard()`
+    - Saved → styled amber note block, click to re-edit
+    - Amber "MSC" indicator in collapsed card header when note exists
+  - `CardModal`: relabeled from "Details" → "MSC Notes", made optional (removed required validation)
+  - 5 new E2E tests in `e2e/msc-notes.spec.ts`
+  - Fixed bug: CardModal previously required `details.en/.he` which broke editing all 100 official cards
+
+### Current state
+- UX model: **complete** (Not in Play + MSC Notes)
+- E2E tests: **40 passing**
+- Next: two-device sync test (Alon + Moral on separate devices)
