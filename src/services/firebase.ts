@@ -1,6 +1,6 @@
 import { initializeApp, type FirebaseApp } from 'firebase/app';
-import { getAuth, type Auth } from 'firebase/auth';
-import { initializeFirestore, persistentLocalCache, type Firestore } from 'firebase/firestore';
+import { getAuth, connectAuthEmulator, GoogleAuthProvider, signInWithCredential, type Auth } from 'firebase/auth';
+import { initializeFirestore, connectFirestoreEmulator, persistentLocalCache, type Firestore } from 'firebase/firestore';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -25,8 +25,27 @@ if (isFirebaseConfigured) {
   db = initializeFirestore(app, {
     localCache: persistentLocalCache(),
   });
+
+  // Connect to emulators in development
+  if (import.meta.env.DEV && import.meta.env.VITE_USE_EMULATORS !== 'false') {
+    connectAuthEmulator(auth, 'http://localhost:9099', { disableWarnings: true });
+    connectFirestoreEmulator(db, 'localhost', 8080);
+    console.log('Connected to Firebase emulators (auth:9099, firestore:8080)');
+  }
 } else {
   console.warn('Firebase credentials not found. Running in local-only mode.');
+}
+
+// Dev helper: sign in with emulator Google account from console
+// Usage: window.__devSignIn('alon@test.com', 'Alon')
+if (import.meta.env.DEV && auth) {
+  (window as Record<string, unknown>).__devSignIn = async (email: string, name: string) => {
+    const fakeIdToken = JSON.stringify({ sub: email, email, name, email_verified: true });
+    const credential = GoogleAuthProvider.credential(fakeIdToken);
+    const result = await signInWithCredential(auth!, credential);
+    console.log('Signed in as:', result.user.email);
+    return result;
+  };
 }
 
 export { app, auth, db };

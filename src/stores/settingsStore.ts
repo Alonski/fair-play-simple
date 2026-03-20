@@ -16,7 +16,7 @@ interface SettingsStore extends AppSettings {
 
 const defaultSettings: AppSettings = {
   language: 'en',
-  theme: 'auto',
+  theme: 'light',
   animations: true,
   soundEnabled: true,
   notifications: true,

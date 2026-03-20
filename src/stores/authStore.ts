@@ -22,10 +22,17 @@ const ALLOWED_EMAILS = [
   'swaddlesnaps@gmail.com',
 ];
 
+// Skip email allowlist check when using emulators
+const SKIP_EMAIL_CHECK = import.meta.env.DEV && import.meta.env.VITE_USE_EMULATORS !== 'false';
+
 const EMAIL_TO_NAME: Record<string, string> = {
   'alonzorz@gmail.com': 'Alon',
   'swaddlesnaps@gmail.com': 'Moral',
 };
+
+function getPartnerName(email: string, displayName?: string | null): string {
+  return EMAIL_TO_NAME[email] ?? displayName ?? email.split('@')[0];
+}
 
 const HOUSEHOLD_ID = 'shared';
 
@@ -77,7 +84,7 @@ async function joinOrCreateHousehold(user: User, profile: UserProfile): Promise<
   if (!db || profile.householdId) return profile;
 
   const updatedProfile = { ...profile };
-  const realName = EMAIL_TO_NAME[user.email ?? ''] ?? user.displayName ?? 'Partner';
+  const realName = getPartnerName(user.email ?? '', user.displayName);
   const otherName = Object.entries(EMAIL_TO_NAME).find(([email]) => email !== user.email)?.[1] ?? 'Partner';
 
   await runTransaction(db, async (transaction) => {
@@ -159,8 +166,8 @@ export const useAuthStore = create<AuthStoreState>()((set, get) => ({
       unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
         try {
           if (user) {
-            // Email allowlist check
-            if (!ALLOWED_EMAILS.includes(user.email ?? '')) {
+            // Email allowlist check (skipped when using emulators)
+            if (!SKIP_EMAIL_CHECK && !ALLOWED_EMAILS.includes(user.email ?? '')) {
               await auth!.signOut();
               set({
                 user: null,
@@ -194,7 +201,7 @@ export const useAuthStore = create<AuthStoreState>()((set, get) => ({
               // Backfill real names if household still has generic placeholders
               const h = household as { partnerAName?: string; partnerBName?: string } | null;
               if (db && h && (h.partnerAName === 'Partner A' || h.partnerBName === 'Partner B')) {
-                const realName = EMAIL_TO_NAME[user.email ?? ''] ?? user.displayName ?? 'Partner';
+                const realName = getPartnerName(user.email ?? '', user.displayName);
                 const otherName = Object.entries(EMAIL_TO_NAME).find(([email]) => email !== user.email)?.[1] ?? 'Partner';
                 const isA = (h as { partnerAUid?: string }).partnerAUid === user.uid;
                 await updateDoc(doc(db, 'households', profile.householdId!), {

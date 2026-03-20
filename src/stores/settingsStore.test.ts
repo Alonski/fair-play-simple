@@ -3,7 +3,7 @@ import { useSettingsStore } from './settingsStore';
 
 const defaultSettings = {
   language: 'en' as const,
-  theme: 'auto' as const,
+  theme: 'light' as const,
   animations: true,
   soundEnabled: true,
   notifications: true,

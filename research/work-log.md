@@ -77,7 +77,22 @@
   - 5 new E2E tests in `e2e/msc-notes.spec.ts`
   - Fixed bug: CardModal previously required `details.en/.he` which broke editing all 100 official cards
 
+### Session 5b — Production Readiness (same day, continued)
+- **24 production readiness tasks** completed across 6 batches
+- 3-agent codebase audit (sync/data, UX, architecture) identified blockers/warnings
+- Interview-driven planning: soft delete, persistent history, dark mode, Gemini translation
+- **Batch 1**: partner names from store, category labels, time formatting, Deal link
+- **Batch 2**: soft delete (`status: 'deleted'`), NIP fix, auth error handling + read-only mode, SyncService listener leak, seeding race fix
+- **Batch 3**: history system (Firestore subcollection, ConfirmDialog, Deal/Reset snapshots, MoreScreen history UI with restore)
+- **Batch 4**: SyncStatusBar, styled delete dialog, dark mode (CSS custom properties + `@custom-variant dark`)
+- **Batch 5**: CI deploys Firestore rules, favicon + PWA manifest
+- **Batch 6**: Gemini translation service + translate buttons in CardModal
+- **Bug found**: CSS `@import` ordering broke stylesheet when `@custom-variant` was placed before font import — fixed
+- **E2E gap identified**: tests check DOM elements but don't validate visual rendering — broken CSS passes all tests
+
 ### Current state
-- UX model: **complete** (Not in Play + MSC Notes)
-- E2E tests: **40 passing**
-- Next: two-device sync test (Alon + Moral on separate devices)
+- Production readiness: **complete** (24/24 tasks)
+- E2E tests: **20 passing** (chromium)
+- Firebase AI Logic: **enabled** (Gemini Developer API on Spark plan)
+- Known issue: E2E screenshots don't validate visual correctness
+- Next: two-device sync test, dark mode QA, translation QA
