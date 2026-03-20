@@ -1,3 +1,20 @@
+// PERF OPTIMIZATION OPPORTUNITY (P1): Lazy-load Firebase SDK
+// Currently Firebase modules are eagerly imported at module level, adding ~100-150KB
+// to the initial bundle even when isFirebaseConfigured=false (local-only mode).
+//
+// To optimize: convert to an async initializeFirebase() that uses dynamic imports:
+//   export async function initializeFirebase() {
+//     const { initializeApp } = await import('firebase/app');
+//     const { getAuth, ... } = await import('firebase/auth');
+//     const { initializeFirestore, ... } = await import('firebase/firestore');
+//     // ... rest of init logic
+//   }
+// Then have App.tsx call initializeFirebase() on mount.
+//
+// This requires updating all consumers (syncService, authStore, etc.) to await
+// the initialization, so it's a non-trivial refactor. Skipping for now to avoid
+// breaking changes.
+
 import { initializeApp, type FirebaseApp } from 'firebase/app';
 import { getAuth, connectAuthEmulator, GoogleAuthProvider, signInWithCredential, type Auth } from 'firebase/auth';
 import { initializeFirestore, connectFirestoreEmulator, persistentLocalCache, type Firestore } from 'firebase/firestore';

@@ -2,10 +2,12 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { useAuthStore } from '@stores/authStore';
+import { useGameStore } from '@stores/gameStore';
 
 export default function SetupScreen() {
   const { t } = useTranslation();
   const { choosePartnerSlot, profile } = useAuthStore();
+  const { partnerAName, partnerBName } = useGameStore();
   const [choosing, setChoosing] = useState(false);
 
   const handleChoose = async (slot: 'partner-a' | 'partner-b') => {
@@ -13,6 +15,12 @@ export default function SetupScreen() {
     await choosePartnerSlot(slot);
     setChoosing(false);
   };
+
+  // TODO (m20): Ideally partner names should come from existing household data
+  // so the buttons show real names instead of "Partner A" / "Partner B" for
+  // returning users joining an existing household.
+  const labelA = partnerAName || t('partners.partnerA', 'Partner A');
+  const labelB = partnerBName || t('partners.partnerB', 'Partner B');
 
   // If profile has household but no partner slot, show slot picker
   if (profile?.householdId && !profile?.partnerSlot) {
@@ -41,7 +49,7 @@ export default function SetupScreen() {
               whileTap={!choosing ? { scale: 0.98 } : {}}
             >
               <span className="text-xl font-display font-bold text-partner-a">
-                {t('partners.partnerA', 'Partner A')}
+                {labelA}
               </span>
             </motion.button>
 
@@ -53,7 +61,7 @@ export default function SetupScreen() {
               whileTap={!choosing ? { scale: 0.98 } : {}}
             >
               <span className="text-xl font-display font-bold text-partner-b">
-                {t('partners.partnerB', 'Partner B')}
+                {labelB}
               </span>
             </motion.button>
           </div>

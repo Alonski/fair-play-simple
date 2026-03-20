@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "Fair Play Deck",
+    "appName": "Fair Play",
     "appDescription": "Manage household tasks with your partner",
     "ok": "OK",
     "cancel": "Cancel",
@@ -21,7 +21,10 @@
     "gameBoard": "Game Board",
     "cardGallery": "Cards",
     "insights": "Insights",
-    "settings": "Settings"
+    "settings": "Settings",
+    "myCards": "My Cards",
+    "deal": "Deal",
+    "more": "More"
   },
   "cards": {
     "title": "Cards",
@@ -34,7 +37,11 @@
     "unassigned": "Unassigned",
     "assigned": "Assigned",
     "completed": "Completed",
-    "noCards": "No cards yet. Create or import some to get started."
+    "noCards": "No cards yet. Create or import some to get started.",
+    "noMyCards": "No cards yet",
+    "noMyCardsExplain": "Cards are household responsibilities you own — things like groceries, school pickup, or bedtime routine.",
+    "noMyCardsHint": "Head to Deal to assign cards →",
+    "noneHere": "No cards here"
   },
   "partners": {
     "partnerA": "Partner A",
@@ -84,11 +91,18 @@
     "markNotDone": "Mark as not done"
   },
   "onboarding": {
-    "welcome": "Welcome to Fair Play Deck",
+    "welcome": "Welcome to Fair Play",
     "step1": "Manage household tasks together",
     "step2": "Fair distribution of responsibilities",
     "step3": "Negotiate and balance workload",
     "getStarted": "Get Started"
+  },
+  "auth": {
+    "subtitle": "Divide your household fairly, together.",
+    "signingIn": "Signing in...",
+    "signInWithGoogle": "Continue with Google",
+    "googleDesc": "Access is limited to authorized accounts.",
+    "signOut": "Sign out"
   },
   "settings": {
     "title": "Settings",

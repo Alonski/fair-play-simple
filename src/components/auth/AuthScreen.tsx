@@ -52,15 +52,12 @@ export default function AuthScreen() {
           transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         >
           <div className="flex items-center justify-center gap-2 mb-3">
-            <span className="text-3xl">🃏</span>
+            <span className="text-3xl" aria-hidden="true">🃏</span>
           </div>
-          <h1
-            className="font-display font-bold text-ink leading-none mb-3"
-            style={{ fontSize: '2.75rem', letterSpacing: '-0.02em' }}
-          >
+          <h1 className="font-display font-bold text-ink leading-none mb-3 text-4xl">
             {t('common.appName', 'Fair Play')}
           </h1>
-          <p className="text-base font-body text-ink/50 leading-relaxed max-w-xs mx-auto">
+          <p className="text-base font-body font-medium text-ink/50 leading-relaxed max-w-xs mx-auto">
             {t('auth.subtitle', 'Divide your household fairly, together.')}
           </p>
         </motion.div>
@@ -104,7 +101,7 @@ export default function AuthScreen() {
         </motion.button>
 
         <p className="mt-5 text-xs font-body text-concrete text-center leading-relaxed">
-          {t('auth.googleDesc', 'Access is limited to authorised accounts.')}
+          {t('auth.googleDesc', 'Access is limited to authorized accounts.')}
         </p>
       </motion.div>
     </div>

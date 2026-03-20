@@ -34,49 +34,6 @@
   color: var(--unassigned);
 }
 
-/* Responsive Typography Scales */
-@media (max-width: 640px) {
-  .text-display-lg {
-    font-size: 1.875rem;
-  }
-
-  .text-display-md {
-    font-size: 1.5rem;
-  }
-
-  .text-display-sm {
-    font-size: 1.25rem;
-  }
-}
-
-@media (min-width: 641px) and (max-width: 1024px) {
-  .text-display-lg {
-    font-size: 2.25rem;
-  }
-
-  .text-display-md {
-    font-size: 1.875rem;
-  }
-
-  .text-display-sm {
-    font-size: 1.5rem;
-  }
-}
-
-@media (min-width: 1025px) {
-  .text-display-lg {
-    font-size: 2.5rem;
-  }
-
-  .text-display-md {
-    font-size: 2rem;
-  }
-
-  .text-display-sm {
-    font-size: 1.5rem;
-  }
-}
-
 /* Cursor Customization */
 .hand-cursor {
   cursor: grab;

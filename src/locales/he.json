@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "פייר פליי דק",
+    "appName": "פייר פליי",
     "appDescription": "ניהול מטלות בית עם בן/בת הזוג",
     "ok": "אישור",
     "cancel": "ביטול",
@@ -21,7 +21,10 @@
     "gameBoard": "לוח המשחק",
     "cardGallery": "כרטיסים",
     "insights": "תובנות",
-    "settings": "הגדרות"
+    "settings": "הגדרות",
+    "myCards": "הכרטיסים שלי",
+    "deal": "חלוקה",
+    "more": "עוד"
   },
   "cards": {
     "title": "כרטיסים",
@@ -34,7 +37,11 @@
     "unassigned": "לא משוייך",
     "assigned": "משוייך",
     "completed": "הושלם",
-    "noCards": "אין כרטיסים עדיין. צור או ייבא כרטיסים כדי להתחיל."
+    "noCards": "אין כרטיסים עדיין. צור או ייבא כרטיסים כדי להתחיל.",
+    "noMyCards": "עדיין אין כרטיסים",
+    "noMyCardsExplain": "כרטיסים הם אחריות ביתית שלך — דברים כמו קניות, איסוף מבית הספר, או שגרת שינה.",
+    "noMyCardsHint": "עבור לחלוקה כדי לשייך כרטיסים ←",
+    "noneHere": "אין כרטיסים כאן"
   },
   "partners": {
     "partnerA": "שותף א",
@@ -84,11 +91,18 @@
     "markNotDone": "סמן כלא בוצע"
   },
   "onboarding": {
-    "welcome": "ברוכים הבאים ל-Fair Play Deck",
+    "welcome": "ברוכים הבאים ל-Fair Play",
     "step1": "נהל מטלות בית יחד",
     "step2": "חלוקה הוגנת של אחריות",
     "step3": "משא ומתן והאזנת עומסי עבודה",
     "getStarted": "בואו נתחיל"
+  },
+  "auth": {
+    "subtitle": "חלקו את משק הבית בהגינות, ביחד.",
+    "signingIn": "מתחבר...",
+    "signInWithGoogle": "המשך עם Google",
+    "googleDesc": "הגישה מוגבלת לחשבונות מורשים.",
+    "signOut": "התנתק"
   },
   "settings": {
     "title": "הגדרות",

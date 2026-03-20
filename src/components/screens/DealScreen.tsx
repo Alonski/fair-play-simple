@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useCardStore, useGameStore } from '@stores/index';
 import { useAuthStore } from '@stores/authStore';
@@ -23,6 +23,15 @@ export default function DealScreen() {
   const [editCard, setEditCard] = useState<CardType | undefined>();
   const [notInPlayExpanded, setNotInPlayExpanded] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [showDealConfirm, setShowDealConfirm] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => setToast(null), 2500);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
 
   const partnerACards = cards.filter((c) => c.holder === 'partner-a' && c.status !== 'not-in-play');
   const partnerBCards = cards.filter((c) => c.holder === 'partner-b' && c.status !== 'not-in-play');
@@ -51,6 +60,12 @@ export default function DealScreen() {
       }),
     }));
     setSegment('partner-a');
+    setToast('Cards dealt!');
+  };
+
+  const handleDealConfirmed = async () => {
+    setShowDealConfirm(false);
+    await handleDeal();
   };
 
   const handleResetConfirmed = async () => {
@@ -63,6 +78,7 @@ export default function DealScreen() {
       ),
     }));
     setSegment('unassigned');
+    setToast('Cards reset');
   };
 
   const handleAssign = (cardId: string, holderId: 'partner-a' | 'partner-b' | null) => {
@@ -111,15 +127,16 @@ export default function DealScreen() {
         <p className="text-xs font-display font-bold uppercase tracking-widest text-concrete mb-1">
           {t('navigation.deal', 'Deal')}
         </p>
-        <h1 className="text-3xl font-display font-bold text-ink leading-tight mb-4">
+        <h1 className="text-3xl font-display font-bold text-ink leading-tight mb-3">
           Fair Play
         </h1>
 
         {/* Action row */}
-        <div className="flex items-center gap-2 mb-4">
+        <div className="flex items-center gap-2 mb-3">
           <select
             value={currentDealMode}
             onChange={(e) => setCurrentDealMode(e.target.value as typeof currentDealMode)}
+            aria-label="Deal mode"
             className="flex-1 px-3 py-2 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/10 font-display font-bold text-sm text-ink focus:outline-none focus:ring-2 focus:ring-partner-a/20 shadow-soft-sm"
           >
             <option value="random">{t('game.dealModes.random', 'Random')}</option>
@@ -127,30 +144,42 @@ export default function DealScreen() {
             <option value="draft" disabled>{t('game.dealModes.draft', 'Draft')}</option>
           </select>
           <button
-            onClick={handleDeal}
+            onClick={() => setShowDealConfirm(true)}
             disabled={unassignedCards.length === 0 || readOnlyMode}
-            className="px-4 py-2 bg-ink text-white font-display font-bold rounded-xl text-sm shadow-soft-sm disabled:opacity-40 active:scale-95 transition-transform"
+            className="px-4 py-2 bg-ink text-white font-display font-bold rounded-xl text-sm shadow-soft-sm disabled:opacity-30 disabled:cursor-not-allowed active:scale-95 transition-transform"
           >
             {t('game.deal', 'Deal')}
           </button>
           <button
             onClick={() => setShowResetConfirm(true)}
             disabled={readOnlyMode}
-            className="px-4 py-2 bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 text-ink font-display font-bold rounded-xl text-sm shadow-soft-sm disabled:opacity-40 active:scale-95 transition-transform"
+            className="px-4 py-2 bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 text-ink font-display font-bold rounded-xl text-sm shadow-soft-sm disabled:opacity-30 disabled:cursor-not-allowed active:scale-95 transition-transform"
           >
             {t('game.reset', 'Reset')}
           </button>
           <button
             onClick={() => { setEditCard(undefined); setIsModalOpen(true); }}
-            className="w-9 h-9 bg-partner-a text-white font-display font-bold rounded-xl text-lg shadow-soft-sm active:scale-95 transition-transform flex items-center justify-center"
+            aria-label="Add new card"
+            className="w-11 h-11 bg-partner-a text-white font-display font-bold rounded-xl text-lg shadow-soft-sm active:scale-95 transition-transform flex items-center justify-center"
           >
             +
           </button>
         </div>
 
+        {/* Toast feedback */}
+        {toast && (
+          <div className="mb-3 px-3 py-1.5 rounded-lg bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs font-display font-bold text-center">
+            {toast}
+          </div>
+        )}
+
         {/* Balance bar */}
         {total > 0 && (
-          <div className="mb-4">
+          <div
+            className="mb-3"
+            role="img"
+            aria-label={`Card distribution: ${partnerACards.length} ${partnerAName}, ${partnerBCards.length} ${partnerBName}, ${unassignedCards.length} Unassigned`}
+          >
             <div className="flex h-2 rounded-full overflow-hidden bg-gray-100 mb-2">
               <div className="bg-partner-a transition-all duration-500" style={{ width: `${aFrac * 100}%` }} />
               <div className="bg-partner-b transition-all duration-500" style={{ width: `${bFrac * 100}%` }} />
@@ -177,30 +206,39 @@ export default function DealScreen() {
         )}
 
         {/* Segment control */}
-        <div className="flex bg-gray-100 dark:bg-white/10 rounded-2xl p-1">
-          {segments.map((seg) => (
-            <button
-              key={seg.id}
-              onClick={() => setSegment(seg.id)}
-              className={`flex-1 py-2 px-1 rounded-xl text-xs font-display font-bold transition-all ${
-                segment === seg.id
-                  ? 'bg-white dark:bg-white/15 shadow-soft-sm text-ink'
-                  : 'text-concrete'
-              }`}
-            >
-              {seg.label}
-              {seg.count > 0 && (
-                <span className={`ml-1 ${segment === seg.id ? 'text-concrete' : 'text-concrete/70'}`}>
-                  ({seg.count})
-                </span>
-              )}
-            </button>
-          ))}
+        <div className="flex bg-gray-100 dark:bg-white/10 rounded-xl p-1" role="tablist">
+          {segments.map((seg) => {
+            const isActive = segment === seg.id;
+            const borderColor =
+              seg.id === 'partner-a' ? 'border-partner-a' :
+              seg.id === 'partner-b' ? 'border-partner-b' :
+              'border-concrete';
+            return (
+              <button
+                key={seg.id}
+                role="tab"
+                aria-selected={isActive}
+                onClick={() => setSegment(seg.id)}
+                className={`flex-1 py-2 px-1 rounded-xl text-xs font-display font-bold transition-all ${
+                  isActive
+                    ? `bg-white dark:bg-white/15 shadow-soft-sm text-ink border-b-2 ${borderColor}`
+                    : 'text-concrete'
+                }`}
+              >
+                {seg.label}
+                {seg.count > 0 && (
+                  <span className={`ml-1 ${isActive ? 'text-concrete' : 'text-concrete/70'}`}>
+                    ({seg.count})
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </div>
       </div>
 
       {/* Card list */}
-      <div className="flex-1 overflow-y-auto px-4 pt-3 pb-4">
+      <div className="flex-1 overflow-y-auto px-5 pt-3 pb-4">
         {visibleCards.length === 0 && segment !== 'unassigned' ? (
           <div className="flex flex-col items-center justify-center h-32 text-center">
             <p className="text-sm font-body text-concrete">
@@ -214,14 +252,9 @@ export default function DealScreen() {
                 key={card.id}
                 card={card}
                 dealMode={true}
-                draggable={true}
                 onAssign={(holderId) => handleAssign(card.id, holderId)}
                 onToggleNotInPlay={() => handleToggleNotInPlay(card)}
                 onEdit={() => { setEditCard(card); setIsModalOpen(true); }}
-                onDragStart={(e) => {
-                  e.dataTransfer.effectAllowed = 'move';
-                  e.dataTransfer.setData('cardId', card.id);
-                }}
               />
             ))}
 
@@ -238,10 +271,11 @@ export default function DealScreen() {
               <div className="mt-2">
                 <button
                   onClick={() => setNotInPlayExpanded((v) => !v)}
+                  aria-expanded={notInPlayExpanded}
                   className="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-display font-bold text-concrete hover:bg-gray-50 transition-colors"
                 >
-                  <span style={{ fontSize: 8, transform: notInPlayExpanded ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform 200ms', display: 'inline-block' }}>▶</span>
-                  Not in Play ({notInPlayCards.length})
+                  <span style={{ fontSize: 8, transform: notInPlayExpanded ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform 200ms', display: 'inline-block' }}>&#9654;</span>
+                  Skipped ({notInPlayCards.length})
                 </button>
                 {notInPlayExpanded && notInPlayCards.map((card) => (
                   <CardRow
@@ -263,6 +297,15 @@ export default function DealScreen() {
         card={editCard}
         onClose={() => { setIsModalOpen(false); setEditCard(undefined); }}
         onSuccess={() => {}}
+      />
+
+      <ConfirmDialog
+        isOpen={showDealConfirm}
+        title="Deal cards?"
+        message="This will randomly assign unassigned cards between partners. Continue?"
+        confirmLabel="Deal"
+        onConfirm={handleDealConfirmed}
+        onCancel={() => setShowDealConfirm(false)}
       />
 
       <ConfirmDialog

@@ -22,6 +22,26 @@ A digital Fair Play card game for couples to divide household responsibilities f
 - Warm/light/family design aesthetic (not the original "Organic Brutalism")
 - Fair Play cards are **responsibilities** (held), not tasks (completed)
 
+## Local Dev with Emulators
+To run the app with Firebase auth + Firestore locally (no production Firebase needed):
+```bash
+make dev-emu
+```
+This starts Firebase emulators (auth:9099, firestore:8080, UI:4000) and the Vite dev server together. The app auto-connects to emulators in dev mode.
+
+**Sign in from browser console:**
+```js
+window.__devSignIn('alon@test.com', 'Alon')
+```
+- Email allowlist is skipped when using emulators
+- Sample cards auto-seed on first sign-in as partner-a
+- Emulator UI available at http://localhost:4000
+
+**Local-only mode** (no Firebase at all — no auth, no sync, no card seeding):
+```bash
+VITE_FIREBASE_PROJECT_ID= VITE_FIREBASE_API_KEY= bun run dev
+```
+
 ## Testing
 - **Unit tests**: `bun run test --run` (Vitest)
 - **E2E tests**: `bun run test:e2e` (Playwright, chromium)

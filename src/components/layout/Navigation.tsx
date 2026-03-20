@@ -21,17 +21,18 @@ export default function Navigation() {
             <Link
               key={tab.path}
               to={tab.path}
+              aria-current={isActive ? 'page' : undefined}
               className="flex-1 flex flex-col items-center justify-center gap-0.5 relative"
             >
               {isActive && (
                 <span
-                  className="absolute top-2 inset-x-3 h-8 rounded-xl bg-partner-a/10"
+                  className="absolute top-2 inset-x-3 h-8 rounded-xl bg-partner-a/15"
                   style={{ transition: 'opacity 150ms' }}
                 />
               )}
-              <span className="relative text-xl leading-none">{tab.icon}</span>
+              <span className="relative text-xl leading-none" aria-hidden="true">{tab.icon}</span>
               <span
-                className={`relative text-[10px] font-display font-bold tracking-wide transition-colors ${
+                className={`relative text-xs font-display font-medium tracking-wide transition-colors ${
                   isActive ? 'text-partner-a' : 'text-concrete'
                 }`}
               >

@@ -109,11 +109,16 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-paper text-ink overflow-x-hidden">
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:bg-white focus:px-4 focus:py-2 focus:rounded-lg focus:shadow-lg focus:text-ink">
+        Skip to content
+      </a>
       <Background />
       {isAuthenticated && <SyncStatusBar syncRef={syncRef} />}
       <div className="flex flex-col h-screen relative z-10">
-        <main className="flex-1 overflow-y-auto pb-16">
-          <Outlet />
+        <main id="main-content" className="flex-1 overflow-y-auto pb-20">
+          <div className="max-w-2xl mx-auto w-full">
+            <Outlet />
+          </div>
         </main>
         <Navigation />
       </div>

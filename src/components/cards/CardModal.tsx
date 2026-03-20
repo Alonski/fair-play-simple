@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCardStore } from '@stores/index';
 import { translateText } from '@services/translationService';
@@ -30,7 +30,7 @@ function TranslateButton({ fromField, toField, from, to, formData, setFormData }
       type="button"
       onClick={handleTranslate}
       disabled={loading}
-      className="text-[10px] px-2.5 py-1 bg-accent/10 text-accent font-display font-bold rounded-lg hover:bg-accent/20 disabled:opacity-50 transition-colors"
+      className="text-xs px-2.5 py-1 bg-accent/10 text-accent font-display font-bold rounded-lg hover:bg-accent/20 disabled:opacity-50 transition-colors"
     >
       {loading ? '...' : `Translate ${arrow}`}
     </button>
@@ -72,6 +72,32 @@ export default function CardModal({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  const stableOnClose = useCallback(() => onClose(), [onClose]);
+
+  // Focus trap and Escape key handler
+  useEffect(() => {
+    if (!isOpen) return;
+    const modal = modalRef.current;
+    if (!modal) return;
+    const focusable = modal.querySelectorAll<HTMLElement>(
+      'button, input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    if (focusable.length) focusable[0].focus();
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') { stableOnClose(); return; }
+      if (e.key === 'Tab' && focusable.length) {
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
+    };
+    modal.addEventListener('keydown', handleKeyDown);
+    return () => modal.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, stableOnClose]);
 
   useEffect(() => {
     if (card) {
@@ -187,6 +213,10 @@ export default function CardModal({
 
           {/* Modal */}
           <motion.div
+            ref={modalRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="modal-title"
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -194,12 +224,12 @@ export default function CardModal({
           >
             {/* Header */}
             <div className="sticky top-0 bg-white dark:bg-[#252540] border-b border-gray-200 dark:border-white/10 p-6 flex justify-between items-center rounded-t-2xl">
-              <h2 className="font-display text-xl font-bold text-ink">
+              <h2 id="modal-title" className="font-display text-xl font-bold text-ink">
                 {card ? 'Edit Card' : 'Create New Card'}
               </h2>
               <button
                 onClick={onClose}
-                className="w-8 h-8 bg-gray-100 rounded-lg text-concrete text-lg flex items-center justify-center hover:bg-gray-200 transition-colors"
+                className="w-11 h-11 bg-gray-100 rounded-lg text-concrete text-lg flex items-center justify-center hover:bg-gray-200 transition-colors"
                 aria-label="Close modal"
               >
                 &times;
@@ -210,10 +240,11 @@ export default function CardModal({
             <form onSubmit={handleSubmit} className="p-6 space-y-5">
               {/* Category Selection */}
               <div>
-                <label className="block font-display font-semibold text-ink mb-1.5 text-sm">
+                <label htmlFor="card-category" className="block font-display font-semibold text-ink mb-1.5 text-sm">
                   Category
                 </label>
                 <select
+                  id="card-category"
                   value={formData.category}
                   onChange={(e) =>
                     setFormData({
@@ -233,10 +264,11 @@ export default function CardModal({
 
               {/* English Title */}
               <div>
-                <label className="block font-display font-semibold text-ink mb-1.5 text-sm">
+                <label htmlFor="card-title-en" className="block font-display font-semibold text-ink mb-1.5 text-sm">
                   English Title *
                 </label>
                 <input
+                  id="card-title-en"
                   type="text"
                   value={formData.titleEn}
                   onChange={(e) =>
@@ -258,10 +290,11 @@ export default function CardModal({
 
               {/* Hebrew Title */}
               <div>
-                <label className="block font-display font-semibold text-ink mb-1.5 text-sm">
+                <label htmlFor="card-title-he" className="block font-display font-semibold text-ink mb-1.5 text-sm">
                   Hebrew Title *
                 </label>
                 <input
+                  id="card-title-he"
                   type="text"
                   value={formData.titleHe}
                   onChange={(e) =>
@@ -278,10 +311,11 @@ export default function CardModal({
 
               {/* English Description */}
               <div>
-                <label className="block font-display font-semibold text-ink mb-1.5 text-sm">
+                <label htmlFor="card-desc-en" className="block font-display font-semibold text-ink mb-1.5 text-sm">
                   English Description *
                 </label>
                 <textarea
+                  id="card-desc-en"
                   value={formData.descEn}
                   onChange={(e) =>
                     setFormData({ ...formData, descEn: e.target.value })
@@ -303,10 +337,11 @@ export default function CardModal({
 
               {/* Hebrew Description */}
               <div>
-                <label className="block font-display font-semibold text-ink mb-1.5 text-sm">
+                <label htmlFor="card-desc-he" className="block font-display font-semibold text-ink mb-1.5 text-sm">
                   Hebrew Description *
                 </label>
                 <textarea
+                  id="card-desc-he"
                   value={formData.descHe}
                   onChange={(e) =>
                     setFormData({ ...formData, descHe: e.target.value })
@@ -323,11 +358,12 @@ export default function CardModal({
 
               {/* MSC Notes — English */}
               <div>
-                <label className="block font-display font-semibold text-ink mb-0.5 text-sm">
+                <label htmlFor="card-details-en" className="block font-display font-semibold text-ink mb-0.5 text-sm">
                   MSC Notes (English)
                 </label>
                 <p className="text-xs text-concrete mb-1.5">What does "done right" look like for this card?</p>
                 <textarea
+                  id="card-details-en"
                   value={formData.detailsEn}
                   onChange={(e) =>
                     setFormData({ ...formData, detailsEn: e.target.value })
@@ -346,11 +382,12 @@ export default function CardModal({
 
               {/* MSC Notes — Hebrew */}
               <div>
-                <label className="block font-display font-semibold text-ink mb-0.5 text-sm">
+                <label htmlFor="card-details-he" className="block font-display font-semibold text-ink mb-0.5 text-sm">
                   MSC Notes (Hebrew)
                 </label>
                 <p className="text-xs text-concrete mb-1.5">מה זה נראה כשהכרטיס מבוצע כמו שצריך?</p>
                 <textarea
+                  id="card-details-he"
                   value={formData.detailsHe}
                   onChange={(e) =>
                     setFormData({ ...formData, detailsHe: e.target.value })
@@ -366,10 +403,11 @@ export default function CardModal({
               <div className="grid grid-cols-3 gap-4">
                 {/* Frequency */}
                 <div>
-                  <label className="block font-display font-semibold text-ink mb-1.5 text-xs">
+                  <label htmlFor="card-frequency" className="block font-display font-semibold text-ink mb-1.5 text-sm">
                     Frequency
                   </label>
                   <select
+                    id="card-frequency"
                     value={formData.frequency}
                     onChange={(e) =>
                       setFormData({
@@ -389,10 +427,11 @@ export default function CardModal({
 
                 {/* Difficulty */}
                 <div>
-                  <label className="block font-display font-semibold text-ink mb-1.5 text-xs">
+                  <label htmlFor="card-difficulty" className="block font-display font-semibold text-ink mb-1.5 text-sm">
                     Difficulty
                   </label>
                   <select
+                    id="card-difficulty"
                     value={formData.difficulty}
                     onChange={(e) =>
                       setFormData({
@@ -412,10 +451,11 @@ export default function CardModal({
 
                 {/* Time Estimate */}
                 <div>
-                  <label className="block font-display font-semibold text-ink mb-1.5 text-xs">
+                  <label htmlFor="card-time" className="block font-display font-semibold text-ink mb-1.5 text-sm">
                     Time (min) *
                   </label>
                   <input
+                    id="card-time"
                     type="number"
                     value={formData.timeEstimate}
                     onChange={(e) =>

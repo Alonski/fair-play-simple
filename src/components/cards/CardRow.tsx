@@ -23,8 +23,6 @@ interface CardRowProps {
   onAssign?: (holderId: 'partner-a' | 'partner-b' | null) => void;
   onEdit?: () => void;
   onToggleNotInPlay?: () => void;
-  draggable?: boolean;
-  onDragStart?: (e: React.DragEvent) => void;
 }
 
 const holderStyles = {
@@ -54,8 +52,6 @@ export default function CardRow({
   onAssign,
   onEdit,
   onToggleNotInPlay,
-  draggable = false,
-  onDragStart,
 }: CardRowProps) {
   const { i18n } = useTranslation();
   const { partnerAName, partnerBName } = useGameStore();
@@ -99,14 +95,13 @@ export default function CardRow({
 
   return (
     <div
-      draggable={draggable}
-      onDragStart={onDragStart}
       className={`border-l-4 ${styles.border} ${styles.bg} rounded-2xl mb-2.5 shadow-soft-sm overflow-hidden`}
       style={{ transition: 'box-shadow 150ms' }}
     >
       {/* Row header — always visible */}
       <button
-        className="w-full text-left px-4 py-3.5 flex items-center gap-3 active:bg-black/[0.02]"
+        aria-expanded={expanded}
+        className="w-full text-left px-4 py-3.5 flex items-center gap-3 active:bg-black/[0.06] transition-colors duration-100"
         onClick={() => setExpanded(!expanded)}
       >
         {/* Category dot */}
@@ -114,40 +109,43 @@ export default function CardRow({
 
         {/* Title + meta */}
         <div className="flex-1 min-w-0">
-          <p className="font-display font-bold text-ink text-[15px] leading-snug truncate">
+          <p className="font-display font-semibold text-ink text-[15px] leading-snug truncate">
             {title}
           </p>
           <div className="flex items-center gap-2 mt-0.5">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-concrete">
+            <span className="text-xs font-bold uppercase tracking-wider text-concrete">
               {formatCategory(card.category)}
             </span>
-            <span className="text-concrete/40 text-[10px]">·</span>
-            <span className="text-[11px] text-concrete font-medium">{formatTime(card.metadata.timeEstimate)}</span>
+            <span className="text-concrete/40 text-xs">·</span>
+            <span className="text-xs text-concrete font-medium">{formatTime(card.metadata.timeEstimate)}</span>
             {mscNote && (
               <>
-                <span className="text-concrete/40 text-[10px]">·</span>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-600/70">MSC</span>
+                <span className="text-concrete/40 text-xs">·</span>
+                <span className="text-xs font-bold uppercase tracking-wider text-amber-600/70">MSC</span>
               </>
             )}
           </div>
         </div>
 
         {/* Chevron */}
-        <span
-          className="text-concrete/70 flex-shrink-0"
-          style={{
-            transform: expanded ? 'rotate(90deg)' : 'rotate(0deg)',
-            transition: 'transform 200ms cubic-bezier(0.4, 0, 0.2, 1)',
-            fontSize: 10,
-          }}
-        >
-          ▶
+        <span className="w-6 h-6 flex items-center justify-center flex-shrink-0">
+          <span
+            className="text-concrete/70"
+            style={{
+              transform: expanded ? 'rotate(90deg)' : 'rotate(0deg)',
+              transition: 'transform 200ms cubic-bezier(0.4, 0, 0.2, 1)',
+              fontSize: 10,
+            }}
+          >
+            ▶
+          </span>
         </span>
       </button>
 
       {/* Expandable content */}
       <div className={`expandable-grid ${expanded ? 'open' : ''}`}>
         <div className="expandable-inner">
+          <div className="mx-4 border-t border-gray-100 dark:border-white/5" />
           <div className="px-4 pb-4 pt-0">
             {description && (
               <p
@@ -198,7 +196,7 @@ export default function CardRow({
                 onToggleNotInPlay && (
                   <button
                     onClick={(e) => { e.stopPropagation(); onToggleNotInPlay(); }}
-                    className="text-[11px] px-3 py-1.5 bg-ink text-white font-display font-bold rounded-lg tracking-wide"
+                    className="text-xs px-3 py-2.5 min-h-[44px] bg-ink text-white font-display font-bold rounded-lg tracking-wide"
                   >
                     Restore
                   </button>
@@ -208,20 +206,20 @@ export default function CardRow({
                   <>
                     <button
                       onClick={(e) => { e.stopPropagation(); onAssign('partner-a'); }}
-                      className="text-[11px] px-3 py-1.5 bg-partner-a text-white font-display font-bold rounded-lg tracking-wide"
+                      className="text-xs px-3 py-2.5 min-h-[44px] bg-partner-a text-white font-display font-bold rounded-lg tracking-wide"
                     >
                       {partnerAName}
                     </button>
                     <button
                       onClick={(e) => { e.stopPropagation(); onAssign('partner-b'); }}
-                      className="text-[11px] px-3 py-1.5 bg-partner-b text-white font-display font-bold rounded-lg tracking-wide"
+                      className="text-xs px-3 py-2.5 min-h-[44px] bg-partner-b text-white font-display font-bold rounded-lg tracking-wide"
                     >
                       {partnerBName}
                     </button>
                     {card.holder && (
                       <button
                         onClick={(e) => { e.stopPropagation(); onAssign(null); }}
-                        className="text-[11px] px-3 py-1.5 bg-gray-100 dark:bg-white/10 text-concrete font-display font-bold rounded-lg"
+                        className="text-xs px-3 py-2.5 min-h-[44px] bg-gray-100 dark:bg-white/10 text-concrete font-display font-bold rounded-lg"
                       >
                         Unassign
                       </button>
@@ -229,7 +227,7 @@ export default function CardRow({
                     {onToggleNotInPlay && (
                       <button
                         onClick={(e) => { e.stopPropagation(); onToggleNotInPlay(); }}
-                        className="text-[11px] px-3 py-1.5 bg-gray-100 dark:bg-white/10 text-concrete font-display font-bold rounded-lg"
+                        className="text-xs px-3 py-2.5 min-h-[44px] bg-gray-100 dark:bg-white/10 text-concrete font-display font-bold rounded-lg"
                       >
                         Remove
                       </button>
@@ -240,7 +238,7 @@ export default function CardRow({
               {onEdit && (
                 <button
                   onClick={(e) => { e.stopPropagation(); onEdit(); }}
-                  className="text-[11px] px-3 py-1.5 bg-gray-50 dark:bg-white/5 text-concrete font-display font-bold rounded-lg border border-gray-100 dark:border-white/10 ml-auto"
+                  className="text-xs px-3 py-2.5 min-h-[44px] bg-gray-50 dark:bg-white/5 text-concrete font-display font-bold rounded-lg border border-gray-100 dark:border-white/10 ml-auto"
                 >
                   Edit
                 </button>
