@@ -163,7 +163,7 @@ export default function GameBoard({ onDeal }: GameBoardProps) {
                 currentDealMode === mode
                   ? 'bg-partner-a text-white shadow-soft'
                   : mode !== 'random'
-                  ? 'bg-gray-100 text-concrete/50 cursor-not-allowed'
+                  ? 'bg-gray-100 text-concrete/70 cursor-not-allowed'
                   : 'bg-gray-100 text-ink hover:bg-gray-200'
               }`}
               whileHover={mode === 'random' ? { scale: 1.02 } : {}}
@@ -326,7 +326,7 @@ export default function GameBoard({ onDeal }: GameBoardProps) {
                 <p className="text-lg font-display font-bold text-concrete mb-2">
                   {t('game.allAssigned')}
                 </p>
-                <p className="text-sm font-body text-concrete/70">
+                <p className="text-sm font-body text-concrete">
                   {t('game.allAssignedDesc')}
                 </p>
               </motion.div>
@@ -401,12 +401,12 @@ export default function GameBoard({ onDeal }: GameBoardProps) {
             )}
           </p>
           <p className="text-2xl font-display font-bold text-partner-a">{partnerACards.length}</p>
-          <p className="text-xs text-concrete/70 mt-1">{getTimeCommitment(partnerACards)}m/{t('game.week')}</p>
+          <p className="text-xs text-concrete mt-1">{getTimeCommitment(partnerACards)}m/{t('game.week')}</p>
         </div>
         <div className="text-center p-4 bg-unassigned-light rounded-2xl">
           <p className="text-sm font-body text-concrete mb-2">{t('cards.unassigned')}</p>
           <p className="text-2xl font-display font-bold text-unassigned">{unassignedCards.length}</p>
-          <p className="text-xs text-concrete/70 mt-1">{getTimeCommitment(unassignedCards)}m</p>
+          <p className="text-xs text-concrete mt-1">{getTimeCommitment(unassignedCards)}m</p>
         </div>
         <div className="text-center p-4 bg-partner-b-light rounded-2xl">
           <p className="text-sm font-body text-concrete mb-2">
@@ -418,7 +418,7 @@ export default function GameBoard({ onDeal }: GameBoardProps) {
             )}
           </p>
           <p className="text-2xl font-display font-bold text-partner-b">{partnerBCards.length}</p>
-          <p className="text-xs text-concrete/70 mt-1">{getTimeCommitment(partnerBCards)}m/{t('game.week')}</p>
+          <p className="text-xs text-concrete mt-1">{getTimeCommitment(partnerBCards)}m/{t('game.week')}</p>
         </div>
       </motion.div>
     </div>

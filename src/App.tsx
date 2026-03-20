@@ -111,7 +111,7 @@ export default function App() {
     <div className="min-h-screen bg-paper text-ink overflow-x-hidden">
       <Background />
       {isAuthenticated && <SyncStatusBar syncRef={syncRef} />}
-      <div className="flex flex-col h-screen">
+      <div className="flex flex-col h-screen relative z-10">
         <main className="flex-1 overflow-y-auto pb-16">
           <Outlet />
         </main>

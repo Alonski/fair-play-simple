@@ -106,7 +106,7 @@ export default function CardStack({
             <p className="text-lg font-display font-bold text-concrete mb-2">
               All cards dealt!
             </p>
-            <p className="text-sm font-body text-concrete/70">
+            <p className="text-sm font-body text-concrete">
               Ready for the next round?
             </p>
           </div>

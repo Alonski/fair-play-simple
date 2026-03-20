@@ -70,7 +70,7 @@ export default function MoreScreen() {
         {/* Language */}
         <div className="bg-white/80 dark:bg-white/10 rounded-2xl border border-gray-100/80 dark:border-white/10 shadow-soft-sm overflow-hidden">
           <div className="px-4 pt-4 pb-3">
-            <p className="text-[10px] font-display font-bold uppercase tracking-widest text-concrete/70 mb-3">
+            <p className="text-[10px] font-display font-bold uppercase tracking-widest text-concrete mb-3">
               {t('settings.language', 'Language')}
             </p>
             <div className="flex bg-gray-100 dark:bg-white/10 rounded-xl p-0.5">
@@ -94,7 +94,7 @@ export default function MoreScreen() {
         {/* Theme */}
         <div className="bg-white/80 dark:bg-white/10 rounded-2xl border border-gray-100/80 dark:border-white/10 shadow-soft-sm overflow-hidden">
           <div className="px-4 pt-4 pb-3">
-            <p className="text-[10px] font-display font-bold uppercase tracking-widest text-concrete/70 mb-3">
+            <p className="text-[10px] font-display font-bold uppercase tracking-widest text-concrete mb-3">
               {t('settings.theme', 'Appearance')}
             </p>
             <div className="flex bg-gray-100 dark:bg-white/10 rounded-xl p-0.5">
@@ -126,11 +126,11 @@ export default function MoreScreen() {
               onClick={handleToggleHistory}
               className="w-full px-4 py-4 flex items-center justify-between"
             >
-              <p className="text-[10px] font-display font-bold uppercase tracking-widest text-concrete/70">
+              <p className="text-[10px] font-display font-bold uppercase tracking-widest text-concrete">
                 History
               </p>
               <span
-                className="text-concrete/50"
+                className="text-concrete/70"
                 style={{
                   transform: historyExpanded ? 'rotate(90deg)' : 'rotate(0deg)',
                   transition: 'transform 200ms',
@@ -147,7 +147,7 @@ export default function MoreScreen() {
                 {historyLoading ? (
                   <p className="text-sm font-body text-concrete py-2">Loading...</p>
                 ) : historyEvents.length === 0 ? (
-                  <p className="text-sm font-body text-concrete/60 py-2">
+                  <p className="text-sm font-body text-concrete py-2">
                     No history yet. Deal or Reset to create entries.
                   </p>
                 ) : (
@@ -188,7 +188,7 @@ export default function MoreScreen() {
         {isFirebaseConfigured && isAuthenticated && (
           <button
             onClick={() => signOut()}
-            className="w-full py-4 bg-white/80 rounded-2xl border border-gray-100/80 shadow-soft-sm text-sm font-display font-bold text-concrete/70 hover:text-partner-a transition-colors"
+            className="w-full py-4 bg-white/80 rounded-2xl border border-gray-100/80 shadow-soft-sm text-sm font-display font-bold text-concrete hover:text-partner-a transition-colors"
           >
             {t('auth.signOut', 'Sign out')}
           </button>

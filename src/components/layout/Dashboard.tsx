@@ -63,7 +63,7 @@ export default function Dashboard() {
           </div>
 
           {/* Call to action */}
-          <p className="text-sm font-body text-concrete/70 mb-6">
+          <p className="text-sm font-body text-concrete mb-6">
             The app is ready to use! Navigate to the Game Board tab to start.
           </p>
           <button className="px-8 py-3 bg-partner-a text-paper font-display font-bold rounded-lg hover:shadow-brutal transition-all animate-pulse">

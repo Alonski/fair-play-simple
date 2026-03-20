@@ -39,7 +39,7 @@ if (isFirebaseConfigured) {
 // Dev helper: sign in with emulator Google account from console
 // Usage: window.__devSignIn('alon@test.com', 'Alon')
 if (import.meta.env.DEV && auth) {
-  (window as Record<string, unknown>).__devSignIn = async (email: string, name: string) => {
+  (window as unknown as Record<string, unknown>).__devSignIn = async (email: string, name: string) => {
     const fakeIdToken = JSON.stringify({ sub: email, email, name, email_verified: true });
     const credential = GoogleAuthProvider.credential(fakeIdToken);
     const result = await signInWithCredential(auth!, credential);

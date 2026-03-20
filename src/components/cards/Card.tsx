@@ -140,7 +140,7 @@ export default function Card({
               <span className="opacity-75">{card.metadata.timeEstimate}m</span>
             </div>
             {isHovered && draggable && (
-              <span className="text-concrete/50 text-xs italic">drag</span>
+              <span className="text-concrete/70 text-xs italic">drag</span>
             )}
           </div>
         </div>

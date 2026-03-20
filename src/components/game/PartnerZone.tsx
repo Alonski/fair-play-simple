@@ -183,7 +183,7 @@ export default function PartnerZone({
               <p className="text-sm font-display font-bold text-concrete mb-2">
                 {t('game.dropCardsHere')}
               </p>
-              <p className="text-xs font-body text-concrete/70">
+              <p className="text-xs font-body text-concrete">
                 {t('game.orTapToAssign')}
               </p>
             </div>

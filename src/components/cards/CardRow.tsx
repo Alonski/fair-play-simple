@@ -118,7 +118,7 @@ export default function CardRow({
             {title}
           </p>
           <div className="flex items-center gap-2 mt-0.5">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-concrete/70">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-concrete">
               {formatCategory(card.category)}
             </span>
             <span className="text-concrete/40 text-[10px]">·</span>
@@ -134,7 +134,7 @@ export default function CardRow({
 
         {/* Chevron */}
         <span
-          className="text-concrete/50 flex-shrink-0"
+          className="text-concrete/70 flex-shrink-0"
           style={{
             transform: expanded ? 'rotate(90deg)' : 'rotate(0deg)',
             transition: 'transform 200ms cubic-bezier(0.4, 0, 0.2, 1)',
@@ -186,7 +186,7 @@ export default function CardRow({
               ) : (
                 <button
                   onClick={startEditingMsc}
-                  className="w-full text-left px-3 py-2 text-sm font-body text-concrete/50 bg-amber-50/40 rounded-xl border border-dashed border-amber-200/60 hover:bg-amber-50/70 hover:text-concrete/70 transition-colors"
+                  className="w-full text-left px-3 py-2 text-sm font-body text-concrete/70 bg-amber-50/40 rounded-xl border border-dashed border-amber-200/60 hover:bg-amber-50/70 hover:text-concrete transition-colors"
                 >
                   Add MSC notes…
                 </button>
@@ -229,7 +229,7 @@ export default function CardRow({
                     {onToggleNotInPlay && (
                       <button
                         onClick={(e) => { e.stopPropagation(); onToggleNotInPlay(); }}
-                        className="text-[11px] px-3 py-1.5 bg-gray-100 dark:bg-white/10 text-concrete/60 font-display font-bold rounded-lg"
+                        className="text-[11px] px-3 py-1.5 bg-gray-100 dark:bg-white/10 text-concrete font-display font-bold rounded-lg"
                       >
                         Remove
                       </button>

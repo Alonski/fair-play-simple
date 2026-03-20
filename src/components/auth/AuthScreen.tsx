@@ -103,7 +103,7 @@ export default function AuthScreen() {
             : t('auth.signInWithGoogle', 'Continue with Google')}
         </motion.button>
 
-        <p className="mt-5 text-xs font-body text-concrete/60 text-center leading-relaxed">
+        <p className="mt-5 text-xs font-body text-concrete text-center leading-relaxed">
           {t('auth.googleDesc', 'Access is limited to authorised accounts.')}
         </p>
       </motion.div>

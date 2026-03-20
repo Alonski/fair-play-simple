@@ -190,7 +190,7 @@ export default function DealScreen() {
             >
               {seg.label}
               {seg.count > 0 && (
-                <span className={`ml-1 ${segment === seg.id ? 'text-concrete' : 'text-concrete/50'}`}>
+                <span className={`ml-1 ${segment === seg.id ? 'text-concrete' : 'text-concrete/70'}`}>
                   ({seg.count})
                 </span>
               )}
@@ -238,7 +238,7 @@ export default function DealScreen() {
               <div className="mt-2">
                 <button
                   onClick={() => setNotInPlayExpanded((v) => !v)}
-                  className="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-display font-bold text-concrete/70 hover:bg-gray-50 transition-colors"
+                  className="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-display font-bold text-concrete hover:bg-gray-50 transition-colors"
                 >
                   <span style={{ fontSize: 8, transform: notInPlayExpanded ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform 200ms', display: 'inline-block' }}>▶</span>
                   Not in Play ({notInPlayCards.length})
