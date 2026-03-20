@@ -12,6 +12,7 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:headed": "playwright test --headed",
+    "test:e2e:firebase": "playwright test --config=playwright-firebase.config.ts",
     "emulators": "firebase emulators:start --only auth,firestore",
     "lighthouse": "node scripts/lighthouse-audit.js"
   },

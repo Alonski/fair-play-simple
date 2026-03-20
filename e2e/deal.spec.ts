@@ -9,8 +9,8 @@ test.describe('Deal screen', () => {
   });
 
   test('shows cards in Unassigned segment', async ({ page }) => {
-    const unassignedBtn = page.getByRole('button', { name: /unassigned/i });
-    await expect(unassignedBtn).toBeVisible();
+    const unassignedTab = page.getByRole('tab', { name: /unassigned/i });
+    await expect(unassignedTab).toBeVisible();
     await page.screenshot({ path: 'test-results/deal-unassigned.png', fullPage: true });
   });
 
@@ -18,29 +18,33 @@ test.describe('Deal screen', () => {
     const dealBtn = page.locator('button', { hasText: 'Deal' });
     await expect(dealBtn).toBeEnabled();
     await dealBtn.click();
+    // Confirm in the dialog
+    await page.getByRole('dialog').getByRole('button', { name: 'Deal' }).click();
     // After deal, view switches to Alon's cards
     await page.screenshot({ path: 'test-results/deal-after-deal.png', fullPage: true });
-    // Alon segment button should be visible
-    await expect(page.getByRole('button', { name: /alon/i }).first()).toBeVisible();
+    // Alon segment tab should be visible
+    await expect(page.getByRole('tab', { name: /alon/i }).first()).toBeVisible();
   });
 
   test('Reset moves all cards back to Unassigned', async ({ page }) => {
     // Deal first
     await page.locator('button', { hasText: 'Deal' }).click();
-    // Then reset — now shows confirmation dialog
-    await page.locator('button', { hasText: 'Reset' }).click();
+    await page.getByRole('dialog').getByRole('button', { name: 'Deal' }).click();
+    await page.waitForTimeout(500);
+    // Then reset
+    await page.getByRole('button', { name: 'Reset' }).click();
     // Confirm the reset in the dialog
-    await page.locator('button', { hasText: 'Reset' }).nth(1).click();
-    // Unassigned button with count (6) should be visible
-    const unassignedBtn = page.getByRole('button', { name: /unassigned/i });
-    await expect(unassignedBtn).toBeVisible();
-    await expect(unassignedBtn).toContainText('6');
+    await page.getByRole('dialog').getByRole('button', { name: 'Reset' }).click();
+    // Unassigned tab with count (6) should be visible
+    const unassignedTab = page.getByRole('tab', { name: /unassigned/i });
+    await expect(unassignedTab).toBeVisible();
+    await expect(unassignedTab).toContainText('6');
   });
 
   test('segment switcher switches between partners and Unassigned', async ({ page }) => {
-    await page.getByRole('button', { name: /alon/i }).first().click();
-    await page.getByRole('button', { name: /moral/i }).first().click();
-    await page.getByRole('button', { name: /unassigned/i }).click();
-    await expect(page.getByRole('button', { name: /unassigned/i })).toBeVisible();
+    await page.getByRole('tab', { name: /alon/i }).first().click();
+    await page.getByRole('tab', { name: /moral/i }).first().click();
+    await page.getByRole('tab', { name: /unassigned/i }).click();
+    await expect(page.getByRole('tab', { name: /unassigned/i })).toBeVisible();
   });
 });

@@ -9,7 +9,7 @@ test.describe('MSC Notes', () => {
   });
 
   test('expanded card shows MSC Notes section with placeholder', async ({ page }) => {
-    const firstCardHeader = page.locator('[class*="border-l-4"]').first().getByRole('button').first();
+    const firstCardHeader = page.locator('[class*="border-l-"]').first().getByRole('button').first();
     await firstCardHeader.click();
     await expect(page.getByText('MSC Notes').first()).toBeVisible();
     await expect(page.getByText(/add msc notes/i).first()).toBeVisible();
@@ -17,7 +17,7 @@ test.describe('MSC Notes', () => {
   });
 
   test('clicking placeholder opens textarea for editing', async ({ page }) => {
-    const firstCardHeader = page.locator('[class*="border-l-4"]').first().getByRole('button').first();
+    const firstCardHeader = page.locator('[class*="border-l-"]').first().getByRole('button').first();
     await firstCardHeader.click();
     await page.getByText(/add msc notes/i).first().click();
     await expect(page.locator('textarea[placeholder*="done right"]')).toBeVisible();
@@ -25,7 +25,7 @@ test.describe('MSC Notes', () => {
   });
 
   test('typing a note and blurring saves it', async ({ page }) => {
-    const firstCardHeader = page.locator('[class*="border-l-4"]').first().getByRole('button').first();
+    const firstCardHeader = page.locator('[class*="border-l-"]').first().getByRole('button').first();
     await firstCardHeader.click();
     await page.getByText(/add msc notes/i).first().click();
     const textarea = page.locator('textarea[placeholder*="done right"]');
@@ -38,7 +38,7 @@ test.describe('MSC Notes', () => {
   });
 
   test('saved note persists after collapse and re-expand', async ({ page }) => {
-    const firstCardHeader = page.locator('[class*="border-l-4"]').first().getByRole('button').first();
+    const firstCardHeader = page.locator('[class*="border-l-"]').first().getByRole('button').first();
     // Expand, type note, save
     await firstCardHeader.click();
     await page.getByText(/add msc notes/i).first().click();

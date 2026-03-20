@@ -16,8 +16,9 @@ test.describe('My Cards screen', () => {
     await injectStoreData(page);
     await page.goto('/deal');
     await page.waitForLoadState('networkidle');
-    // Deal cards
+    // Deal cards (now requires confirmation dialog)
     await page.locator('button', { hasText: 'Deal' }).click();
+    await page.getByRole('dialog').getByRole('button', { name: 'Deal' }).click();
     // Navigate to My Cards
     await page.getByRole('link', { name: /my cards/i }).click();
     await page.waitForLoadState('networkidle');

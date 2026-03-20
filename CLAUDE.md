@@ -47,6 +47,10 @@ VITE_FIREBASE_PROJECT_ID= VITE_FIREBASE_API_KEY= bun run dev
 - **E2E tests**: `bun run test:e2e` (Playwright, chromium)
 - **After running E2E tests**: ALWAYS read the screenshot files in `test-results/*.png` to visually verify the UI renders correctly. The E2E assertions only check DOM structure — they will pass even if CSS is broken, the page is blank, or styles are missing. The screenshots are the only way to catch visual regressions.
 - E2E tests bypass Firebase auth entirely (no env vars → `isFirebaseConfigured = false`). They seed data via localStorage. This means auth, sync, and Firestore are not tested in E2E.
+- **Firebase E2E tests**: `bun run test:e2e:firebase` (requires Java for emulators)
+  - Tests real auth flow via `window.__devSignIn()` against Firebase emulators
+  - Config: `playwright-firebase.config.ts`
+  - Tests in `e2e/firebase/`
 
 ## Conventions
 - Never use grep, always ripgrep
