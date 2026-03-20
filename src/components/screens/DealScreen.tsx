@@ -168,7 +168,11 @@ export default function DealScreen() {
 
         {/* Toast feedback */}
         {toast && (
-          <div className="mb-3 px-3 py-1.5 rounded-lg bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs font-display font-bold text-center">
+          <div
+            className="mb-3 px-4 py-2 rounded-xl bg-partner-b/10 dark:bg-partner-b/20 text-partner-b text-xs font-display font-bold text-center flex items-center justify-center gap-2"
+            style={{ animation: 'revealUp 0.3s ease forwards' }}
+          >
+            <span className="text-sm">✓</span>
             {toast}
           </div>
         )}
@@ -180,10 +184,10 @@ export default function DealScreen() {
             role="img"
             aria-label={`Card distribution: ${partnerACards.length} ${partnerAName}, ${partnerBCards.length} ${partnerBName}, ${unassignedCards.length} Unassigned`}
           >
-            <div className="flex h-2 rounded-full overflow-hidden bg-gray-100 mb-2">
-              <div className="bg-partner-a transition-all duration-500" style={{ width: `${aFrac * 100}%` }} />
-              <div className="bg-partner-b transition-all duration-500" style={{ width: `${bFrac * 100}%` }} />
-              <div className="bg-unassigned transition-all duration-500" style={{ width: `${uFrac * 100}%` }} />
+            <div className="flex h-3 rounded-full overflow-hidden bg-gray-100 dark:bg-white/10 mb-2 shadow-[inset_0_1px_2px_rgba(0,0,0,0.06)]">
+              <div className="bg-gradient-to-b from-partner-a to-partner-a/90 transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]" style={{ width: `${aFrac * 100}%` }} />
+              <div className="bg-gradient-to-b from-partner-b to-partner-b/90 transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]" style={{ width: `${bFrac * 100}%` }} />
+              <div className="bg-gradient-to-b from-unassigned to-unassigned/80 transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]" style={{ width: `${uFrac * 100}%` }} />
             </div>
             <div className="flex items-center gap-4 text-xs font-body">
               <span className="flex items-center gap-1.5">
@@ -247,10 +251,11 @@ export default function DealScreen() {
           </div>
         ) : (
           <>
-            {visibleCards.map((card) => (
+            {visibleCards.map((card, i) => (
               <CardRow
                 key={card.id}
                 card={card}
+                index={i}
                 dealMode={true}
                 onAssign={(holderId) => handleAssign(card.id, holderId)}
                 onToggleNotInPlay={() => handleToggleNotInPlay(card)}
@@ -259,10 +264,14 @@ export default function DealScreen() {
             ))}
 
             {segment === 'unassigned' && visibleCards.length === 0 && (
-              <div className="flex flex-col items-center justify-center h-32 text-center">
-                <p className="text-sm font-body text-concrete">
-                  {t('game.allAssigned', 'All cards assigned')}
+              <div className="flex flex-col items-center justify-center h-32 text-center"
+                style={{ animation: 'revealUp 0.4s ease forwards' }}
+              >
+                <span className="text-2xl mb-2" aria-hidden="true">🎉</span>
+                <p className="text-sm font-display font-bold text-partner-b">
+                  {t('game.allAssigned', 'All cards assigned!')}
                 </p>
+                <p className="text-xs text-concrete mt-1">Your household is balanced</p>
               </div>
             )}
 

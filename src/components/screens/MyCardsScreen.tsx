@@ -56,7 +56,7 @@ export default function MyCardsScreen() {
         {mySlot && myCards.length > 0 && (
           <div className="flex items-center gap-3 mt-3 relative">
             <span
-              className="px-3 py-1 rounded-full text-xs font-display font-bold"
+              className="px-3 py-1 rounded-full text-xs font-display font-bold backdrop-blur-sm"
               style={{
                 background: isA ? 'var(--color-partner-a-light)' : 'var(--color-partner-b-light)',
                 color: isA ? 'var(--color-partner-a)' : 'var(--color-partner-b)',
@@ -75,7 +75,9 @@ export default function MyCardsScreen() {
       {/* Card list */}
       <div className="flex-1 overflow-y-auto px-5 pt-4 pb-4">
         {myCards.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-52 text-center px-8">
+          <div className="flex flex-col items-center justify-center h-52 text-center px-8"
+            style={{ animation: 'revealUp 0.5s ease forwards' }}
+          >
             <div className="text-4xl mb-4" aria-hidden="true">🃏</div>
             <p className="font-display font-bold text-ink text-lg mb-1">
               {t('cards.noMyCards', 'No cards yet')}
@@ -91,8 +93,8 @@ export default function MyCardsScreen() {
             </Link>
           </div>
         ) : (
-          myCards.map((card) => (
-            <CardRow key={card.id} card={card} />
+          myCards.map((card, i) => (
+            <CardRow key={card.id} card={card} index={i} />
           ))
         )}
       </div>

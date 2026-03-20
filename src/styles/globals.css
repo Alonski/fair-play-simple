@@ -66,6 +66,7 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
+    background: var(--color-paper);
   }
 
   /* Subtle paper grain overlay */
@@ -124,6 +125,24 @@
 }
 .expandable-grid.open .expandable-inner {
   opacity: 1;
+}
+
+/* Card hover lift effect */
+.card-hover {
+  transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 200ms ease;
+}
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+.card-hover:active {
+  transform: translateY(0px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+/* Page content entrance */
+.page-enter {
+  animation: revealUp 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 /* iOS safe area for bottom nav */

@@ -169,10 +169,11 @@ export default function MoreScreen() {
                     </p>
                   ) : (
                     <div className="space-y-1.5">
-                      {historyEvents.map((event) => (
+                      {historyEvents.map((event, i) => (
                         <div
                           key={event.id}
                           className="flex items-center gap-3 py-2 px-3 rounded-xl bg-gray-50/60 dark:bg-white/5"
+                          style={{ animation: 'revealUp 0.3s ease forwards', animationDelay: `${i * 40}ms`, opacity: 0 }}
                         >
                           <span className="text-base">{eventIcons[event.type] || '📋'}</span>
                           <div className="flex-1 min-w-0">
@@ -206,7 +207,7 @@ export default function MoreScreen() {
         {isFirebaseConfigured && isAuthenticated && (
           <button
             onClick={() => setSignOutConfirmOpen(true)}
-            className="w-full py-4 bg-white/80 rounded-2xl border border-gray-100/80 shadow-soft-sm text-sm font-display font-bold text-concrete hover:text-partner-a transition-colors"
+            className="w-full py-4 bg-white/80 rounded-2xl border border-gray-100/80 shadow-soft-sm text-sm font-display font-bold text-concrete hover:text-partner-a hover:border-partner-a/20 hover:bg-partner-a/5 transition-colors"
           >
             {t('auth.signOut', 'Sign out')}
           </button>

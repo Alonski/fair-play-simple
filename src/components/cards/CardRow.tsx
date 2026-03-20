@@ -19,6 +19,7 @@ function formatTime(minutes: number): string {
 
 interface CardRowProps {
   card: CardType;
+  index?: number;
   dealMode?: boolean;
   onAssign?: (holderId: 'partner-a' | 'partner-b' | null) => void;
   onEdit?: () => void;
@@ -48,6 +49,7 @@ const holderStyles = {
 
 export default function CardRow({
   card,
+  index = 0,
   dealMode = false,
   onAssign,
   onEdit,
@@ -95,8 +97,12 @@ export default function CardRow({
 
   return (
     <div
-      className={`border-l-4 ${styles.border} ${styles.bg} rounded-2xl mb-2.5 shadow-soft-sm overflow-hidden`}
-      style={{ transition: 'box-shadow 150ms' }}
+      className={`border-l-[5px] ${styles.border} ${styles.bg} rounded-2xl mb-2.5 shadow-soft-sm overflow-hidden hover:shadow-soft hover:-translate-y-0.5 hover:scale-[1.005] transition-all duration-200 ${expanded ? 'shadow-soft ring-1 ring-black/[0.03]' : ''}`}
+      style={{
+        animation: 'revealUp 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards',
+        animationDelay: `${index * 50}ms`,
+        opacity: 0,
+      }}
     >
       {/* Row header — always visible */}
       <button
@@ -149,7 +155,7 @@ export default function CardRow({
           <div className="px-4 pb-4 pt-0">
             {description && (
               <p
-                className={`text-sm text-ink/65 font-body leading-relaxed mb-3 ${
+                className={`text-sm text-ink/70 font-body leading-relaxed mb-3 ${
                   isRTL ? 'text-right' : 'text-left'
                 }`}
               >

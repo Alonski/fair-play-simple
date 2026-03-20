@@ -29,19 +29,19 @@ export default function AuthScreen() {
         {/* Decorative card shapes */}
         <div
           className="absolute top-8 -left-6 w-28 h-40 rounded-2xl border-2 border-partner-a/20 bg-white/40"
-          style={{ transform: 'rotate(-12deg)', boxShadow: '0 8px 24px rgba(224,122,142,0.12)' }}
+          style={{ transform: 'rotate(-12deg)', animation: 'float 8s ease-in-out infinite', '--rotate': '-12deg', boxShadow: '0 8px 24px rgba(224,122,142,0.12)' } as React.CSSProperties}
         />
         <div
           className="absolute top-16 -right-4 w-24 h-36 rounded-2xl border-2 border-partner-b/20 bg-white/40"
-          style={{ transform: 'rotate(10deg)', boxShadow: '0 8px 24px rgba(127,182,158,0.12)' }}
+          style={{ transform: 'rotate(10deg)', animation: 'float 9s ease-in-out infinite 2s', '--rotate': '10deg', boxShadow: '0 8px 24px rgba(127,182,158,0.12)' } as React.CSSProperties}
         />
         <div
           className="absolute bottom-4 left-8 w-20 h-32 rounded-2xl border-2 border-unassigned/40 bg-white/40"
-          style={{ transform: 'rotate(6deg)', boxShadow: '0 8px 24px rgba(245,216,154,0.15)' }}
+          style={{ transform: 'rotate(6deg)', animation: 'float 7s ease-in-out infinite 4s', '--rotate': '6deg', boxShadow: '0 8px 24px rgba(245,216,154,0.15)' } as React.CSSProperties}
         />
         <div
           className="absolute bottom-12 right-10 w-16 h-24 rounded-2xl border-2 border-partner-a/15 bg-white/30"
-          style={{ transform: 'rotate(-8deg)' }}
+          style={{ transform: 'rotate(-8deg)', animation: 'float 10s ease-in-out infinite 1s', '--rotate': '-8deg' } as React.CSSProperties}
         />
 
         {/* Brand */}

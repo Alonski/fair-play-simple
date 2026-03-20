@@ -207,6 +207,18 @@
   }
 }
 
+/* Gentle float for decorative elements */
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(var(--rotate, 0deg)); }
+  50% { transform: translateY(-8px) rotate(var(--rotate, 0deg)); }
+}
+
+/* Scale in for toasts and dialogs */
+@keyframes scaleIn {
+  0% { opacity: 0; transform: scale(0.95); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
 /* Utility Classes */
 .card-flip {
   animation: cardFlip 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
@@ -298,4 +310,12 @@
 
 .flip-back {
   transform: rotateY(180deg);
+}
+
+.float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.scale-in {
+  animation: scaleIn 0.25s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
