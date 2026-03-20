@@ -22,6 +22,12 @@ A digital Fair Play card game for couples to divide household responsibilities f
 - Warm/light/family design aesthetic (not the original "Organic Brutalism")
 - Fair Play cards are **responsibilities** (held), not tasks (completed)
 
+## Testing
+- **Unit tests**: `bun run test --run` (Vitest)
+- **E2E tests**: `bun run test:e2e` (Playwright, chromium)
+- **After running E2E tests**: ALWAYS read the screenshot files in `test-results/*.png` to visually verify the UI renders correctly. The E2E assertions only check DOM structure — they will pass even if CSS is broken, the page is blank, or styles are missing. The screenshots are the only way to catch visual regressions.
+- E2E tests bypass Firebase auth entirely (no env vars → `isFirebaseConfigured = false`). They seed data via localStorage. This means auth, sync, and Firestore are not tested in E2E.
+
 ## Conventions
 - Never use grep, always ripgrep
 - Never use cat for file creation, use Write tool

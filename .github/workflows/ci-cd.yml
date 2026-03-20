@@ -79,10 +79,4 @@ jobs:
           channelId: live
           projectId: ${{ secrets.VITE_FIREBASE_PROJECT_ID }}
 
-      - name: Deploy Firestore rules
-        run: |
-          echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > "$RUNNER_TEMP/sa_key.json"
-          npx firebase-tools deploy --only firestore:rules --project ${{ secrets.VITE_FIREBASE_PROJECT_ID }}
-          rm -f "$RUNNER_TEMP/sa_key.json"
-        env:
-          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/sa_key.json
+      # Firestore rules are deployed locally: firebase deploy --only firestore:rules
