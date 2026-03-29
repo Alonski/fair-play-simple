@@ -1,9 +1,11 @@
+import { type ReactNode } from 'react';
 import { Link, useRouterState } from '@tanstack/react-router';
+import { CardsIcon, DealIcon, MoreIcon } from '@components/ui/NavIcons';
 
-const tabs = [
-  { path: '/' as const, icon: '🃏', label: 'My Cards' },
-  { path: '/deal' as const, icon: '⚖️', label: 'Deal' },
-  { path: '/more' as const, icon: '⚙️', label: 'More' },
+const tabs: { path: '/' | '/deal' | '/more'; icon: ReactNode; label: string }[] = [
+  { path: '/', icon: <CardsIcon />, label: 'My Cards' },
+  { path: '/deal', icon: <DealIcon />, label: 'Deal' },
+  { path: '/more', icon: <MoreIcon />, label: 'More' },
 ];
 
 export default function Navigation() {
@@ -34,14 +36,12 @@ export default function Navigation() {
               key={tab.path}
               to={tab.path}
               aria-current={isActive ? 'page' : undefined}
-              className="flex-1 flex flex-col items-center justify-center gap-0.5 relative"
+              className={`flex-1 flex flex-col items-center justify-center gap-0.5 relative transition-colors duration-200 ${
+                isActive ? 'text-partner-a' : 'text-concrete'
+              }`}
             >
-              <span className="relative text-xl leading-none" aria-hidden="true">{tab.icon}</span>
-              <span
-                className={`relative text-xs font-display font-medium tracking-wide transition-colors duration-200 ${
-                  isActive ? 'text-partner-a' : 'text-concrete'
-                }`}
-              >
+              <span className="relative w-6 h-6 [&>svg]:w-full [&>svg]:h-full">{tab.icon}</span>
+              <span className="relative text-xs font-display font-medium tracking-wide">
                 {tab.label}
               </span>
             </Link>
