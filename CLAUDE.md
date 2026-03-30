@@ -31,9 +31,9 @@ This starts Firebase emulators (auth:9099, firestore:8080, UI:4000) and the Vite
 
 **Sign in from browser console:**
 ```js
-window.__devSignIn('alon@test.com', 'Alon')
+window.__devSignIn('alonzorz@gmail.com', 'Alon')
 ```
-- Email allowlist is skipped when using emulators
+- App-side email allowlist is skipped when using emulators, but Firestore rules still expect an allowlisted email
 - Sample cards auto-seed on first sign-in as partner-a
 - Emulator UI available at http://localhost:4000
 
@@ -41,6 +41,22 @@ window.__devSignIn('alon@test.com', 'Alon')
 ```bash
 VITE_FIREBASE_PROJECT_ID= VITE_FIREBASE_API_KEY= bun run dev
 ```
+
+## Current Handoff (2026-03-30)
+- Detailed handoff: `research/claude-code-handoff-2026-03-30.md`
+- Current uncommitted app/docs work:
+  - mobile nav active-state redesign
+  - dark-mode palette/surface polish
+  - narrow mobile Deal toolbar layout fix
+  - local emulator sign-in instructions corrected to use `alonzorz@gmail.com`
+- Verification already run:
+  - `bun run lint` passed
+  - `bun run build` passed
+  - headless Playwright screenshots saved in `tmp/review-cli/`
+- Important workspace note:
+  - there are many untracked `tmp/` artifacts; do not blindly stage everything
+- Local process note:
+  - local emulator/dev ports were cleaned up before handoff; start fresh with `make dev-emu` if resuming QA
 
 ## Testing
 - **Unit tests**: `bun run test --run` (Vitest)

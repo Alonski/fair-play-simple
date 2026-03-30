@@ -1,5 +1,27 @@
 # Fair Play Deck App - Work Log
 
+## Session 2: Frontend Polish & Claude Handoff (2026-03-30)
+
+### ✅ Completed Tasks
+- User-confirmed MVP scope narrowed to English-first shared usage for Alon + Moral
+- Dead board/dashboard UI path was removed from `src/`
+- Mobile UI polish pass completed:
+  - bottom nav active state redesigned
+  - dark mode warmed and improved
+  - narrow Deal toolbar layout fixed
+  - More screen sign-out surface fixed in dark mode
+- Local emulator docs/instructions corrected to use `window.__devSignIn('alonzorz@gmail.com', 'Alon')`
+- Claude handoff saved to `research/claude-code-handoff-2026-03-30.md`
+
+### 📊 Verification
+- `bun run lint` ✅
+- `bun run build` ✅
+- Headless Playwright screenshots saved in `tmp/review-cli/`
+
+### 📝 Notes
+- Do not blindly stage `tmp/` artifacts; there are many scratch screenshots and helper files
+- Local emulator/dev ports were cleaned up before handoff; start fresh with `make dev-emu`
+
 ## Session 1: Phase 1 Foundation Complete ✅ (2025-11-14)
 
 ### ✅ Completed Tasks

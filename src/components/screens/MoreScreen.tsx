@@ -207,7 +207,7 @@ export default function MoreScreen() {
         {isFirebaseConfigured && isAuthenticated && (
           <button
             onClick={() => setSignOutConfirmOpen(true)}
-            className="w-full py-4 bg-white/80 rounded-2xl border border-gray-100/80 shadow-soft-sm text-sm font-display font-bold text-concrete hover:text-partner-a hover:border-partner-a/20 hover:bg-partner-a/5 transition-colors"
+            className="w-full py-4 bg-white/80 dark:bg-white/[0.08] rounded-2xl border border-gray-100/80 dark:border-white/10 shadow-soft-sm text-sm font-display font-bold text-concrete hover:text-partner-a hover:border-partner-a/20 hover:bg-partner-a/5 dark:hover:bg-partner-a/12 transition-colors"
           >
             {t('auth.signOut', 'Sign out')}
           </button>

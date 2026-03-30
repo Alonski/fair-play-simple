@@ -1,5 +1,20 @@
 # Agent Workflow & Development Guide
 
+## Local Dev with Emulators
+To run the app with Firebase auth + Firestore locally (no production Firebase needed):
+```bash
+make dev-emu
+```
+This starts Firebase emulators (auth:9099, firestore:8080, UI:4000) and the Vite dev server together. The app auto-connects to emulators in dev mode.
+
+**Sign in from browser console:**
+```js
+window.__devSignIn('alonzorz@gmail.com', 'Alon')
+```
+- App-side email allowlist is skipped when using emulators, but Firestore rules still expect an allowlisted email
+- Sample cards auto-seed on first sign-in as partner-a
+- Emulator UI available at http://localhost:4000
+
 ## Project Agents
 
 ### 1. Setup Agent

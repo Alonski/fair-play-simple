@@ -9,16 +9,17 @@ export function CardsIcon({ className }: IconProps) {
       height="24"
       viewBox="0 0 24 24"
       fill="none"
+      stroke="currentColor"
       strokeWidth="1.25"
       strokeLinecap="round"
       strokeLinejoin="round"
       className={className}
       aria-hidden="true"
     >
-      <rect x="6" y="3.5" width="9" height="13" rx="2" stroke="currentColor" opacity="0.3" transform="rotate(-10 10.5 10)" />
-      <rect x="7.5" y="4" width="9" height="13" rx="2" stroke="currentColor" fill="white" />
-      <rect x="9" y="3.5" width="9" height="13" rx="2" stroke="currentColor" opacity="0.3" transform="rotate(10 13.5 10)" />
-      <path d="M12 8 L13 9.5 L12 11 L11 9.5 Z" fill="currentColor" stroke="none" opacity="0.5" />
+      <rect x="6" y="3.5" width="9" height="13" rx="2" opacity="0.28" transform="rotate(-10 10.5 10)" />
+      <rect x="7.5" y="4" width="9" height="13" rx="2" fill="currentColor" fillOpacity="0.12" />
+      <rect x="9" y="3.5" width="9" height="13" rx="2" opacity="0.28" transform="rotate(10 13.5 10)" />
+      <path d="M12 8 L13 9.5 L12 11 L11 9.5 Z" fill="currentColor" stroke="none" opacity="0.55" />
     </svg>
   );
 }
@@ -66,11 +67,11 @@ export function MoreIcon({ className }: IconProps) {
       aria-hidden="true"
     >
       <line x1="4" y1="6" x2="20" y2="6" />
-      <circle cx="15" cy="6" r="2" fill="white" />
+      <circle cx="15" cy="6" r="2" fill="currentColor" fillOpacity="0.24" />
       <line x1="4" y1="12" x2="20" y2="12" />
-      <circle cx="9" cy="12" r="2" fill="white" />
+      <circle cx="9" cy="12" r="2" fill="currentColor" fillOpacity="0.24" />
       <line x1="4" y1="18" x2="20" y2="18" />
-      <circle cx="14" cy="18" r="2" fill="white" />
+      <circle cx="14" cy="18" r="2" fill="currentColor" fillOpacity="0.24" />
     </svg>
   );
 }

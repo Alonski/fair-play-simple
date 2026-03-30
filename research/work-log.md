@@ -96,3 +96,32 @@
 - Firebase AI Logic: **enabled** (Gemini Developer API on Spark plan)
 - Known issue: E2E screenshots don't validate visual correctness
 - Next: two-device sync test, dark mode QA, translation QA
+
+---
+
+## 2026-03-30
+
+### Session 6
+- User clarified real MVP scope:
+  - English-only for now
+  - local-only/offline polish not required yet
+  - focus on the real shared app for Alon + Moral
+- User removed the dead board/dashboard UI path from `src/`
+- Production auth slot mapping had already been updated/deployed:
+  - `alonzorz@gmail.com` -> `partner-a`
+  - `swaddlesnaps@gmail.com` -> `partner-b`
+  - `moralalon@gmail.com` -> `partner-b`
+- Frontend review saved to `research/frontend-review-2026-03-29.md`
+- Mobile UI polish pass:
+  - bottom nav active state redesigned to avoid the old overflowing slab feel
+  - dark mode palette warmed and made more legible
+  - narrow Deal toolbar layout fixed for mobile
+  - dark-mode sign-out button surface fixed on More
+- Local emulator workflow corrected:
+  - `make dev-emu` banner/docs now use `window.__devSignIn('alonzorz@gmail.com', 'Alon')`
+  - docs note that app-side allowlist is skipped in emulators, but Firestore rules still expect an allowlisted email
+- Verification:
+  - `bun run lint` passed
+  - `bun run build` passed
+  - headless Playwright screenshots saved to `tmp/review-cli/`
+- Claude/assistant handoff saved to `research/claude-code-handoff-2026-03-30.md`
