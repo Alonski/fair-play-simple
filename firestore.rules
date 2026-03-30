@@ -2,10 +2,24 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Only these two emails can use the app
+    // Only these production emails can use the app
     function isAllowedUser() {
       return request.auth != null
-        && request.auth.token.email in ['alonzorz@gmail.com', 'swaddlesnaps@gmail.com'];
+        && request.auth.token.email in [
+          'alonzorz@gmail.com',
+          'swaddlesnaps@gmail.com',
+          'moralalon@gmail.com'
+        ];
+    }
+
+    function isPartnerAEmail() {
+      return isAllowedUser()
+        && request.auth.token.email == 'alonzorz@gmail.com';
+    }
+
+    function isPartnerBEmail() {
+      return isAllowedUser()
+        && request.auth.token.email in ['swaddlesnaps@gmail.com', 'moralalon@gmail.com'];
     }
 
     // Helper: is the caller a member of this household?
@@ -30,12 +44,16 @@ service cloud.firestore {
       // (user doc has householdId: null before first join, so isMember() would fail)
       allow read: if isAllowedUser();
 
-      allow create: if isAllowedUser()
-        && request.resource.data.partnerAUid == request.auth.uid;
+      allow create: if (isPartnerAEmail()
+          && request.resource.data.partnerAUid == request.auth.uid)
+        || (isPartnerBEmail()
+          && request.resource.data.partnerBUid == request.auth.uid);
 
       allow update: if isMember(householdId)
-        || (isAllowedUser()
-            && resource.data.partnerBUid == null
+        || (isPartnerAEmail()
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['partnerAUid'])
+            && request.resource.data.partnerAUid == request.auth.uid)
+        || (isPartnerBEmail()
             && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['partnerBUid'])
             && request.resource.data.partnerBUid == request.auth.uid);
 

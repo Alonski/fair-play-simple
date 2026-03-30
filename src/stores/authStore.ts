@@ -17,21 +17,34 @@ import {
 } from 'firebase/firestore';
 import type { UserProfile, PartnerId } from '@types';
 
-const ALLOWED_EMAILS = [
-  'alonzorz@gmail.com',
-  'swaddlesnaps@gmail.com',
-];
+const PRODUCTION_ACCOUNT_MAP: Record<string, { slot: PartnerId; name: string }> = {
+  'alonzorz@gmail.com': { slot: 'partner-a', name: 'Alon' },
+  'swaddlesnaps@gmail.com': { slot: 'partner-b', name: 'Moral' },
+  'moralalon@gmail.com': { slot: 'partner-b', name: 'Moral' },
+};
+
+const PARTNER_NAMES: Record<PartnerId, string> = {
+  'partner-a': 'Alon',
+  'partner-b': 'Moral',
+};
 
 // Skip email allowlist check when using emulators
 const SKIP_EMAIL_CHECK = import.meta.env.DEV && import.meta.env.VITE_USE_EMULATORS !== 'false';
 
-const EMAIL_TO_NAME: Record<string, string> = {
-  'alonzorz@gmail.com': 'Alon',
-  'swaddlesnaps@gmail.com': 'Moral',
-};
+function normalizeEmail(email?: string | null): string {
+  return (email ?? '').trim().toLowerCase();
+}
+
+function getProductionAccount(email?: string | null) {
+  return PRODUCTION_ACCOUNT_MAP[normalizeEmail(email)] ?? null;
+}
+
+function isAllowedEmail(email?: string | null): boolean {
+  return !!getProductionAccount(email);
+}
 
 function getPartnerName(email: string, displayName?: string | null): string {
-  return EMAIL_TO_NAME[email] ?? displayName ?? email.split('@')[0];
+  return getProductionAccount(email)?.name ?? displayName ?? email.split('@')[0];
 }
 
 const HOUSEHOLD_ID = 'shared';
@@ -81,15 +94,54 @@ async function ensureUserProfile(user: User): Promise<UserProfile> {
 }
 
 async function joinOrCreateHousehold(user: User, profile: UserProfile): Promise<UserProfile> {
-  if (!db || profile.householdId) return profile;
+  if (!db) return profile;
 
   const updatedProfile = { ...profile };
-  const realName = getPartnerName(user.email ?? '', user.displayName);
-  const otherName = Object.entries(EMAIL_TO_NAME).find(([email]) => email !== user.email)?.[1] ?? 'Partner';
+  const mappedAccount = getProductionAccount(user.email);
 
   await runTransaction(db, async (transaction) => {
     const householdRef = doc(db!, 'households', HOUSEHOLD_ID);
+    const userRef = doc(db!, 'users', user.uid);
     const householdSnap = await transaction.get(householdRef);
+
+    if (mappedAccount) {
+      if (householdSnap.exists()) {
+        transaction.update(
+          householdRef,
+          mappedAccount.slot === 'partner-a'
+            ? { partnerAUid: user.uid }
+            : { partnerBUid: user.uid }
+        );
+      } else {
+        transaction.set(householdRef, {
+          name: 'Our Home',
+          partnerAUid: mappedAccount.slot === 'partner-a' ? user.uid : null,
+          partnerBUid: mappedAccount.slot === 'partner-b' ? user.uid : null,
+          partnerAName: PARTNER_NAMES['partner-a'],
+          partnerBName: PARTNER_NAMES['partner-b'],
+          dealMode: 'random',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        });
+      }
+
+      transaction.set(userRef, {
+        householdId: HOUSEHOLD_ID,
+        partnerSlot: mappedAccount.slot,
+        displayName: mappedAccount.name,
+        email: user.email || '',
+      }, { merge: true });
+
+      updatedProfile.householdId = HOUSEHOLD_ID;
+      updatedProfile.partnerSlot = mappedAccount.slot;
+      updatedProfile.displayName = mappedAccount.name;
+      return;
+    }
+
+    if (profile.householdId) return;
+
+    const realName = getPartnerName(user.email ?? '', user.displayName);
+    const otherName = 'Partner';
 
     let slot: PartnerId;
     if (householdSnap.exists()) {
@@ -112,10 +164,18 @@ async function joinOrCreateHousehold(user: User, profile: UserProfile): Promise<
       });
     }
 
-    transaction.update(doc(db!, 'users', user.uid), { householdId: HOUSEHOLD_ID, partnerSlot: slot });
+    transaction.update(userRef, { householdId: HOUSEHOLD_ID, partnerSlot: slot });
     updatedProfile.householdId = HOUSEHOLD_ID;
     updatedProfile.partnerSlot = slot;
   });
+
+  if (mappedAccount) {
+    await setDoc(doc(db, 'households', HOUSEHOLD_ID), {
+      partnerAName: PARTNER_NAMES['partner-a'],
+      partnerBName: PARTNER_NAMES['partner-b'],
+      updatedAt: new Date().toISOString(),
+    }, { merge: true });
+  }
 
   return updatedProfile;
 }
@@ -167,7 +227,7 @@ export const useAuthStore = create<AuthStoreState>()((set, get) => ({
         try {
           if (user) {
             // Email allowlist check (skipped when using emulators)
-            if (!SKIP_EMAIL_CHECK && !ALLOWED_EMAILS.includes(user.email ?? '')) {
+            if (!SKIP_EMAIL_CHECK && !isAllowedEmail(user.email)) {
               await auth!.signOut();
               set({
                 user: null,
@@ -184,6 +244,7 @@ export const useAuthStore = create<AuthStoreState>()((set, get) => ({
 
             let profile = await ensureUserProfile(user);
             profile = await joinOrCreateHousehold(user, profile);
+            const mappedAccount = getProductionAccount(user.email);
 
             if (profile.householdId) {
               const household = await fetchHouseholdDoc(profile.householdId);
@@ -191,23 +252,35 @@ export const useAuthStore = create<AuthStoreState>()((set, get) => ({
 
               // Backfill partnerSlot for users who joined before auto-assign
               if (!profile.partnerSlot && household && db) {
-                const slot: PartnerId = (household as { partnerAUid?: string }).partnerAUid === user.uid
+                const slot: PartnerId = mappedAccount?.slot ?? ((household as { partnerAUid?: string }).partnerAUid === user.uid
                   ? 'partner-a'
-                  : 'partner-b';
+                  : 'partner-b');
                 await updateDoc(doc(db, 'users', user.uid), { partnerSlot: slot });
                 profile = { ...profile, partnerSlot: slot };
               }
 
-              // Backfill real names if household still has generic placeholders
-              const h = household as { partnerAName?: string; partnerBName?: string } | null;
-              if (db && h && (h.partnerAName === 'Partner A' || h.partnerBName === 'Partner B')) {
-                const realName = getPartnerName(user.email ?? '', user.displayName);
-                const otherName = Object.entries(EMAIL_TO_NAME).find(([email]) => email !== user.email)?.[1] ?? 'Partner';
-                const isA = (h as { partnerAUid?: string }).partnerAUid === user.uid;
-                await updateDoc(doc(db, 'households', profile.householdId!), {
-                  partnerAName: isA ? realName : otherName,
-                  partnerBName: isA ? otherName : realName,
-                });
+              // Keep production household names canonical regardless of which mapped account signs in.
+              if (db && mappedAccount) {
+                await setDoc(doc(db, 'households', profile.householdId!), {
+                  partnerAName: PARTNER_NAMES['partner-a'],
+                  partnerBName: PARTNER_NAMES['partner-b'],
+                  ...(mappedAccount.slot === 'partner-a'
+                    ? { partnerAUid: user.uid }
+                    : { partnerBUid: user.uid }),
+                  updatedAt: new Date().toISOString(),
+                }, { merge: true });
+              } else {
+                // Backfill real names if household still has generic placeholders
+                const h = household as { partnerAName?: string; partnerBName?: string } | null;
+                if (db && h && (h.partnerAName === 'Partner A' || h.partnerBName === 'Partner B')) {
+                  const realName = getPartnerName(user.email ?? '', user.displayName);
+                  const otherName = 'Partner';
+                  const isA = (h as { partnerAUid?: string }).partnerAUid === user.uid;
+                  await updateDoc(doc(db, 'households', profile.householdId!), {
+                    partnerAName: isA ? realName : otherName,
+                    partnerBName: isA ? otherName : realName,
+                  });
+                }
               }
             }
 
