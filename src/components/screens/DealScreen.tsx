@@ -132,12 +132,12 @@ export default function DealScreen() {
         </h1>
 
         {/* Action row */}
-        <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] items-center gap-2 mb-3">
+        <div className="flex items-stretch gap-2 mb-3">
           <select
             value={currentDealMode}
             onChange={(e) => setCurrentDealMode(e.target.value as typeof currentDealMode)}
             aria-label="Deal mode"
-            className="col-span-2 min-w-0 w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/10 font-display font-bold text-sm text-ink focus:outline-none focus:ring-2 focus:ring-partner-a/20 shadow-soft-sm"
+            className="min-w-0 flex-1 px-3 py-2.5 rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/10 font-display font-bold text-sm text-ink focus:outline-none focus:ring-2 focus:ring-partner-a/20 shadow-soft-sm"
           >
             <option value="random">{t('game.dealModes.random', 'Random')}</option>
             <option value="weighted" disabled>{t('game.dealModes.weighted', 'Weighted')}</option>
@@ -146,21 +146,21 @@ export default function DealScreen() {
           <button
             onClick={() => setShowDealConfirm(true)}
             disabled={unassignedCards.length === 0 || readOnlyMode}
-            className="min-w-0 whitespace-nowrap px-3.5 py-2 bg-ink text-white font-display font-bold rounded-xl text-[13px] shadow-soft-sm disabled:opacity-30 disabled:cursor-not-allowed active:scale-95 transition-transform"
+            className="whitespace-nowrap px-4 py-2.5 bg-ink text-white font-display font-bold rounded-2xl text-[13px] shadow-soft-sm hover:opacity-90 disabled:opacity-30 disabled:cursor-not-allowed active:scale-95 transition-all"
           >
             {t('game.deal', 'Deal')}
           </button>
           <button
             onClick={() => setShowResetConfirm(true)}
             disabled={readOnlyMode}
-            className="min-w-0 whitespace-nowrap px-3.5 py-2 bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 text-ink font-display font-bold rounded-xl text-[13px] shadow-soft-sm disabled:opacity-30 disabled:cursor-not-allowed active:scale-95 transition-transform"
+            className="whitespace-nowrap px-4 py-2.5 bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 text-ink font-display font-bold rounded-2xl text-[13px] shadow-soft-sm hover:bg-gray-50 dark:hover:bg-white/15 disabled:opacity-30 disabled:cursor-not-allowed active:scale-95 transition-all"
           >
             {t('game.reset', 'Reset')}
           </button>
           <button
             onClick={() => { setEditCard(undefined); setIsModalOpen(true); }}
             aria-label="Add new card"
-            className="w-11 h-11 shrink-0 bg-partner-a text-white font-display font-bold rounded-xl text-lg shadow-soft-sm active:scale-95 transition-transform flex items-center justify-center"
+            className="aspect-square shrink-0 bg-partner-a text-white font-display font-bold rounded-2xl text-lg shadow-soft-sm hover:opacity-90 active:scale-95 transition-all flex items-center justify-center"
           >
             +
           </button>

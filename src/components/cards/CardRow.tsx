@@ -64,7 +64,8 @@ export default function CardRow({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const isRTL = i18n.language === 'he';
-  const title = isRTL ? card.title.he : card.title.en;
+  const rawTitle = isRTL ? card.title.he : card.title.en;
+  const title = rawTitle.replace('{{partner-a}}', partnerAName).replace('{{partner-b}}', partnerBName);
   const description = isRTL ? card.description.he : card.description.en;
   const mscNote = card.details.en; // shared household note field
 
@@ -212,20 +213,20 @@ export default function CardRow({
                   <>
                     <button
                       onClick={(e) => { e.stopPropagation(); onAssign('partner-a'); }}
-                      className="text-xs px-3 py-2.5 min-h-[44px] bg-partner-a text-white font-display font-bold rounded-lg tracking-wide"
+                      className="text-xs px-3 py-2.5 min-h-[44px] bg-partner-a text-white font-display font-bold rounded-lg tracking-wide hover:opacity-85 active:scale-95 transition-all cursor-pointer"
                     >
                       {partnerAName}
                     </button>
                     <button
                       onClick={(e) => { e.stopPropagation(); onAssign('partner-b'); }}
-                      className="text-xs px-3 py-2.5 min-h-[44px] bg-partner-b text-white font-display font-bold rounded-lg tracking-wide"
+                      className="text-xs px-3 py-2.5 min-h-[44px] bg-partner-b text-white font-display font-bold rounded-lg tracking-wide hover:opacity-85 active:scale-95 transition-all cursor-pointer"
                     >
                       {partnerBName}
                     </button>
                     {card.holder && (
                       <button
                         onClick={(e) => { e.stopPropagation(); onAssign(null); }}
-                        className="text-xs px-3 py-2.5 min-h-[44px] bg-gray-100 dark:bg-white/10 text-concrete font-display font-bold rounded-lg"
+                        className="text-xs px-3 py-2.5 min-h-[44px] bg-gray-100 dark:bg-white/10 text-concrete font-display font-bold rounded-lg hover:bg-gray-200 dark:hover:bg-white/15 active:scale-95 transition-all cursor-pointer"
                       >
                         Unassign
                       </button>
@@ -233,7 +234,7 @@ export default function CardRow({
                     {onToggleNotInPlay && (
                       <button
                         onClick={(e) => { e.stopPropagation(); onToggleNotInPlay(); }}
-                        className="text-xs px-3 py-2.5 min-h-[44px] bg-gray-100 dark:bg-white/10 text-concrete font-display font-bold rounded-lg"
+                        className="text-xs px-3 py-2.5 min-h-[44px] bg-gray-100 dark:bg-white/10 text-concrete font-display font-bold rounded-lg hover:bg-gray-200 dark:hover:bg-white/15 active:scale-95 transition-all cursor-pointer"
                       >
                         Remove
                       </button>

@@ -1,5 +1,7 @@
 .PHONY: lighthouse emulators dev dev-emu test lint build
 
+.DEFAULT_GOAL := dev-emu
+
 lighthouse:
 	bun run scripts/lighthouse-audit.js
 
