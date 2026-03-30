@@ -1,98 +1,69 @@
-# Fair Play Deck App - Implementation Plan
+# Fair Play — Implementation Plan
 
 ## Overview
-A production-grade PWA for couples managing household tasks (Fair Play cards) with distinctive "Organic Brutalism" aesthetic.
+A mobile-first PWA for couples managing household responsibilities using Eve Rodsky's Fair Play method. Cards represent responsibilities (not tasks) — they are held by a partner, not completed and checked off.
 
-## Development Phases
+Design aesthetic: warm, light, family-friendly. Soft shadows, rounded surfaces, paper-like backgrounds, partner-colored accents.
 
-### Phase 1: Foundation ✅ IN PROGRESS
-**Duration**: Weeks 1-2
-- [x] Project setup with Vite, TypeScript, Catalyst
-- [x] Design system implementation (colors, fonts, animations)
-- [ ] Basic card components with animations
-- [ ] Database schema and migrations
-- [ ] Internationalization setup
+## Current State
 
-**Deliverables**:
-- Working dev environment
-- Type definitions and design system tokens
-- Component architecture established
-- Database ready for data
+### Shipped (on main, deployed via Firebase Hosting)
+- Three-tab mobile shell: My Cards, Deal, More
+- Google sign-in auth (restricted to two emails)
+- Real-time Firestore sync between partners
+- Card assignment via Deal screen (random deal)
+- Card detail editing via CardModal
+- MSC (Minimum Standard of Care) notes per card
+- Deal history with snapshot/restore
+- Dark mode (functional, needs design polish)
+- EN/HE language toggle (partial — see "Remaining Work")
+- Gemini-powered EN↔HE translation buttons
+- Firebase emulator support for local dev
+- E2E tests (Playwright) + unit tests (Vitest)
+- Lighthouse accessibility auditing
 
-### Phase 2: Core Features
-**Duration**: Weeks 3-4
-- Card CRUD operations
-- Partner profiles
-- Deal mechanics (simple)
-- Basic game board UI
-- Offline storage integration
+### Not Shipped
+- Full i18n (most UI copy is hardcoded English)
+- Offline-first local mode (exists technically but UX is incomplete)
+- Quick-add card flow (current editor requires all fields)
 
-### Phase 3: Game Logic
-**Duration**: Weeks 5-6
-- Negotiation system
-- Rules engine
-- Time tracking
-- Analytics dashboard
-- Advanced animations
+## Remaining Work (prioritized)
 
-### Phase 4: Polish
-**Duration**: Weeks 7-8
-- Visual effects refinement
-- Performance optimization
-- Accessibility audit
-- User testing
-- Bug fixes
+### 1. i18n pass
+Most UI strings are hardcoded English: nav labels, deal screen copy, dialog text, MSC labels, card editor fields, history labels. The architecture (react-i18next, locale files, RTL support) is in place — the strings just need to be moved into locale files.
 
-### Phase 5: Advanced Features
-**Duration**: Weeks 9-10
-- AI suggestions
-- Cloud sync
-- Social features
-- Premium templates
-- Launch preparation
+### 2. Local/offline mode coherence
+The app works without Firebase (`isFirebaseConfigured = false`) but the UX assumes auth context. `My Cards` shows wrong partner name when `partnerSlot` is missing. History and sign-out are hidden. Translation buttons silently fail. Either make local mode a first-class experience or remove it.
+
+### 3. Dead code cleanup
+The repo contains unused components from an earlier "game board" design direction: `Dashboard.tsx`, `GameBoard.tsx`, `PartnerZone.tsx`, `Card.tsx`, `CardStack.tsx`. These are not routed and should be deleted.
+
+### 4. Hebrew card translations
+100 sample cards need Hebrew translations. Can be done via the existing Gemini translation service.
+
+### 5. Quick-add card flow
+Current CardModal requires title (EN+HE), description (EN+HE), category, frequency, difficulty, time. Add a lightweight "title + category" quick-add path.
+
+### 6. Two-device sync test
+Core value prop — need to verify real-time sync works correctly between Alon and Moral's devices.
 
 ## Technical Stack
-- **Frontend**: React 18.3 + TypeScript 5.x
-- **Build**: Vite 5.x
-- **Styling**: Tailwind CSS 3.4 + CSS Modules
-- **Components**: Catalyst UI
-- **State**: Zustand + persistence
-- **Database**: IndexedDB (Dexie.js)
-- **Animation**: Framer Motion + CSS
+- **Frontend**: React 18 + TypeScript
+- **Build**: Vite 5
+- **Styling**: Tailwind CSS v4 + CSS custom properties
+- **State**: Zustand + persist middleware
+- **Backend**: Firebase (Auth, Firestore, Hosting)
+- **AI**: Firebase AI / Gemini (translation)
+- **Animation**: Framer Motion + CSS transitions
 - **i18n**: react-i18next (EN + HE)
-- **Testing**: Vitest + React Testing Library
-- **PWA**: Workbox
-
-## Folder Structure
-```
-src/
-├── components/
-│   ├── cards/
-│   ├── layout/
-│   ├── game/
-│   ├── ui/
-│   └── index.ts (barrel exports)
-├── hooks/
-├── stores/
-├── services/
-├── utils/
-├── types/
-├── locales/
-├── styles/
-├── App.tsx
-└── main.tsx
-```
+- **Testing**: Vitest + Playwright
+- **Linter**: oxlint
+- **Package manager**: bun
 
 ## Key Design Decisions
-1. **Atomic Design**: Component hierarchy from atoms to pages
-2. **Barrel Exports**: Clean import paths via index.ts files
-3. **Type Safety**: Strict TypeScript for runtime safety
-4. **Offline First**: Complete offline functionality
-5. **Accessible**: WCAG 2.1 AA compliance from day 1
-
-## Success Criteria
-- Initial load < 2s on 3G
-- Lighthouse score > 95
-- Zero TypeScript errors
-- Full test coverage for logic
-- All PRD features implemented
+1. **Cards are responsibilities, not tasks** — held by a partner, not completed
+2. **Two-person household** — hardcoded for Alon + Moral, not multi-tenant
+3. **Mobile-first** — bottom tab nav, centered content, no desktop-specific layout
+4. **List-based UI** — CardRow inline workflow, not a drag-and-drop game board
+5. **Warm aesthetic** — soft shadows, partner colors, paper texture, gradient blobs
+6. **Firebase-first** — auth, sync, hosting, AI all through Firebase
