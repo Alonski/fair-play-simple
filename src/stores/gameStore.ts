@@ -31,8 +31,8 @@ export const useGameStore = create<GameStoreState>()(
       currentDealMode: 'random',
       isDealing: false,
       dealHistory: [],
-      partnerAName: 'Partner A',
-      partnerBName: 'Partner B',
+      partnerAName: 'Alon',
+      partnerBName: 'Moral',
 
       initializeGame: (gameState) =>
         set(() => ({

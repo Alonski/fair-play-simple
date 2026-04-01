@@ -26,8 +26,8 @@ beforeEach(() => {
     currentDealMode: 'random',
     isDealing: false,
     dealHistory: [],
-    partnerAName: 'Partner A',
-    partnerBName: 'Partner B',
+    partnerAName: 'Alon',
+    partnerBName: 'Moral',
   });
 });
 

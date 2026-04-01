@@ -155,8 +155,8 @@ export class SyncService {
       const data = snapshot.data();
       this.isRemoteUpdate = true;
       useGameStore.setState({
-        partnerAName: data.partnerAName || 'Partner A',
-        partnerBName: data.partnerBName || 'Partner B',
+        partnerAName: data.partnerAName || 'Alon',
+        partnerBName: data.partnerBName || 'Moral',
         currentDealMode: data.dealMode || 'random',
       });
       this.isRemoteUpdate = false;
