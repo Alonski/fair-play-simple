@@ -1,14 +1,16 @@
 import { type ReactNode } from 'react';
 import { Link, useRouterState } from '@tanstack/react-router';
+import { useTranslation } from 'react-i18next';
 import { CardsIcon, DealIcon, MoreIcon } from '@components/ui/NavIcons';
 
-const tabs: { path: '/' | '/deal' | '/more'; icon: ReactNode; label: string }[] = [
-  { path: '/', icon: <CardsIcon />, label: 'My Cards' },
-  { path: '/deal', icon: <DealIcon />, label: 'Deal' },
-  { path: '/more', icon: <MoreIcon />, label: 'More' },
+const tabs: { path: '/' | '/deal' | '/more'; icon: ReactNode; labelKey: string }[] = [
+  { path: '/', icon: <CardsIcon />, labelKey: 'navigation.myCards' },
+  { path: '/deal', icon: <DealIcon />, labelKey: 'navigation.deal' },
+  { path: '/more', icon: <MoreIcon />, labelKey: 'navigation.more' },
 ];
 
 export default function Navigation() {
+  const { t } = useTranslation();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   return (
@@ -61,7 +63,7 @@ export default function Navigation() {
                     {tab.icon}
                   </span>
                   <span className="block max-w-full truncate text-[10.5px] leading-none font-display font-semibold tracking-[0.04em]">
-                    {tab.label}
+                    {t(tab.labelKey)}
                   </span>
                 </span>
               </Link>
