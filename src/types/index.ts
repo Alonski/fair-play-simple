@@ -239,6 +239,20 @@ export interface Household {
 }
 
 /**
+ * AI Advisor Types
+ */
+export interface AISuggestion {
+  cardId: string;
+  suggestedHolder: PartnerId | null;
+  reason: string;
+}
+
+export interface AISkipSuggestion {
+  cardId: string;
+  reason: string;
+}
+
+/**
  * Deal History Types
  */
 export interface CardSnapshot {

@@ -3,8 +3,10 @@ import { useTranslation } from 'react-i18next';
 import { useCardStore, useGameStore } from '@stores/index';
 import { useAuthStore } from '@stores/authStore';
 import { saveSnapshot } from '@services/historyService';
+import { recordEvent, recordDeal, recordReset, recordAssignment } from '@services/statsService';
 import CardRow from '@components/cards/CardRow';
 import CardModal from '@components/cards/CardModal';
+import OnboardingScreen from '@components/screens/OnboardingScreen';
 import { Button } from '@components/catalyst/button';
 import { Select } from '@components/catalyst/select';
 import ConfirmDialog from '@components/ui/ConfirmDialog';
@@ -20,6 +22,7 @@ export default function DealScreen() {
   const userId = useAuthStore((s) => s.user?.uid ?? '');
   const readOnlyMode = useAuthStore((s) => s.readOnlyMode);
 
+  const [showOnboarding, setShowOnboarding] = useState(false);
   const [segment, setSegment] = useState<Segment>('unassigned');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editCard, setEditCard] = useState<CardType | undefined>();
@@ -63,6 +66,7 @@ export default function DealScreen() {
     }));
     setSegment('partner-a');
     setToast(t('game.cardsDealt', 'Cards dealt!'));
+    recordDeal(userId, useCardStore.getState().getCards()).catch(console.error);
   };
 
   const handleDealConfirmed = async () => {
@@ -81,9 +85,12 @@ export default function DealScreen() {
     }));
     setSegment('unassigned');
     setToast(t('game.cardsReset', 'Cards reset'));
+    recordReset(userId, useCardStore.getState().getCards()).catch(console.error);
   };
 
   const handleAssign = (cardId: string, holderId: 'partner-a' | 'partner-b' | null) => {
+    const card = cards.find((c) => c.id === cardId);
+    const prevHolder = card?.holder ?? null;
     useCardStore.setState((state) => ({
       cards: state.cards.map((c) =>
         c.id === cardId
@@ -91,18 +98,25 @@ export default function DealScreen() {
           : c
       ),
     }));
+    if (card) {
+      recordAssignment(userId, useCardStore.getState().getCards(), cardId, card.title.en, card.category, prevHolder, holderId).catch(console.error);
+    }
   };
 
   const handleToggleNotInPlay = (card: CardType) => {
+    const wasSkipped = card.status === 'not-in-play';
     useCardStore.setState((state) => ({
       cards: state.cards.map((c) =>
         c.id === card.id
-          ? card.status === 'not-in-play'
+          ? wasSkipped
             ? { ...c, status: 'unassigned' as CardStatus }
             : { ...c, status: 'not-in-play' as CardStatus, holder: null }
           : c
       ),
     }));
+    recordEvent(wasSkipped ? 'card_unskipped' : 'card_skipped', userId, useCardStore.getState().getCards(), {
+      cardId: card.id, cardTitle: card.title.en, category: card.category,
+    }).catch(console.error);
   };
 
   const activeCards = cards.filter((c) => c.status !== 'not-in-play');
@@ -121,6 +135,17 @@ export default function DealScreen() {
     segment === 'partner-a' ? partnerACards :
     segment === 'partner-b' ? partnerBCards :
     unassignedCards;
+
+  // Show onboarding when all cards are unassigned (first-time use)
+  const noCardsAssigned = partnerACards.length === 0 && partnerBCards.length === 0;
+  if (showOnboarding || (noCardsAssigned && cards.length > 0 && !localStorage.getItem('fp-onboarding-done'))) {
+    return (
+      <OnboardingScreen onComplete={() => {
+        setShowOnboarding(false);
+        localStorage.setItem('fp-onboarding-done', '1');
+      }} />
+    );
+  }
 
   return (
     <div className="flex flex-col h-full">

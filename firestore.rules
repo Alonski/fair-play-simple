@@ -70,6 +70,12 @@ service cloud.firestore {
         allow read: if isMember(householdId);
         allow create: if isMember(householdId);
       }
+
+      // Stats — append-only analytics events
+      match /stats/{eventId} {
+        allow read: if isMember(householdId);
+        allow create: if isMember(householdId);
+      }
     }
   }
 }

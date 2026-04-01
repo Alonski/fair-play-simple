@@ -4,6 +4,8 @@ import { useSettingsStore } from '@stores/index';
 import { useAuthStore } from '@stores/authStore';
 import { isFirebaseConfigured } from '@services/firebase';
 import { getHistory, restoreSnapshot } from '@services/historyService';
+import { recordRestore } from '@services/statsService';
+import { useCardStore } from '@stores/index';
 import { Button } from '@components/catalyst/button';
 import ConfirmDialog from '@components/ui/ConfirmDialog';
 import type { DealHistoryEvent } from '@types';
@@ -55,6 +57,7 @@ export default function MoreScreen() {
   const handleRestore = async () => {
     if (!restoreTarget || !user) return;
     await restoreSnapshot(restoreTarget.id, user.uid).catch(console.error);
+    recordRestore(user.uid, useCardStore.getState().getCards()).catch(console.error);
     setRestoreTarget(null);
     // Refresh history list
     const events = await getHistory(20).catch(() => []);
