@@ -1,4 +1,5 @@
 import { useAuthStore } from '@stores/authStore';
+import { Button } from '@components/catalyst/button';
 
 /** Map Firebase / network error codes to user-friendly messages */
 function friendlyMessage(error: string | null): string {
@@ -44,18 +45,12 @@ export default function ErrorScreen() {
           {message}
         </p>
         <div className="flex flex-col gap-3">
-          <button
-            onClick={() => initialize()}
-            className="w-full px-6 py-3 bg-ink text-white font-display font-bold rounded-xl shadow-soft-sm active:scale-95 transition-transform"
-          >
+          <Button color="dark/zinc" onClick={() => initialize()} className="w-full shadow-soft-sm">
             Retry
-          </button>
-          <button
-            onClick={() => enterReadOnlyMode()}
-            className="w-full px-6 py-3 bg-gray-100 text-concrete font-display font-bold rounded-xl active:scale-95 transition-transform"
-          >
+          </Button>
+          <Button outline onClick={() => enterReadOnlyMode()} className="w-full">
             Continue offline (read-only)
-          </button>
+          </Button>
         </div>
       </div>
     </div>

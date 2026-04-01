@@ -2,6 +2,11 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCardStore } from '@stores/index';
 import { translateText } from '@services/translationService';
+import { Button } from '@components/catalyst/button';
+import { Field, Label, Description, ErrorMessage } from '@components/catalyst/fieldset';
+import { Input } from '@components/catalyst/input';
+import { Select } from '@components/catalyst/select';
+import { Textarea } from '@components/catalyst/textarea';
 import ConfirmDialog from '@components/ui/ConfirmDialog';
 import type { Card, Category, Frequency, DifficultyLevel } from '@types';
 
@@ -26,14 +31,15 @@ function TranslateButton({ fromField, toField, from, to, formData, setFormData }
 
   const arrow = from === 'en' ? '→ HE' : '→ EN';
   return (
-    <button
+    <Button
+      plain
       type="button"
       onClick={handleTranslate}
       disabled={loading}
-      className="text-xs px-2.5 py-1 bg-accent/10 text-accent font-display font-bold rounded-lg hover:bg-accent/20 disabled:opacity-50 transition-colors"
+      className="!text-xs !px-2 !py-0.5 text-accent"
     >
       {loading ? '...' : `Translate ${arrow}`}
-    </button>
+    </Button>
   );
 }
 
@@ -87,7 +93,12 @@ export default function CardModal({
     if (focusable.length) focusable[0].focus();
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') { stableOnClose(); return; }
+      // Don't close CardModal if a child Headless UI dialog (e.g. ConfirmDialog) is open
+      if (e.key === 'Escape') {
+        if (document.querySelector('[role="dialog"][data-headlessui-state]')) return;
+        stableOnClose();
+        return;
+      }
       if (e.key === 'Tab' && focusable.length) {
         const first = focusable[0];
         const last = focusable[focusable.length - 1];
@@ -137,7 +148,6 @@ export default function CardModal({
     if (!formData.titleHe.trim()) newErrors.titleHe = 'Hebrew title required';
     if (!formData.descEn.trim()) newErrors.descEn = 'English description required';
     if (!formData.descHe.trim()) newErrors.descHe = 'Hebrew description required';
-    // MSC notes are optional — no validation required
     if (formData.timeEstimate < 5 || formData.timeEstimate > 480)
       newErrors.timeEstimate = 'Time estimate must be between 5-480 minutes';
 
@@ -190,13 +200,6 @@ export default function CardModal({
     onClose();
   };
 
-  const inputClasses = (field?: string) =>
-    `w-full px-4 py-2.5 border rounded-xl font-body bg-white dark:bg-white/10 text-ink focus:outline-hidden focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all ${
-      field && errors[field]
-        ? 'border-partner-a'
-        : 'border-gray-300 dark:border-white/15'
-    }`;
-
   return (
     <>
     <AnimatePresence>
@@ -227,60 +230,43 @@ export default function CardModal({
               <h2 id="modal-title" className="font-display text-xl font-bold text-ink">
                 {card ? 'Edit Card' : 'Create New Card'}
               </h2>
-              <button
+              <Button
+                plain
                 onClick={onClose}
-                className="w-11 h-11 bg-gray-100 rounded-lg text-concrete text-lg flex items-center justify-center hover:bg-gray-200 transition-colors"
                 aria-label="Close modal"
+                className="!w-11 !h-11 !px-0"
               >
                 &times;
-              </button>
+              </Button>
             </div>
 
             {/* Form */}
             <form onSubmit={handleSubmit} className="p-6 space-y-5">
-              {/* Category Selection */}
-              <div>
-                <label htmlFor="card-category" className="block font-display font-semibold text-ink mb-1.5 text-sm">
-                  Category
-                </label>
-                <select
-                  id="card-category"
+              {/* Category */}
+              <Field>
+                <Label className="font-display font-semibold">Category</Label>
+                <Select
                   value={formData.category}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      category: e.target.value as Category,
-                    })
-                  }
-                  className={inputClasses()}
+                  onChange={(e) => setFormData({ ...formData, category: e.target.value as Category })}
                 >
                   {CATEGORIES.map((cat) => (
-                    <option key={cat} value={cat}>
-                      {cat}
-                    </option>
+                    <option key={cat} value={cat}>{cat}</option>
                   ))}
-                </select>
-              </div>
+                </Select>
+              </Field>
 
               {/* English Title */}
-              <div>
-                <label htmlFor="card-title-en" className="block font-display font-semibold text-ink mb-1.5 text-sm">
-                  English Title *
-                </label>
-                <input
-                  id="card-title-en"
+              <Field>
+                <Label className="font-display font-semibold">English Title *</Label>
+                <Input
                   type="text"
                   value={formData.titleEn}
-                  onChange={(e) =>
-                    setFormData({ ...formData, titleEn: e.target.value })
-                  }
+                  onChange={(e) => setFormData({ ...formData, titleEn: e.target.value })}
                   placeholder="e.g., Morning Dishes"
-                  className={inputClasses('titleEn')}
+                  invalid={!!errors.titleEn}
                 />
-                {errors.titleEn && (
-                  <p className="text-partner-a text-sm mt-1">{errors.titleEn}</p>
-                )}
-              </div>
+                {errors.titleEn && <ErrorMessage>{errors.titleEn}</ErrorMessage>}
+              </Field>
 
               {/* Title translate */}
               <div className="flex gap-2 -mt-2 mb-1">
@@ -289,45 +275,32 @@ export default function CardModal({
               </div>
 
               {/* Hebrew Title */}
-              <div>
-                <label htmlFor="card-title-he" className="block font-display font-semibold text-ink mb-1.5 text-sm">
-                  Hebrew Title *
-                </label>
-                <input
-                  id="card-title-he"
+              <Field>
+                <Label className="font-display font-semibold">Hebrew Title *</Label>
+                <Input
                   type="text"
                   value={formData.titleHe}
-                  onChange={(e) =>
-                    setFormData({ ...formData, titleHe: e.target.value })
-                  }
+                  onChange={(e) => setFormData({ ...formData, titleHe: e.target.value })}
                   placeholder="כותרת בעברית"
-                  className={`${inputClasses('titleHe')} text-right`}
                   dir="rtl"
+                  invalid={!!errors.titleHe}
                 />
-                {errors.titleHe && (
-                  <p className="text-partner-a text-sm mt-1">{errors.titleHe}</p>
-                )}
-              </div>
+                {errors.titleHe && <ErrorMessage>{errors.titleHe}</ErrorMessage>}
+              </Field>
 
               {/* English Description */}
-              <div>
-                <label htmlFor="card-desc-en" className="block font-display font-semibold text-ink mb-1.5 text-sm">
-                  English Description *
-                </label>
-                <textarea
-                  id="card-desc-en"
+              <Field>
+                <Label className="font-display font-semibold">English Description *</Label>
+                <Textarea
                   value={formData.descEn}
-                  onChange={(e) =>
-                    setFormData({ ...formData, descEn: e.target.value })
-                  }
+                  onChange={(e) => setFormData({ ...formData, descEn: e.target.value })}
                   placeholder="Brief description of the task"
                   rows={3}
-                  className={`${inputClasses('descEn')} resize-none`}
+                  resizable={false}
+                  invalid={!!errors.descEn}
                 />
-                {errors.descEn && (
-                  <p className="text-partner-a text-sm mt-1">{errors.descEn}</p>
-                )}
-              </div>
+                {errors.descEn && <ErrorMessage>{errors.descEn}</ErrorMessage>}
+              </Field>
 
               {/* Description translate */}
               <div className="flex gap-2 -mt-2 mb-1">
@@ -336,43 +309,32 @@ export default function CardModal({
               </div>
 
               {/* Hebrew Description */}
-              <div>
-                <label htmlFor="card-desc-he" className="block font-display font-semibold text-ink mb-1.5 text-sm">
-                  Hebrew Description *
-                </label>
-                <textarea
-                  id="card-desc-he"
+              <Field>
+                <Label className="font-display font-semibold">Hebrew Description *</Label>
+                <Textarea
                   value={formData.descHe}
-                  onChange={(e) =>
-                    setFormData({ ...formData, descHe: e.target.value })
-                  }
+                  onChange={(e) => setFormData({ ...formData, descHe: e.target.value })}
                   placeholder="תיאור קצר של המשימה"
                   rows={3}
                   dir="rtl"
-                  className={`${inputClasses('descHe')} resize-none text-right`}
+                  resizable={false}
+                  invalid={!!errors.descHe}
                 />
-                {errors.descHe && (
-                  <p className="text-partner-a text-sm mt-1">{errors.descHe}</p>
-                )}
-              </div>
+                {errors.descHe && <ErrorMessage>{errors.descHe}</ErrorMessage>}
+              </Field>
 
               {/* MSC Notes — English */}
-              <div>
-                <label htmlFor="card-details-en" className="block font-display font-semibold text-ink mb-0.5 text-sm">
-                  MSC Notes (English)
-                </label>
-                <p className="text-xs text-concrete mb-1.5">What does "done right" look like for this card?</p>
-                <textarea
-                  id="card-details-en"
+              <Field>
+                <Label className="font-display font-semibold">MSC Notes (English)</Label>
+                <Description>What does "done right" look like for this card?</Description>
+                <Textarea
                   value={formData.detailsEn}
-                  onChange={(e) =>
-                    setFormData({ ...formData, detailsEn: e.target.value })
-                  }
+                  onChange={(e) => setFormData({ ...formData, detailsEn: e.target.value })}
                   placeholder="e.g. Whites and darks separated, folded same day"
                   rows={2}
-                  className={`${inputClasses()} resize-none`}
+                  resizable={false}
                 />
-              </div>
+              </Field>
 
               {/* MSC translate */}
               <div className="flex gap-2 -mt-2 mb-1">
@@ -381,130 +343,79 @@ export default function CardModal({
               </div>
 
               {/* MSC Notes — Hebrew */}
-              <div>
-                <label htmlFor="card-details-he" className="block font-display font-semibold text-ink mb-0.5 text-sm">
-                  MSC Notes (Hebrew)
-                </label>
-                <p className="text-xs text-concrete mb-1.5">מה זה נראה כשהכרטיס מבוצע כמו שצריך?</p>
-                <textarea
-                  id="card-details-he"
+              <Field>
+                <Label className="font-display font-semibold">MSC Notes (Hebrew)</Label>
+                <Description>מה זה נראה כשהכרטיס מבוצע כמו שצריך?</Description>
+                <Textarea
                   value={formData.detailsHe}
-                  onChange={(e) =>
-                    setFormData({ ...formData, detailsHe: e.target.value })
-                  }
+                  onChange={(e) => setFormData({ ...formData, detailsHe: e.target.value })}
                   placeholder="לדוגמה: לבנים ובגדי צבע בנפרד, מקופלים באותו יום"
                   rows={2}
                   dir="rtl"
-                  className={`${inputClasses()} resize-none text-right`}
+                  resizable={false}
                 />
-              </div>
+              </Field>
 
               {/* Metadata Grid */}
               <div className="grid grid-cols-3 gap-4">
-                {/* Frequency */}
-                <div>
-                  <label htmlFor="card-frequency" className="block font-display font-semibold text-ink mb-1.5 text-sm">
-                    Frequency
-                  </label>
-                  <select
-                    id="card-frequency"
+                <Field>
+                  <Label className="font-display font-semibold">Frequency</Label>
+                  <Select
                     value={formData.frequency}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        frequency: e.target.value as Frequency,
-                      })
-                    }
-                    className={`${inputClasses()} text-sm`}
+                    onChange={(e) => setFormData({ ...formData, frequency: e.target.value as Frequency })}
                   >
                     {FREQUENCIES.map((freq) => (
-                      <option key={freq} value={freq}>
-                        {freq}
-                      </option>
+                      <option key={freq} value={freq}>{freq}</option>
                     ))}
-                  </select>
-                </div>
+                  </Select>
+                </Field>
 
-                {/* Difficulty */}
-                <div>
-                  <label htmlFor="card-difficulty" className="block font-display font-semibold text-ink mb-1.5 text-sm">
-                    Difficulty
-                  </label>
-                  <select
-                    id="card-difficulty"
+                <Field>
+                  <Label className="font-display font-semibold">Difficulty</Label>
+                  <Select
                     value={formData.difficulty}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        difficulty: parseInt(e.target.value) as DifficultyLevel,
-                      })
-                    }
-                    className={`${inputClasses()} text-sm`}
+                    onChange={(e) => setFormData({ ...formData, difficulty: parseInt(e.target.value) as DifficultyLevel })}
                   >
                     {DIFFICULTIES.map((diff) => (
-                      <option key={diff} value={diff}>
-                        {'⚡'.repeat(diff)}
-                      </option>
+                      <option key={diff} value={diff}>{'⚡'.repeat(diff)}</option>
                     ))}
-                  </select>
-                </div>
+                  </Select>
+                </Field>
 
-                {/* Time Estimate */}
-                <div>
-                  <label htmlFor="card-time" className="block font-display font-semibold text-ink mb-1.5 text-sm">
-                    Time (min) *
-                  </label>
-                  <input
-                    id="card-time"
+                <Field>
+                  <Label className="font-display font-semibold">Time (min) *</Label>
+                  <Input
                     type="number"
                     value={formData.timeEstimate}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        timeEstimate: parseInt(e.target.value) || 0,
-                      })
-                    }
-                    min="5"
-                    max="480"
-                    className={`${inputClasses('timeEstimate')} text-sm`}
+                    onChange={(e) => setFormData({ ...formData, timeEstimate: parseInt(e.target.value) || 0 })}
+                    min={5}
+                    max={480}
+                    invalid={!!errors.timeEstimate}
                   />
-                  {errors.timeEstimate && (
-                    <p className="text-partner-a text-xs mt-1">
-                      {errors.timeEstimate}
-                    </p>
-                  )}
-                </div>
+                  {errors.timeEstimate && <ErrorMessage>{errors.timeEstimate}</ErrorMessage>}
+                </Field>
               </div>
 
               {/* Action Buttons */}
               <div className="flex gap-3 pt-6 border-t border-gray-200 dark:border-white/10">
-                <motion.button
-                  type="submit"
-                  className="flex-1 px-6 py-3 bg-partner-a text-white font-display font-bold rounded-xl hover:shadow-soft-lg transition-all"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
+                <Button color="partner-a" type="submit" className="flex-1">
                   {card ? 'Update Card' : 'Create Card'}
-                </motion.button>
+                </Button>
 
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="flex-1 px-6 py-3 bg-gray-100 dark:bg-white/10 text-ink font-display font-bold rounded-xl hover:bg-gray-200 dark:hover:bg-white/15 transition-all"
-                >
+                <Button plain type="button" onClick={onClose} className="flex-1">
                   Cancel
-                </button>
+                </Button>
 
                 {card && (
-                  <button
+                  <Button
+                    color="destructive"
                     type="button"
                     onClick={() => setShowDeleteConfirm(true)}
                     disabled={isDeleting}
-                    className="px-6 py-3 bg-red-50 text-red-500 font-display font-bold rounded-xl hover:bg-red-100 disabled:opacity-50 transition-all"
                     title="Delete this card"
                   >
                     Delete
-                  </button>
+                  </Button>
                 )}
               </div>
             </form>

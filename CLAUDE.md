@@ -68,6 +68,14 @@ VITE_FIREBASE_PROJECT_ID= VITE_FIREBASE_API_KEY= bun run dev
   - Config: `playwright-firebase.config.ts`
   - Tests in `e2e/firebase/`
 
+## UI Components
+- **Catalyst**: Adapted Tailwind Plus Catalyst components in `src/components/catalyst/` (Button, Dialog)
+  - Button colors include app tokens: `partner-a`, `partner-b`, `destructive`, `accent`, plus standard Catalyst colors
+  - Dialog uses Headless UI with app dark mode colors (`dark:bg-[#252540]`)
+  - Dependencies: `@headlessui/react` v2, `clsx`
+- **ConfirmDialog**: Wrapper around Catalyst Dialog in `src/components/ui/ConfirmDialog.tsx`
+- Card name templates: `{{partner-a}}` / `{{partner-b}}` in card data, substituted at display time in CardRow
+
 ## Conventions
 - Never use grep, always ripgrep
 - Never use cat for file creation, use Write tool
@@ -75,3 +83,5 @@ VITE_FIREBASE_PROJECT_ID= VITE_FIREBASE_API_KEY= bun run dev
 - Commit messages should not mention Claude
 - Run full test suite before committing
 - Create plans before implementing non-trivial changes
+- Never use Playwright or Chrome DevTools MCP tools for visual verification — write Playwright CLI scripts in `tmp/` instead
+- For visual QA, write a standalone `.mjs` script and run it with `node`

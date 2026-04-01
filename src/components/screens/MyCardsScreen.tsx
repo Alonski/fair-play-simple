@@ -5,6 +5,7 @@ import { useCardStore } from '@stores/index';
 import { useAuthStore } from '@stores/authStore';
 import { useGameStore } from '@stores/gameStore';
 import CardRow from '@components/cards/CardRow';
+import { Badge } from '@components/catalyst/badge';
 
 function formatTime(minutes: number): string {
   if (minutes >= 60) {
@@ -55,16 +56,9 @@ export default function MyCardsScreen() {
 
         {mySlot && myCards.length > 0 && (
           <div className="flex items-center gap-3 mt-3 relative">
-            <span
-              className="px-3 py-1 rounded-full text-xs font-display font-bold backdrop-blur-sm"
-              style={{
-                background: isA ? 'var(--color-partner-a-light)' : 'var(--color-partner-b-light)',
-                color: isA ? 'var(--color-partner-a)' : 'var(--color-partner-b)',
-                border: `1px solid color-mix(in srgb, ${isA ? 'var(--color-partner-a)' : 'var(--color-partner-b)'} 20%, transparent)`,
-              }}
-            >
+            <Badge color={isA ? 'partner-a' : 'partner-b'} className="font-display font-bold">
               {myCards.length} {myCards.length === 1 ? 'card' : 'cards'}
-            </span>
+            </Badge>
             <span className="text-xs text-concrete font-body">
               {formatTime(totalTime)} / {t('game.week', 'week')}
             </span>

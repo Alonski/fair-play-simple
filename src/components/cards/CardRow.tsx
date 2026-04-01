@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { useCardStore } from '@stores/index';
 import { useGameStore } from '@stores/gameStore';
 import { useAuthStore } from '@stores/authStore';
+import { Button } from '@components/catalyst/button';
+import { Badge } from '@components/catalyst/badge';
 import type { Card as CardType, Category } from '@types';
 
 function formatCategory(category: Category): string {
@@ -65,7 +67,9 @@ export default function CardRow({
 
   const isRTL = i18n.language === 'he';
   const rawTitle = isRTL ? card.title.he : card.title.en;
-  const title = rawTitle.replace('{{partner-a}}', partnerAName).replace('{{partner-b}}', partnerBName);
+  const title = rawTitle
+    .replace('{{partner-a}}', partnerAName).replace('{{partner-b}}', partnerBName)
+    .replace('Player 1', partnerAName).replace('Player 2', partnerBName);
   const description = isRTL ? card.description.he : card.description.en;
   const mscNote = card.details.en; // shared household note field
 
@@ -128,7 +132,7 @@ export default function CardRow({
             {mscNote && (
               <>
                 <span className="text-concrete/40 text-xs">·</span>
-                <span className="text-xs font-bold uppercase tracking-wider text-amber-600/70">MSC</span>
+                <Badge color="amber" className="!text-[10px]">MSC</Badge>
               </>
             )}
           </div>
@@ -179,7 +183,7 @@ export default function CardRow({
                   onClick={(e) => e.stopPropagation()}
                   placeholder="What does 'done right' look like for this card?"
                   rows={3}
-                  className="w-full px-3 py-2 text-sm font-body text-ink bg-amber-50 border border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-300/40 resize-none"
+                  className="w-full px-3 py-2 text-sm font-body text-ink bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-300/40 resize-none"
                 />
               ) : mscNote ? (
                 <button
@@ -201,54 +205,40 @@ export default function CardRow({
             <div className="flex items-center gap-2 flex-wrap">
               {dealMode && card.status === 'not-in-play' ? (
                 onToggleNotInPlay && (
-                  <button
-                    onClick={(e) => { e.stopPropagation(); onToggleNotInPlay(); }}
-                    className="text-xs px-3 py-2.5 min-h-[44px] bg-ink text-white font-display font-bold rounded-lg tracking-wide"
-                  >
+                  <Button color="dark/zinc" onClick={(e: React.MouseEvent) => { e.stopPropagation(); onToggleNotInPlay(); }}>
                     Restore
-                  </button>
+                  </Button>
                 )
               ) : (
                 dealMode && onAssign && (
                   <>
-                    <button
-                      onClick={(e) => { e.stopPropagation(); onAssign('partner-a'); }}
-                      className="text-xs px-3 py-2.5 min-h-[44px] bg-partner-a text-white font-display font-bold rounded-lg tracking-wide hover:opacity-85 active:scale-95 transition-all cursor-pointer"
-                    >
+                    <Button color="partner-a" onClick={(e: React.MouseEvent) => { e.stopPropagation(); onAssign('partner-a'); }}>
                       {partnerAName}
-                    </button>
-                    <button
-                      onClick={(e) => { e.stopPropagation(); onAssign('partner-b'); }}
-                      className="text-xs px-3 py-2.5 min-h-[44px] bg-partner-b text-white font-display font-bold rounded-lg tracking-wide hover:opacity-85 active:scale-95 transition-all cursor-pointer"
-                    >
+                    </Button>
+                    <Button color="partner-b" onClick={(e: React.MouseEvent) => { e.stopPropagation(); onAssign('partner-b'); }}>
                       {partnerBName}
-                    </button>
+                    </Button>
                     {card.holder && (
-                      <button
-                        onClick={(e) => { e.stopPropagation(); onAssign(null); }}
-                        className="text-xs px-3 py-2.5 min-h-[44px] bg-gray-100 dark:bg-white/10 text-concrete font-display font-bold rounded-lg hover:bg-gray-200 dark:hover:bg-white/15 active:scale-95 transition-all cursor-pointer"
-                      >
+                      <Button outline onClick={(e: React.MouseEvent) => { e.stopPropagation(); onAssign(null); }}>
                         Unassign
-                      </button>
+                      </Button>
                     )}
                     {onToggleNotInPlay && (
-                      <button
-                        onClick={(e) => { e.stopPropagation(); onToggleNotInPlay(); }}
-                        className="text-xs px-3 py-2.5 min-h-[44px] bg-gray-100 dark:bg-white/10 text-concrete font-display font-bold rounded-lg hover:bg-gray-200 dark:hover:bg-white/15 active:scale-95 transition-all cursor-pointer"
-                      >
+                      <Button plain onClick={(e: React.MouseEvent) => { e.stopPropagation(); onToggleNotInPlay(); }}>
                         Remove
-                      </button>
+                      </Button>
                     )}
                   </>
                 )
               )}
               {onEdit && (
-                <button
-                  onClick={(e) => { e.stopPropagation(); onEdit(); }}
-                  className="text-xs px-3 py-2.5 min-h-[44px] bg-gray-50 dark:bg-white/5 text-concrete font-display font-bold rounded-lg border border-gray-100 dark:border-white/10 ml-auto"
+                <Button
+                  plain
+                  onClick={(e: React.MouseEvent) => { e.stopPropagation(); onEdit(); }}
+                  className="ml-auto"
                 >
                   Edit
-                </button>
+                </Button>
               )}
             </div>
           </div>

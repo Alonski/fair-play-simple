@@ -5,6 +5,8 @@ import { useAuthStore } from '@stores/authStore';
 import { saveSnapshot } from '@services/historyService';
 import CardRow from '@components/cards/CardRow';
 import CardModal from '@components/cards/CardModal';
+import { Button } from '@components/catalyst/button';
+import { Select } from '@components/catalyst/select';
 import ConfirmDialog from '@components/ui/ConfirmDialog';
 import type { Card as CardType, CardStatus } from '@types';
 
@@ -132,38 +134,41 @@ export default function DealScreen() {
         </h1>
 
         {/* Action row */}
-        <div className="flex items-stretch gap-2 mb-3">
-          <select
+        <div className="flex items-center gap-2 mb-3">
+          <Select
             value={currentDealMode}
             onChange={(e) => setCurrentDealMode(e.target.value as typeof currentDealMode)}
             aria-label="Deal mode"
-            className="min-w-0 flex-1 px-3 py-2.5 rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/10 font-display font-bold text-sm text-ink focus:outline-none focus:ring-2 focus:ring-partner-a/20 shadow-soft-sm"
+            className="min-w-0 flex-1"
           >
             <option value="random">{t('game.dealModes.random', 'Random')}</option>
             <option value="weighted" disabled>{t('game.dealModes.weighted', 'Weighted')}</option>
             <option value="draft" disabled>{t('game.dealModes.draft', 'Draft')}</option>
-          </select>
-          <button
+          </Select>
+          <Button
+            color="dark/zinc"
             onClick={() => setShowDealConfirm(true)}
             disabled={unassignedCards.length === 0 || readOnlyMode}
-            className="whitespace-nowrap px-4 py-2.5 bg-ink text-white font-display font-bold rounded-2xl text-[13px] shadow-soft-sm hover:opacity-90 disabled:opacity-30 disabled:cursor-not-allowed active:scale-95 transition-all"
+            className="whitespace-nowrap"
           >
             {t('game.deal', 'Deal')}
-          </button>
-          <button
+          </Button>
+          <Button
+            outline
             onClick={() => setShowResetConfirm(true)}
             disabled={readOnlyMode}
-            className="whitespace-nowrap px-4 py-2.5 bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 text-ink font-display font-bold rounded-2xl text-[13px] shadow-soft-sm hover:bg-gray-50 dark:hover:bg-white/15 disabled:opacity-30 disabled:cursor-not-allowed active:scale-95 transition-all"
+            className="whitespace-nowrap"
           >
             {t('game.reset', 'Reset')}
-          </button>
-          <button
+          </Button>
+          <Button
+            outline
             onClick={() => { setEditCard(undefined); setIsModalOpen(true); }}
             aria-label="Add new card"
-            className="aspect-square shrink-0 bg-partner-a text-white font-display font-bold rounded-2xl text-lg shadow-soft-sm hover:opacity-90 active:scale-95 transition-all flex items-center justify-center"
+            className="shrink-0 !px-2.5"
           >
             +
-          </button>
+          </Button>
         </div>
 
         {/* Toast feedback */}

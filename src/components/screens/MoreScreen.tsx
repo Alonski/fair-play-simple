@@ -4,6 +4,7 @@ import { useSettingsStore } from '@stores/index';
 import { useAuthStore } from '@stores/authStore';
 import { isFirebaseConfigured } from '@services/firebase';
 import { getHistory, restoreSnapshot } from '@services/historyService';
+import { Button } from '@components/catalyst/button';
 import ConfirmDialog from '@components/ui/ConfirmDialog';
 import type { DealHistoryEvent } from '@types';
 
@@ -205,12 +206,13 @@ export default function MoreScreen() {
 
         {/* Sign out */}
         {isFirebaseConfigured && isAuthenticated && (
-          <button
+          <Button
+            outline
             onClick={() => setSignOutConfirmOpen(true)}
-            className="w-full py-4 bg-white/80 dark:bg-white/[0.08] rounded-2xl border border-gray-100/80 dark:border-white/10 shadow-soft-sm text-sm font-display font-bold text-concrete hover:text-partner-a hover:border-partner-a/20 hover:bg-partner-a/5 dark:hover:bg-partner-a/12 transition-colors"
+            className="w-full font-display"
           >
             {t('auth.signOut', 'Sign out')}
-          </button>
+          </Button>
         )}
       </div>
 
