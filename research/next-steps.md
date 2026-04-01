@@ -1,6 +1,6 @@
 # Next Steps — Fair Play Simple
 
-_Last updated: 2026-03-14_
+_Last updated: 2026-04-01_
 
 ---
 
@@ -30,6 +30,10 @@ _Last updated: 2026-03-14_
 | Favicon + PWA manifest | ✅ Done |
 | Gemini EN↔HE translation | ✅ Done (code) |
 | Playwright E2E tests (20 × 2) | ✅ Done |
+| Catalyst UI kit adoption | ✅ Done |
+| Hebrew translations (100 cards) | ✅ Done |
+| Nav tab + UI string i18n | ✅ Done |
+| Dark mode visual QA | ✅ Done |
 | Two-device sync test | ❌ Next |
 
 ---
@@ -44,27 +48,19 @@ _Last updated: 2026-03-14_
 
 ---
 
-## Phase 1-3: ✅ DONE
+## Phase 1-4: ✅ DONE
 
-Visual polish, card data, UX model (Not in Play, MSC notes, E2E tests) — all complete.
+Visual polish, card data, UX model (Not in Play, MSC notes, E2E tests), production readiness — all complete.
 
 ---
 
-## Phase 4: Production Readiness ✅ DONE
+## Phase 4.5: UI Component System + i18n ✅ DONE
 
-All items from the production readiness audit have been addressed:
-
-- **Soft delete**: Cards use `status: 'deleted'` instead of hard removal; syncs to Firestore correctly
-- **Deal/Reset history**: Persistent Firestore subcollection (`households/shared/history`), snapshot before each Deal/Reset, restore from More screen
-- **Auth error handling**: try/catch in onAuthStateChanged, retry button, read-only offline mode
-- **Sync feedback**: SyncStatusBar shows syncing/offline state
-- **Seeding race fix**: Only partner-a seeds cards
-- **Event listener leak fix**: Named listeners cleaned up in SyncService.stop()
-- **Dark mode**: CSS custom properties overridden under `.dark`, inline hex replaced with vars, `dark:` variants on all components
-- **Confirmation dialogs**: Styled ConfirmDialog replaces window.confirm for Reset and card delete
-- **PWA**: favicon.svg, manifest.json, apple-touch-icon, theme-color
-- **CI**: Firestore rules now deployed alongside hosting
-- **Translation**: Gemini 2.5 Flash via Firebase AI Logic, translate buttons between EN/HE fields in CardModal
+- **Catalyst UI kit**: Adopted Tailwind Plus Catalyst components (Button, Dialog, Badge, Select, Input, Textarea, Fieldset) with custom color tokens (partner-a, partner-b, destructive, accent)
+- **Hebrew translations**: All 100 card titles/descriptions translated; all UI strings use i18n
+- **Nav tabs**: Wired to i18n — Hebrew shows הכרטיסים שלי / חלוקה / עוד
+- **Dark mode polish**: Warmed palette, nav active state rework, MSC textarea dark mode fix
+- **Card name templates**: `{{partner-a}}`/`{{partner-b}}` in card data, substituted at display time
 
 ---
 
@@ -76,23 +72,22 @@ All items from the production readiness audit have been addressed:
   - Verify Not in Play toggles sync
   - Verify Deal/Reset history appears on both devices
   - Test conflict handling (both editing same card)
-- **Dark mode visual QA**: Check all screens in dark mode on mobile + desktop
-- **Translation QA**: Test Gemini translate buttons work end-to-end
+- **Translation QA**: Test Gemini translate buttons work end-to-end (requires Firebase AI Logic enabled)
 
 ---
 
 ## Phase 6: Polish & Future
 
-- **Hebrew translations**: Use Gemini translate buttons to translate all 100 card titles/descriptions
 - **Offline support** — Firestore persistent cache is enabled; add UI indicator for offline state
 - **Push notifications** — reminders for held cards
 - **Onboarding flow** — guided card selection for new households (mark irrelevant cards as Not in Play)
-- **Nav tab translations** — tab labels are currently hardcoded English
+- **CardModal → Catalyst Dialog migration** — CardModal still uses framer-motion; could use Catalyst Dialog for consistency and native focus/escape handling
+- **RTL layout** — Hebrew text renders RTL via `dir` attribute, but full page layout (header alignment, nav order) doesn't flip yet
 
 ---
 
 ## Open Questions
 
-1. **Hebrew translations**: Use the new translate feature to batch-translate, or translate manually for quality?
-2. **MSC notes language**: Inline edit writes same text to both `en` and `he` — is that OK, or add a language toggle?
-3. **MSC starter suggestions**: Should common cards have pre-written MSC examples?
+1. **MSC notes language**: Inline edit writes same text to both `en` and `he` — is that OK, or add a language toggle?
+2. **MSC starter suggestions**: Should common cards have pre-written MSC examples?
+3. **Stale emulator data**: When emulator Firestore has old card data (with "Player 1"/"Player 2"), display-time substitution handles it, but re-seeding would give cleaner Hebrew titles

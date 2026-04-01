@@ -3,7 +3,7 @@
 A digital Fair Play card game for couples to divide household responsibilities fairly. Based on Eve Rodsky's Fair Play method.
 
 ## Quick Reference
-- **Stack**: React 18 + TypeScript + Vite + Tailwind CSS + Zustand + Firebase
+- **Stack**: React 18 + TypeScript + Vite + Tailwind CSS v4 + Zustand + Firebase
 - **Package manager**: bun (not npm)
 - **Linter**: oxlint (`bun run lint`)
 - **Build**: `bun run build` (runs tsc then vite build)
@@ -21,13 +21,14 @@ A digital Fair Play card game for couples to divide household responsibilities f
 - Firestore data model: `households/shared` doc + `cards` subcollection + `users/{uid}` collection
 - Warm/light/family design aesthetic (not the original "Organic Brutalism")
 - Fair Play cards are **responsibilities** (held), not tasks (completed)
+- Partner names default to Alon/Moral in gameStore and syncService fallbacks
 
 ## Local Dev with Emulators
 To run the app with Firebase auth + Firestore locally (no production Firebase needed):
 ```bash
 make dev-emu
 ```
-This starts Firebase emulators (auth:9099, firestore:8080, UI:4000) and the Vite dev server together. The app auto-connects to emulators in dev mode.
+This starts Firebase emulators (auth:9099, firestore:8080, UI:4000) and the Vite dev server together. The app auto-connects to emulators in dev mode. `make` with no args also runs `dev-emu`.
 
 **Sign in from browser console:**
 ```js
@@ -42,22 +43,6 @@ window.__devSignIn('alonzorz@gmail.com', 'Alon')
 VITE_FIREBASE_PROJECT_ID= VITE_FIREBASE_API_KEY= bun run dev
 ```
 
-## Current Handoff (2026-03-30)
-- Detailed handoff: `research/claude-code-handoff-2026-03-30.md`
-- Current uncommitted app/docs work:
-  - mobile nav active-state redesign
-  - dark-mode palette/surface polish
-  - narrow mobile Deal toolbar layout fix
-  - local emulator sign-in instructions corrected to use `alonzorz@gmail.com`
-- Verification already run:
-  - `bun run lint` passed
-  - `bun run build` passed
-  - headless Playwright screenshots saved in `tmp/review-cli/`
-- Important workspace note:
-  - there are many untracked `tmp/` artifacts; do not blindly stage everything
-- Local process note:
-  - local emulator/dev ports were cleaned up before handoff; start fresh with `make dev-emu` if resuming QA
-
 ## Testing
 - **Unit tests**: `bun run test --run` (Vitest)
 - **E2E tests**: `bun run test:e2e` (Playwright, chromium)
@@ -69,12 +54,23 @@ VITE_FIREBASE_PROJECT_ID= VITE_FIREBASE_API_KEY= bun run dev
   - Tests in `e2e/firebase/`
 
 ## UI Components
-- **Catalyst**: Adapted Tailwind Plus Catalyst components in `src/components/catalyst/` (Button, Dialog)
+- **Catalyst**: Adapted Tailwind Plus Catalyst components in `src/components/catalyst/` (Button, Dialog, Badge, Select, Input, Textarea, Fieldset, etc.)
   - Button colors include app tokens: `partner-a`, `partner-b`, `destructive`, `accent`, plus standard Catalyst colors
+  - Badge colors include app tokens: `partner-a`, `partner-b`, `accent`
   - Dialog uses Headless UI with app dark mode colors (`dark:bg-[#252540]`)
   - Dependencies: `@headlessui/react` v2, `clsx`
 - **ConfirmDialog**: Wrapper around Catalyst Dialog in `src/components/ui/ConfirmDialog.tsx`
 - Card name templates: `{{partner-a}}` / `{{partner-b}}` in card data, substituted at display time in CardRow
+- CardModal form uses Catalyst `Field` + `Label` + `Input`/`Select`/`Textarea` + `ErrorMessage`
+
+## i18n
+- Full English + Hebrew translations via react-i18next
+- Translation files: `src/locales/en.json` and `src/locales/he.json`
+- All 100 card titles and descriptions translated to Hebrew in `src/utils/sampleCards.ts`
+- Nav tabs, settings labels, toasts, and dialogs all use `t()` — no hardcoded English in UI
+- Language switcher on More screen; setting persisted in localStorage
+- Card titles support `{{partner-a}}`/`{{partner-b}}` templates in both languages
+- Legacy "Player 1"/"Player 2" text also substituted at display time for old Firestore data
 
 ## Conventions
 - Never use grep, always ripgrep
