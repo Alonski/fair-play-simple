@@ -62,7 +62,7 @@ export default function DealScreen() {
       }),
     }));
     setSegment('partner-a');
-    setToast('Cards dealt!');
+    setToast(t('game.cardsDealt', 'Cards dealt!'));
   };
 
   const handleDealConfirmed = async () => {
@@ -80,7 +80,7 @@ export default function DealScreen() {
       ),
     }));
     setSegment('unassigned');
-    setToast('Cards reset');
+    setToast(t('game.cardsReset', 'Cards reset'));
   };
 
   const handleAssign = (cardId: string, holderId: 'partner-a' | 'partner-b' | null) => {
@@ -276,7 +276,7 @@ export default function DealScreen() {
                 <p className="text-sm font-display font-bold text-partner-b">
                   {t('game.allAssigned', 'All cards assigned!')}
                 </p>
-                <p className="text-xs text-concrete mt-1">Your household is balanced</p>
+                <p className="text-xs text-concrete mt-1">{t('game.balanced', 'Your household is balanced')}</p>
               </div>
             )}
 
@@ -289,7 +289,7 @@ export default function DealScreen() {
                   className="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-display font-bold text-concrete hover:bg-gray-50 transition-colors"
                 >
                   <span style={{ fontSize: 8, transform: notInPlayExpanded ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform 200ms', display: 'inline-block' }}>&#9654;</span>
-                  Skipped ({notInPlayCards.length})
+                  {t('game.skipped', 'Skipped')} ({notInPlayCards.length})
                 </button>
                 {notInPlayExpanded && notInPlayCards.map((card) => (
                   <CardRow

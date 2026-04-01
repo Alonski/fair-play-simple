@@ -113,9 +113,9 @@ export default function MoreScreen() {
             </p>
             <div className="flex bg-gray-100 dark:bg-white/10 rounded-xl p-1" role="tablist">
               {([
-                { value: 'light', label: 'Light' },
-                { value: 'dark', label: 'Dark' },
-                { value: 'auto', label: 'Auto' },
+                { value: 'light', label: t('settings.themeLight', 'Light') },
+                { value: 'dark', label: t('settings.themeDark', 'Dark') },
+                { value: 'auto', label: t('settings.themeAuto', 'Auto') },
               ] as const).map(({ value, label }) => (
                 <button
                   key={value}
@@ -144,7 +144,7 @@ export default function MoreScreen() {
               className="w-full px-5 py-4 flex items-center justify-between"
             >
               <p className="text-xs font-display font-semibold uppercase tracking-widest text-concrete">
-                History
+                {t('settings.history', 'History')}
               </p>
               <span
                 className="text-concrete/70"
@@ -163,10 +163,10 @@ export default function MoreScreen() {
               <div className="expandable-inner">
                 <div className="px-5 pb-4">
                   {historyLoading ? (
-                    <p className="text-sm font-body text-concrete py-2">Loading...</p>
+                    <p className="text-sm font-body text-concrete py-2">{t('common.loading', 'Loading...')}</p>
                   ) : historyEvents.length === 0 ? (
                     <p className="text-sm font-body text-concrete py-2">
-                      After you assign or redistribute cards, you'll see a timeline here.
+                      {t('settings.historyEmpty', "After you assign or redistribute cards, you'll see a timeline here.")}
                     </p>
                   ) : (
                     <div className="space-y-1.5">
@@ -189,7 +189,7 @@ export default function MoreScreen() {
                             onClick={() => setRestoreTarget(event)}
                             className="text-[10px] px-2.5 py-1 bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 text-concrete font-display font-bold rounded-lg hover:bg-gray-50 dark:hover:bg-white/15 transition-colors"
                           >
-                            Restore
+                            {t('game.restore', 'Restore')}
                           </button>
                         </div>
                       ))}
@@ -218,11 +218,11 @@ export default function MoreScreen() {
 
       <ConfirmDialog
         isOpen={!!restoreTarget}
-        title="Restore this state?"
+        title={t('game.restoreTitle', 'Restore this state?')}
         message={restoreTarget
-          ? `This will reset all card assignments to the state from ${new Date(restoreTarget.timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}. Your current assignments will be saved in history first.`
+          ? `This will reset all card assignments to the state from ${new Date(restoreTarget.timestamp).toLocaleDateString(language === 'he' ? 'he-IL' : 'en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}. Your current assignments will be saved in history first.`
           : ''}
-        confirmLabel="Restore"
+        confirmLabel={t('game.restore', 'Restore')}
         variant="default"
         onConfirm={handleRestore}
         onCancel={() => setRestoreTarget(null)}
