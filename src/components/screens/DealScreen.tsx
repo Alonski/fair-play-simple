@@ -205,7 +205,7 @@ export default function DealScreen() {
                 <span className="font-bold text-partner-b">{partnerBCards.length}</span>
                 <span className="text-concrete">{partnerBName}</span>
               </span>
-              <span className="flex items-center gap-1.5 ml-auto">
+              <span className="flex items-center gap-1.5 ms-auto">
                 <span className="w-2 h-2 rounded-full bg-unassigned" />
                 <span className="font-bold text-concrete">{unassignedCards.length}</span>
                 <span className="text-concrete">{t('cards.unassigned', 'Unassigned')}</span>

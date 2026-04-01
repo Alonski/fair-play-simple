@@ -112,7 +112,7 @@ export default function CardRow({
       {/* Row header — always visible */}
       <button
         aria-expanded={expanded}
-        className="w-full text-left px-4 py-3.5 flex items-center gap-3 active:bg-black/[0.06] transition-colors duration-100"
+        className="w-full text-start px-4 py-3.5 flex items-center gap-3 active:bg-black/[0.06] transition-colors duration-100"
         onClick={() => setExpanded(!expanded)}
       >
         {/* Category dot */}
@@ -188,14 +188,14 @@ export default function CardRow({
               ) : mscNote ? (
                 <button
                   onClick={startEditingMsc}
-                  className="w-full text-left px-3 py-2 text-sm font-body text-ink/75 bg-amber-50/70 rounded-xl border border-amber-100 hover:bg-amber-50 transition-colors leading-relaxed"
+                  className="w-full text-start px-3 py-2 text-sm font-body text-ink/75 bg-amber-50/70 rounded-xl border border-amber-100 hover:bg-amber-50 transition-colors leading-relaxed"
                 >
                   {mscNote}
                 </button>
               ) : (
                 <button
                   onClick={startEditingMsc}
-                  className="w-full text-left px-3 py-2 text-sm font-body text-concrete/70 bg-amber-50/40 rounded-xl border border-dashed border-amber-200/60 hover:bg-amber-50/70 hover:text-concrete transition-colors"
+                  className="w-full text-start px-3 py-2 text-sm font-body text-concrete/70 bg-amber-50/40 rounded-xl border border-dashed border-amber-200/60 hover:bg-amber-50/70 hover:text-concrete transition-colors"
                 >
                   Add MSC notes…
                 </button>
@@ -235,7 +235,7 @@ export default function CardRow({
                 <Button
                   plain
                   onClick={(e: React.MouseEvent) => { e.stopPropagation(); onEdit(); }}
-                  className="ml-auto"
+                  className="ms-auto"
                 >
                   Edit
                 </Button>

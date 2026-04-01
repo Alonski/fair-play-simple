@@ -43,7 +43,7 @@ export default function MyCardsScreen() {
       >
         {/* Decorative circle */}
         <div
-          className="absolute -top-8 -right-8 w-40 h-40 rounded-full opacity-20"
+          className="absolute -top-8 -end-8 w-40 h-40 rounded-full opacity-20"
           style={{ background: isA ? 'var(--color-partner-a)' : 'var(--color-partner-b)' }}
         />
 
