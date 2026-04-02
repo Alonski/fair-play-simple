@@ -41,6 +41,8 @@
     "noMyCards": "No cards yet",
     "noMyCardsExplain": "Cards are household responsibilities you own — things like groceries, school pickup, or bedtime routine.",
     "noMyCardsHint": "Head to Deal to assign cards →",
+    "countOne": "card",
+    "countOther": "cards",
     "noneHere": "No cards here"
   },
   "partners": {

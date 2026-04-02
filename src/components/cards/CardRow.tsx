@@ -105,7 +105,7 @@ export default function CardRow({
       className={`border-l-[5px] ${styles.border} ${styles.bg} rounded-2xl mb-2.5 shadow-soft-sm overflow-hidden hover:shadow-soft hover:-translate-y-0.5 hover:scale-[1.005] transition-all duration-200 ${expanded ? 'shadow-soft ring-1 ring-black/[0.03]' : ''}`}
       style={{
         animation: 'revealUp 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards',
-        animationDelay: `${index * 50}ms`,
+        animationDelay: `${Math.min(index * 50, 300)}ms`,
         opacity: 0,
       }}
     >
@@ -132,7 +132,7 @@ export default function CardRow({
             {mscNote && (
               <>
                 <span className="text-concrete/40 text-xs">·</span>
-                <Badge color="amber" className="!text-[10px]">MSC</Badge>
+                <Badge color="amber" className="!text-[10px]" title="Minimum Standard of Care — what 'done right' looks like">MSC</Badge>
               </>
             )}
           </div>
@@ -141,11 +141,11 @@ export default function CardRow({
         {/* Chevron */}
         <span className="w-6 h-6 flex items-center justify-center flex-shrink-0">
           <span
-            className="text-concrete/70"
+            className="text-concrete"
             style={{
               transform: expanded ? 'rotate(90deg)' : 'rotate(0deg)',
               transition: 'transform 200ms cubic-bezier(0.4, 0, 0.2, 1)',
-              fontSize: 10,
+              fontSize: 14,
             }}
           >
             ▶
@@ -170,8 +170,11 @@ export default function CardRow({
 
             {/* MSC Notes section */}
             <div className="mb-3">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-amber-700/60 mb-1">
-                MSC Notes
+              <p className="text-[10px] font-bold uppercase tracking-widest text-amber-700/60 mb-0.5">
+                Minimum Standard of Care
+              </p>
+              <p className="text-[9px] text-amber-700/40 mb-1">
+                What &ldquo;done right&rdquo; looks like for this card
               </p>
               {editingMsc ? (
                 <textarea
@@ -202,43 +205,65 @@ export default function CardRow({
               )}
             </div>
 
-            <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex flex-col gap-2">
               {dealMode && card.status === 'not-in-play' ? (
                 onToggleNotInPlay && (
-                  <Button color="dark/zinc" onClick={(e: React.MouseEvent) => { e.stopPropagation(); onToggleNotInPlay(); }}>
-                    Restore
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    <Button color="dark/zinc" onClick={(e: React.MouseEvent) => { e.stopPropagation(); onToggleNotInPlay(); }}>
+                      Restore
+                    </Button>
+                  </div>
                 )
               ) : (
                 dealMode && onAssign && (
                   <>
-                    <Button color="partner-a" onClick={(e: React.MouseEvent) => { e.stopPropagation(); onAssign('partner-a'); }}>
-                      {partnerAName}
-                    </Button>
-                    <Button color="partner-b" onClick={(e: React.MouseEvent) => { e.stopPropagation(); onAssign('partner-b'); }}>
-                      {partnerBName}
-                    </Button>
-                    {card.holder && (
-                      <Button outline onClick={(e: React.MouseEvent) => { e.stopPropagation(); onAssign(null); }}>
-                        Unassign
+                    {/* Assignment buttons */}
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <Button color="partner-a" onClick={(e: React.MouseEvent) => { e.stopPropagation(); onAssign('partner-a'); }}>
+                        {partnerAName}
                       </Button>
-                    )}
-                    {onToggleNotInPlay && (
-                      <Button plain onClick={(e: React.MouseEvent) => { e.stopPropagation(); onToggleNotInPlay(); }}>
-                        Remove
+                      <Button color="partner-b" onClick={(e: React.MouseEvent) => { e.stopPropagation(); onAssign('partner-b'); }}>
+                        {partnerBName}
                       </Button>
+                      {card.holder && (
+                        <Button outline onClick={(e: React.MouseEvent) => { e.stopPropagation(); onAssign(null); }}>
+                          Unassign
+                        </Button>
+                      )}
+                    </div>
+                    {/* Management buttons */}
+                    {(onToggleNotInPlay || onEdit) && (
+                      <div className="flex items-center gap-2 border-t border-gray-100 dark:border-white/5 pt-2">
+                        {onToggleNotInPlay && (
+                          <Button plain onClick={(e: React.MouseEvent) => { e.stopPropagation(); onToggleNotInPlay(); }}>
+                            Remove
+                          </Button>
+                        )}
+                        {onEdit && (
+                          <Button
+                            plain
+                            onClick={(e: React.MouseEvent) => { e.stopPropagation(); onEdit(); }}
+                            className="ms-auto"
+                          >
+                            Edit
+                          </Button>
+                        )}
+                      </div>
                     )}
                   </>
                 )
               )}
-              {onEdit && (
-                <Button
-                  plain
-                  onClick={(e: React.MouseEvent) => { e.stopPropagation(); onEdit(); }}
-                  className="ms-auto"
-                >
-                  Edit
-                </Button>
+              {/* Edit button when not in deal mode */}
+              {(!dealMode || !onAssign) && onEdit && (
+                <div className="flex items-center">
+                  <Button
+                    plain
+                    onClick={(e: React.MouseEvent) => { e.stopPropagation(); onEdit(); }}
+                    className="ms-auto"
+                  >
+                    Edit
+                  </Button>
+                </div>
               )}
             </div>
           </div>

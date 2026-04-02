@@ -1,11 +1,13 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from '@tanstack/react-router';
 import { useCardStore } from '@stores/index';
 import { useAuthStore } from '@stores/authStore';
 import { useGameStore } from '@stores/gameStore';
 import CardRow from '@components/cards/CardRow';
+import CardModal from '@components/cards/CardModal';
 import { Badge } from '@components/catalyst/badge';
+import type { Card as CardType } from '@types';
 
 function formatTime(minutes: number): string {
   if (minutes >= 60) {
@@ -20,6 +22,8 @@ export default function MyCardsScreen() {
   const cards = useCardStore((state) => state.getCards());
   const mySlot = useAuthStore((state) => state.profile?.partnerSlot);
   const { partnerAName, partnerBName } = useGameStore();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editCard, setEditCard] = useState<CardType | undefined>();
 
   useEffect(() => {
     document.title = 'My Cards — Fair Play';
@@ -57,7 +61,7 @@ export default function MyCardsScreen() {
         {mySlot && myCards.length > 0 && (
           <div className="flex items-center gap-3 mt-3 relative">
             <Badge color={isA ? 'partner-a' : 'partner-b'} className="font-display font-bold">
-              {myCards.length} {myCards.length === 1 ? 'card' : 'cards'}
+              {myCards.length} {myCards.length === 1 ? t('cards.countOne', 'card') : t('cards.countOther', 'cards')}
             </Badge>
             <span className="text-xs text-concrete font-body">
               {formatTime(totalTime)} / {t('game.week', 'week')}
@@ -83,15 +87,22 @@ export default function MyCardsScreen() {
               to="/deal"
               className="text-sm font-body text-partner-a font-bold leading-relaxed px-4 py-2 bg-partner-a/10 rounded-xl inline-block underline underline-offset-2 hover:bg-partner-a/20 transition-colors"
             >
-              {t('cards.noMyCardsHint', 'Head to Deal to assign cards →')}
+              {t('cards.noMyCardsHint', 'Head to Deal to assign cards')}
             </Link>
           </div>
         ) : (
           myCards.map((card, i) => (
-            <CardRow key={card.id} card={card} index={i} />
+            <CardRow key={card.id} card={card} index={i} onEdit={() => { setEditCard(card); setIsModalOpen(true); }} />
           ))
         )}
       </div>
+
+      <CardModal
+        isOpen={isModalOpen}
+        card={editCard}
+        onClose={() => { setIsModalOpen(false); setEditCard(undefined); }}
+        onSuccess={() => {}}
+      />
     </div>
   );
 }

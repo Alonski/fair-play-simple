@@ -7,6 +7,8 @@ interface SyncStatusBarProps {
 
 export default function SyncStatusBar({ syncRef }: SyncStatusBarProps) {
   const [status, setStatus] = useState<string>('connected');
+  const [showRecovered, setShowRecovered] = useState(false);
+  const prevStatusRef = useRef<string>('connected');
   const unsubRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
@@ -14,14 +16,29 @@ export default function SyncStatusBar({ syncRef }: SyncStatusBarProps) {
     if (!sync) return;
 
     setStatus(sync.status);
-    unsubRef.current = sync.onStatusChange(setStatus);
+    unsubRef.current = sync.onStatusChange((newStatus) => {
+      if (prevStatusRef.current === 'offline' && newStatus === 'connected') {
+        setShowRecovered(true);
+        setTimeout(() => setShowRecovered(false), 2000);
+      }
+      prevStatusRef.current = newStatus;
+      setStatus(newStatus);
+    });
 
     return () => {
       unsubRef.current?.();
     };
   }, [syncRef.current]);
 
-  if (status === 'connected') return null;
+  if (status === 'connected' && !showRecovered) return null;
+
+  if (showRecovered) {
+    return (
+      <div className="fixed top-0 left-0 right-0 z-30 px-4 py-1.5 text-center text-xs font-display font-bold bg-emerald-500 text-white transition-colors">
+        Back online ✓
+      </div>
+    );
+  }
 
   const isError = status === 'offline';
 

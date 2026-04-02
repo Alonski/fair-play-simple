@@ -9,6 +9,7 @@ import CardModal from '@components/cards/CardModal';
 import OnboardingScreen from '@components/screens/OnboardingScreen';
 import { Button } from '@components/catalyst/button';
 import { Select } from '@components/catalyst/select';
+import { Divider } from '@components/catalyst/divider';
 import ConfirmDialog from '@components/ui/ConfirmDialog';
 import type { Card as CardType, CardStatus } from '@types';
 
@@ -30,6 +31,10 @@ export default function DealScreen() {
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [showDealConfirm, setShowDealConfirm] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+
+  useEffect(() => {
+    document.title = 'Deal — Fair Play';
+  }, []);
 
   useEffect(() => {
     if (toast) {
@@ -158,6 +163,13 @@ export default function DealScreen() {
           Fair Play
         </h1>
 
+        {/* Read-only mode indicator */}
+        {readOnlyMode && (
+          <p className="text-xs font-body text-concrete mb-3">
+            {t('game.readOnly', 'Read-only mode — sign in to make changes')}
+          </p>
+        )}
+
         {/* Action row */}
         <div className="flex items-center gap-2 mb-3">
           <Select
@@ -167,8 +179,6 @@ export default function DealScreen() {
             className="min-w-0 flex-1"
           >
             <option value="random">{t('game.dealModes.random', 'Random')}</option>
-            <option value="weighted" disabled>{t('game.dealModes.weighted', 'Weighted')}</option>
-            <option value="draft" disabled>{t('game.dealModes.draft', 'Draft')}</option>
           </Select>
           <Button
             color="dark/zinc"
@@ -199,7 +209,7 @@ export default function DealScreen() {
         {/* Toast feedback */}
         {toast && (
           <div
-            className="mb-3 px-4 py-2 rounded-xl bg-partner-b/10 dark:bg-partner-b/20 text-partner-b text-xs font-display font-bold text-center flex items-center justify-center gap-2"
+            className="mb-3 px-4 py-2 rounded-xl bg-accent/10 dark:bg-accent/20 text-accent text-xs font-display font-bold text-center flex items-center justify-center gap-2"
             style={{ animation: 'revealUp 0.3s ease forwards' }}
           >
             <span className="text-sm">✓</span>
@@ -307,7 +317,8 @@ export default function DealScreen() {
 
             {/* Not in Play collapsible section */}
             {segment === 'unassigned' && notInPlayCards.length > 0 && (
-              <div className="mt-2">
+              <div className="mt-6">
+                {visibleCards.length === 0 && <Divider soft className="mb-4" />}
                 <button
                   onClick={() => setNotInPlayExpanded((v) => !v)}
                   aria-expanded={notInPlayExpanded}

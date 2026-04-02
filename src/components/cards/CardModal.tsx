@@ -78,6 +78,7 @@ export default function CardModal({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [saved, setSaved] = useState(false);
 
   useEffect(() => {
     if (card) {
@@ -156,8 +157,12 @@ export default function CardModal({
       addCard(cardData);
     }
 
-    onSuccess?.();
-    onClose();
+    setSaved(true);
+    setTimeout(() => {
+      setSaved(false);
+      onSuccess?.();
+      onClose();
+    }, 500);
   };
 
   const handleDeleteConfirmed = () => {
@@ -311,7 +316,9 @@ export default function CardModal({
                   onChange={(e) => setFormData({ ...formData, difficulty: parseInt(e.target.value) as DifficultyLevel })}
                 >
                   {DIFFICULTIES.map((diff) => (
-                    <option key={diff} value={diff}>{'⚡'.repeat(diff)}</option>
+                    <option key={diff} value={diff}>
+                      {'⚡'.repeat(diff)} {diff === 1 ? 'Easy' : diff === 2 ? 'Medium' : 'Hard'}
+                    </option>
                   ))}
                 </Select>
               </Field>
@@ -346,8 +353,8 @@ export default function CardModal({
             <Button plain type="button" onClick={onClose}>
               Cancel
             </Button>
-            <Button color="partner-a" type="submit">
-              {card ? 'Update Card' : 'Create Card'}
+            <Button color="partner-a" type="submit" disabled={saved}>
+              {saved ? 'Saved \u2713' : card ? 'Update Card' : 'Create Card'}
             </Button>
           </DialogActions>
         </form>

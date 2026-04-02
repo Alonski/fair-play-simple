@@ -12,6 +12,35 @@ import type { CardStatus, AISuggestion, AISkipSuggestion } from '@types';
 
 type Step = 'welcome' | 'context' | 'skip-review' | 'deal-review' | 'done';
 
+const STEPS_WITH_INDICATOR: Step[] = ['welcome', 'context', 'skip-review', 'deal-review'];
+
+function Spinner() {
+  return (
+    <span className="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+  );
+}
+
+function StepIndicator({ current }: { current: Step }) {
+  const idx = STEPS_WITH_INDICATOR.indexOf(current);
+  if (idx === -1) return null;
+  return (
+    <div className="flex items-center justify-center gap-2 py-3">
+      {STEPS_WITH_INDICATOR.map((s, i) => (
+        <div
+          key={s}
+          className={`h-2 rounded-full transition-all ${
+            i === idx
+              ? 'w-6 bg-partner-a'
+              : i < idx
+                ? 'w-2 bg-partner-a/40'
+                : 'w-2 bg-gray-300 dark:bg-white/20'
+          }`}
+        />
+      ))}
+    </div>
+  );
+}
+
 export default function OnboardingScreen({ onComplete }: { onComplete: () => void }) {
   const { t } = useTranslation();
   const cards = useCardStore((state) => state.getCards());
@@ -23,6 +52,7 @@ export default function OnboardingScreen({ onComplete }: { onComplete: () => voi
   const [loading, setLoading] = useState(false);
   const [skipSuggestions, setSkipSuggestions] = useState<AISkipSuggestion[]>([]);
   const [dealSuggestions, setDealSuggestions] = useState<AISuggestion[]>([]);
+  // selectedSkips contains card IDs that will be SKIPPED (i.e. unchecked cards)
   const [selectedSkips, setSelectedSkips] = useState<Set<string>>(new Set());
   const [selectedDeals, setSelectedDeals] = useState<Map<string, 'partner-a' | 'partner-b'>>(new Map());
 
@@ -30,6 +60,7 @@ export default function OnboardingScreen({ onComplete }: { onComplete: () => voi
     setLoading(true);
     const suggestions = await suggestCardsToSkip(cards, context);
     setSkipSuggestions(suggestions);
+    // AI-suggested cards start as skipped (unchecked)
     setSelectedSkips(new Set(suggestions.map((s) => s.cardId)));
     setLoading(false);
     setStep('skip-review');
@@ -100,6 +131,7 @@ export default function OnboardingScreen({ onComplete }: { onComplete: () => voi
   if (step === 'welcome') {
     return (
       <div className="flex flex-col items-center justify-center h-full px-6 text-center">
+        <StepIndicator current={step} />
         <h1 className="text-3xl font-display font-bold text-ink mb-3">
           {t('onboarding.welcome', 'Welcome to Fair Play')}
         </h1>
@@ -118,8 +150,9 @@ export default function OnboardingScreen({ onComplete }: { onComplete: () => voi
 
   if (step === 'context') {
     return (
-      <div className="flex flex-col h-full px-6 pt-10 pb-6">
-        <h2 className="text-2xl font-display font-bold text-ink mb-2">Tell us about your household</h2>
+      <div className="flex flex-col h-full px-6 pt-6 pb-6">
+        <StepIndicator current={step} />
+        <h2 className="text-2xl font-display font-bold text-ink mb-2 mt-4">Tell us about your household</h2>
         <p className="text-sm font-body text-concrete mb-6 leading-relaxed">
           This helps our AI suggest which cards to skip and how to divide responsibilities.
         </p>
@@ -138,7 +171,7 @@ export default function OnboardingScreen({ onComplete }: { onComplete: () => voi
         </Field>
         <div className="flex gap-3 mt-6">
           <Button color="partner-a" onClick={handleContextSubmit} disabled={!context.trim() || loading}>
-            {loading ? 'Analyzing...' : 'Continue'}
+            {loading ? <span className="flex items-center gap-2"><Spinner /> Analyzing...</span> : 'Continue'}
           </Button>
           <Button plain onClick={() => setStep('welcome')}>Back</Button>
         </div>
@@ -149,10 +182,11 @@ export default function OnboardingScreen({ onComplete }: { onComplete: () => voi
   if (step === 'skip-review') {
     return (
       <div className="flex flex-col h-full">
-        <div className="px-6 pt-10 pb-4">
-          <h2 className="text-2xl font-display font-bold text-ink mb-2">Cards to skip</h2>
+        <div className="px-6 pt-6 pb-4">
+          <StepIndicator current={step} />
+          <h2 className="text-2xl font-display font-bold text-ink mb-2 mt-4">Review your cards</h2>
           <p className="text-sm font-body text-concrete mb-4 leading-relaxed">
-            AI suggests these {skipSuggestions.length} cards don't apply to your household. Tap to toggle.
+            Uncheck cards that don't apply to your household. AI suggested unchecking {skipSuggestions.length} cards.
           </p>
         </div>
         <div className="flex-1 overflow-y-auto px-6 pb-4 space-y-2">
@@ -162,24 +196,27 @@ export default function OnboardingScreen({ onComplete }: { onComplete: () => voi
             skipSuggestions.map((s) => {
               const card = cards.find((c) => c.id === s.cardId);
               if (!card) return null;
-              const isSelected = selectedSkips.has(s.cardId);
+              // isSkipped = card is in the skip set = unchecked
+              const isSkipped = selectedSkips.has(s.cardId);
+              // isKept = card is NOT in the skip set = checked
+              const isKept = !isSkipped;
               return (
                 <button
                   key={s.cardId}
                   onClick={() => toggleSkip(s.cardId)}
                   className={`w-full text-start p-3 rounded-xl border transition-all ${
-                    isSelected
-                      ? 'bg-gray-100 dark:bg-white/5 border-gray-200 dark:border-white/10 opacity-60'
-                      : 'bg-white dark:bg-white/10 border-gray-200 dark:border-white/10'
+                    isKept
+                      ? 'bg-white dark:bg-white/10 border-gray-200 dark:border-white/10'
+                      : 'bg-gray-100 dark:bg-white/5 border-gray-200 dark:border-white/10 opacity-60'
                   }`}
                 >
                   <div className="flex items-center gap-2">
                     <span className={`w-5 h-5 rounded border-2 flex items-center justify-center text-xs ${
-                      isSelected ? 'bg-concrete border-concrete text-white' : 'border-gray-300'
+                      isKept ? 'bg-partner-a border-partner-a text-white' : 'border-gray-300'
                     }`}>
-                      {isSelected && '✓'}
+                      {isKept && '\u2713'}
                     </span>
-                    <span className="font-display font-semibold text-ink text-sm">{card.title.en}</span>
+                    <span className={`font-display font-semibold text-ink text-sm ${isSkipped ? 'line-through' : ''}`}>{card.title.en}</span>
                     <Badge color="zinc" className="ms-auto">{card.category}</Badge>
                   </div>
                   <p className="text-xs text-concrete mt-1 ps-7">{s.reason}</p>
@@ -190,7 +227,7 @@ export default function OnboardingScreen({ onComplete }: { onComplete: () => voi
         </div>
         <div className="flex gap-3 px-6 py-4 border-t border-gray-200 dark:border-white/10">
           <Button color="partner-a" onClick={handleSkipConfirm} disabled={loading}>
-            {loading ? 'Preparing deal...' : `Skip ${selectedSkips.size} cards & continue`}
+            {loading ? <span className="flex items-center gap-2"><Spinner /> Preparing deal...</span> : `Skip ${selectedSkips.size} cards & continue`}
           </Button>
           <Button plain onClick={() => setStep('context')}>Back</Button>
         </div>
@@ -205,8 +242,9 @@ export default function OnboardingScreen({ onComplete }: { onComplete: () => voi
 
     return (
       <div className="flex flex-col h-full">
-        <div className="px-6 pt-10 pb-4">
-          <h2 className="text-2xl font-display font-bold text-ink mb-2">AI-suggested deal</h2>
+        <div className="px-6 pt-6 pb-4">
+          <StepIndicator current={step} />
+          <h2 className="text-2xl font-display font-bold text-ink mb-2 mt-4">AI-suggested deal</h2>
           <p className="text-sm font-body text-concrete mb-2 leading-relaxed">
             Tap cards to cycle assignment: {partnerAName} → {partnerBName} → unassigned
           </p>
@@ -251,14 +289,50 @@ export default function OnboardingScreen({ onComplete }: { onComplete: () => voi
     );
   }
 
-  // step === 'done'
+  // step === 'done' — show summary
+  const allCards = useCardStore.getState().cards;
+  const skippedCount = allCards.filter((c) => c.status === 'not-in-play').length;
+  const partnerACards = allCards.filter((c) => c.holder === 'partner-a' && c.status === 'held');
+  const partnerBCards = allCards.filter((c) => c.holder === 'partner-b' && c.status === 'held');
+  const partnerAMinutes = partnerACards.reduce((sum, c) => sum + (c.metadata?.timeEstimate ?? 0), 0);
+  const partnerBMinutes = partnerBCards.reduce((sum, c) => sum + (c.metadata?.timeEstimate ?? 0), 0);
+
+  const formatTime = (mins: number) => {
+    if (mins < 60) return `${mins} min/week`;
+    const h = Math.floor(mins / 60);
+    const m = mins % 60;
+    return m > 0 ? `${h}h ${m}m/week` : `${h}h/week`;
+  };
+
   return (
     <div className="flex flex-col items-center justify-center h-full px-6 text-center">
       <span className="text-5xl mb-4">🎉</span>
       <h2 className="text-2xl font-display font-bold text-ink mb-2">You're all set!</h2>
-      <p className="text-sm font-body text-concrete mb-8 max-w-sm leading-relaxed">
+      <p className="text-sm font-body text-concrete mb-6 max-w-sm leading-relaxed">
         Cards have been distributed. You can always reassign them from the Deal screen.
       </p>
+
+      <div className="w-full max-w-xs space-y-3 mb-8">
+        {skippedCount > 0 && (
+          <div className="flex justify-between text-sm font-body px-3 py-2 bg-gray-100 dark:bg-white/5 rounded-lg">
+            <span className="text-concrete">Cards skipped</span>
+            <span className="font-display font-bold text-ink">{skippedCount}</span>
+          </div>
+        )}
+        <div className="flex justify-between text-sm font-body px-3 py-2 bg-partner-a/10 rounded-lg">
+          <span className="text-partner-a font-semibold">{partnerAName}</span>
+          <span className="font-display font-bold text-ink">
+            {partnerACards.length} cards{partnerAMinutes > 0 ? ` \u00B7 ${formatTime(partnerAMinutes)}` : ''}
+          </span>
+        </div>
+        <div className="flex justify-between text-sm font-body px-3 py-2 bg-partner-b/10 rounded-lg">
+          <span className="text-partner-b font-semibold">{partnerBName}</span>
+          <span className="font-display font-bold text-ink">
+            {partnerBCards.length} cards{partnerBMinutes > 0 ? ` \u00B7 ${formatTime(partnerBMinutes)}` : ''}
+          </span>
+        </div>
+      </div>
+
       <Button color="partner-a" onClick={onComplete} className="px-8">
         Go to My Cards
       </Button>

@@ -74,7 +74,7 @@ export default function MoreScreen() {
       {/* Header */}
       <div className="px-5 pt-10 pb-6">
         <p className="text-xs font-display font-bold uppercase tracking-widest text-concrete mb-1">
-          {t('navigation.more', 'More')}
+          {t('settings.title', 'Settings')}
         </p>
         <h1 className="text-3xl font-display font-bold text-ink leading-tight">
           {t('settings.title', 'Settings')}
@@ -190,7 +190,7 @@ export default function MoreScreen() {
                           </div>
                           <button
                             onClick={() => setRestoreTarget(event)}
-                            className="text-[10px] px-2.5 py-1 bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 text-concrete font-display font-bold rounded-lg hover:bg-gray-50 dark:hover:bg-white/15 transition-colors"
+                            className="text-xs px-3 py-1.5 bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 text-concrete font-display font-bold rounded-lg hover:bg-gray-50 dark:hover:bg-white/15 transition-colors"
                           >
                             {t('game.restore', 'Restore')}
                           </button>
