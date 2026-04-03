@@ -89,5 +89,10 @@ service cloud.firestore {
     match /users/{uid}/chats/{chatId}/messages/{messageId} {
       allow read, write: if isAllowedUser() && request.auth.uid == uid;
     }
+
+    // Push notification tokens — each user manages their own
+    match /users/{uid}/tokens/{tokenId} {
+      allow read, write: if isAllowedUser() && request.auth.uid == uid;
+    }
   }
 }

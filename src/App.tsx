@@ -6,6 +6,7 @@ import { useCardStore } from '@stores/index';
 import { useAuthStore } from '@stores/authStore';
 import { isFirebaseConfigured } from '@services/firebase';
 import { SyncService } from '@services/syncService';
+import { initPushNotifications } from '@services/pushService';
 import { sampleCards } from '@utils/sampleCards';
 
 // Components
@@ -52,6 +53,8 @@ export default function App() {
         useCardStore.getState().bulkAddCards(sampleCards);
         await sync.seedCards(sampleCards);
       }
+      // Register for push notifications
+      initPushNotifications(user.uid).catch(console.error);
     });
 
     return () => {

@@ -12,4 +12,7 @@ export const dealSuggest = onCallGenkit(genkitOpts, dealSuggestFlow);
 export const rebalance = onCallGenkit(genkitOpts, rebalanceFlow);
 export const mscSuggest = onCallGenkit(genkitOpts, mscSuggestFlow);
 export const chat = onCallGenkit(genkitOpts, chatFlow);
+// --- Scheduled Functions ---
+export { weeklyCheckIn } from './scheduled/weeklyCheckIn.js';
+export { cardReminder } from './scheduled/cardReminder.js';
 //# sourceMappingURL=index.js.map
