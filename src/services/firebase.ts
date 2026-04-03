@@ -18,6 +18,7 @@
 import { initializeApp, type FirebaseApp } from 'firebase/app';
 import { getAuth, connectAuthEmulator, GoogleAuthProvider, signInWithCredential, type Auth } from 'firebase/auth';
 import { initializeFirestore, connectFirestoreEmulator, persistentLocalCache, type Firestore } from 'firebase/firestore';
+import { getFunctions, connectFunctionsEmulator } from 'firebase/functions';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -47,7 +48,9 @@ if (isFirebaseConfigured) {
   if (import.meta.env.DEV && import.meta.env.VITE_USE_EMULATORS !== 'false') {
     connectAuthEmulator(auth, 'http://localhost:9099', { disableWarnings: true });
     connectFirestoreEmulator(db, 'localhost', 8080);
-    console.log('Connected to Firebase emulators (auth:9099, firestore:8080)');
+    const functions = getFunctions(app);
+    connectFunctionsEmulator(functions, 'localhost', 5001);
+    console.log('Connected to Firebase emulators (auth:9099, firestore:8080, functions:5001)');
   }
 } else {
   console.warn('Firebase credentials not found. Running in local-only mode.');

@@ -1,18 +1,13 @@
 import { onCallGenkit } from 'firebase-functions/https';
 import { defineSecret } from 'firebase-functions/params';
-import { z } from 'genkit';
-import { ai } from './genkit.js';
+import { translateFlow } from './flows/translate.js';
+import { skipSuggestFlow, dealSuggestFlow, rebalanceFlow, mscSuggestFlow } from './flows/cards.js';
 const geminiApiKey = defineSecret('GEMINI_API_KEY');
-// --- Test flow: verify Genkit round-trip ---
-const helloFlow = ai.defineFlow({
-    name: 'helloFlow',
-    inputSchema: z.object({ name: z.string() }),
-    outputSchema: z.object({ greeting: z.string() }),
-}, async ({ name }) => {
-    const { text } = await ai.generate(`Say hello to ${name} in a friendly, brief way. One sentence only.`);
-    return { greeting: text };
-});
-export const hello = onCallGenkit({
-    secrets: [geminiApiKey],
-}, helloFlow);
+const genkitOpts = { secrets: [geminiApiKey] };
+// --- AI Flows exposed as callable Cloud Functions ---
+export const translate = onCallGenkit(genkitOpts, translateFlow);
+export const skipSuggest = onCallGenkit(genkitOpts, skipSuggestFlow);
+export const dealSuggest = onCallGenkit(genkitOpts, dealSuggestFlow);
+export const rebalance = onCallGenkit(genkitOpts, rebalanceFlow);
+export const mscSuggest = onCallGenkit(genkitOpts, mscSuggestFlow);
 //# sourceMappingURL=index.js.map
