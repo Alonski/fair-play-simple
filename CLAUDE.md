@@ -63,6 +63,22 @@ VITE_FIREBASE_PROJECT_ID= VITE_FIREBASE_API_KEY= bun run dev
 - Card name templates: `{{partner-a}}` / `{{partner-b}}` in card data, substituted at display time in CardRow
 - CardModal form uses Catalyst `Field` + `Label` + `Input`/`Select`/`Textarea` + `ErrorMessage`
 
+## AI / Cloud Functions
+- **Backend**: Firebase Cloud Functions with Genkit (Gemini 2.5 Flash)
+- **Functions source**: `functions/` directory with its own `package.json` (Node.js 22)
+- **Build functions**: `make fn-build`
+- **Install function deps**: `make fn-install`
+- **Dev with functions emulator**: `make dev-emu-full` (auth + firestore + functions)
+- **Flows**: translate, skipSuggest, dealSuggest, rebalance, mscSuggest, chat
+- **Scheduled**: weeklyCheckIn (Sunday 9am IST), cardReminder (daily 10am IST)
+- **Chat**: Multi-turn conversational AI with Fair Play Expert persona, tools (getCardState, getStats, explainCard), Firestore persistence, compaction after 50 messages
+- **Chat modes**: Private (per-user) and Shared (both partners see)
+- **Push notifications**: FCM web push, service worker at `public/firebase-messaging-sw.js`
+- **Inline AI**: Rebalance button on Deal screen, MSC suggestion button on CardRow
+- **Client calls Cloud Functions via `httpsCallable`** — no client-side Gemini calls
+- **API key**: Set via `firebase functions:secrets:set GEMINI_API_KEY`
+- **Requires Firebase Blaze plan** for Cloud Functions deployment
+
 ## i18n
 - Full English + Hebrew translations via react-i18next
 - Translation files: `src/locales/en.json` and `src/locales/he.json`
