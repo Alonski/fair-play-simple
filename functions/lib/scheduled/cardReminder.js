@@ -1,8 +1,5 @@
 import { onSchedule } from 'firebase-functions/scheduler';
-import * as admin from 'firebase-admin';
-if (!admin.apps.length)
-    admin.initializeApp();
-const db = admin.firestore();
+import { db, messaging } from '../admin.js';
 const TWO_WEEKS_MS = 14 * 24 * 60 * 60 * 1000;
 export const cardReminder = onSchedule({ schedule: 'every day 10:00', timeZone: 'Asia/Jerusalem' }, async () => {
     const householdId = 'shared';
@@ -51,7 +48,7 @@ export const cardReminder = onSchedule({ schedule: 'every day 10:00', timeZone: 
         });
     }
     if (tokens.length > 0) {
-        await admin.messaging().sendEachForMulticast({
+        await messaging.sendEachForMulticast({
             tokens,
             notification: {
                 title: '📝 Cards need attention',

@@ -1,9 +1,6 @@
 import { onSchedule } from 'firebase-functions/scheduler';
-import * as admin from 'firebase-admin';
 import { ai } from '../genkit.js';
-if (!admin.apps.length)
-    admin.initializeApp();
-const db = admin.firestore();
+import { db, messaging } from '../admin.js';
 export const weeklyCheckIn = onSchedule({ schedule: 'every sunday 09:00', timeZone: 'Asia/Jerusalem' }, async () => {
     const householdId = 'shared';
     // Get card state
@@ -62,7 +59,7 @@ Write 3-4 sentences max. Celebrate balance or gently suggest improvements. End w
         });
     }
     if (tokens.length > 0) {
-        await admin.messaging().sendEachForMulticast({
+        await messaging.sendEachForMulticast({
             tokens,
             notification: {
                 title: '📊 Weekly Fair Play Check-in',

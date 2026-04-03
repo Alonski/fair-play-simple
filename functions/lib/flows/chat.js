@@ -1,11 +1,7 @@
 import { z } from 'genkit';
+import { FieldValue } from 'firebase-admin/firestore';
 import { ai } from '../genkit.js';
-import * as admin from 'firebase-admin';
-// Initialize admin if not already done
-if (!admin.apps.length) {
-    admin.initializeApp();
-}
-const db = admin.firestore();
+import { db } from '../admin.js';
 const SYSTEM_PROMPT = `You are the Fair Play Expert — a friendly, helpful advisor who knows everything about Eve Rodsky's Fair Play method for dividing household responsibilities fairly between partners.
 
 You help couples:
@@ -114,7 +110,7 @@ async function saveMessage(chatPath, message) {
     await db.collection(chatPath).add({
         role: message.role,
         content: message.content,
-        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        createdAt: FieldValue.serverTimestamp(),
     });
 }
 async function compactHistory(chatPath, messages) {
@@ -136,7 +132,7 @@ async function compactHistory(chatPath, messages) {
     batch.set(summaryRef, {
         role: 'model',
         content: [{ text: `[Previous conversation summary]\n${summary}` }],
-        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        createdAt: FieldValue.serverTimestamp(),
         isSummary: true,
     });
     await batch.commit();
