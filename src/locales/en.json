@@ -24,7 +24,18 @@
     "settings": "Settings",
     "myCards": "My Cards",
     "deal": "Deal",
+    "chat": "Chat",
     "more": "More"
+  },
+  "chat": {
+    "title": "Fair Play Expert",
+    "heading": "Chat",
+    "shared": "Shared",
+    "private": "Private",
+    "empty": "Ask your Fair Play Expert",
+    "emptyHint": "Ask about cards, get rebalancing advice, or learn about the Fair Play method.",
+    "placeholder": "Ask about your cards...",
+    "error": "Sorry, something went wrong. Please try again."
   },
   "cards": {
     "title": "Cards",

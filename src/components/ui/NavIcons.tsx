@@ -53,6 +53,28 @@ export function DealIcon({ className }: IconProps) {
   );
 }
 
+export function ChatIcon({ className }: IconProps) {
+  return (
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.25"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" fill="currentColor" fillOpacity="0.08" />
+      <circle cx="9" cy="10" r="1" fill="currentColor" stroke="none" opacity="0.5" />
+      <circle cx="12" cy="10" r="1" fill="currentColor" stroke="none" opacity="0.5" />
+      <circle cx="15" cy="10" r="1" fill="currentColor" stroke="none" opacity="0.5" />
+    </svg>
+  );
+}
+
 export function MoreIcon({ className }: IconProps) {
   return (
     <svg

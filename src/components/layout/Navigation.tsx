@@ -1,12 +1,13 @@
 import { type ReactNode } from 'react';
 import { Link, useRouterState } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
-import { CardsIcon, DealIcon, MoreIcon } from '@components/ui/NavIcons';
+import { CardsIcon, DealIcon, ChatIcon, MoreIcon } from '@components/ui/NavIcons';
 import { useAuthStore } from '@stores/authStore';
 
-const tabs: { path: '/' | '/deal' | '/more'; icon: ReactNode; labelKey: string }[] = [
+const tabs: { path: '/' | '/deal' | '/chat' | '/more'; icon: ReactNode; labelKey: string }[] = [
   { path: '/', icon: <CardsIcon />, labelKey: 'navigation.myCards' },
   { path: '/deal', icon: <DealIcon />, labelKey: 'navigation.deal' },
+  { path: '/chat', icon: <ChatIcon />, labelKey: 'navigation.chat' },
   { path: '/more', icon: <MoreIcon />, labelKey: 'navigation.more' },
 ];
 
@@ -29,7 +30,7 @@ export default function Navigation() {
             '0 18px 42px color-mix(in srgb, var(--color-ink) 10%, transparent), inset 0 1px 0 color-mix(in srgb, white 16%, transparent)',
         }}
       >
-        <div className="grid grid-cols-3 items-stretch gap-1.5">
+        <div className="grid grid-cols-4 items-stretch gap-1">
           {tabs.map((tab) => {
             const isActive = tab.path === '/' ? pathname === '/' : pathname.startsWith(tab.path);
             return (
@@ -40,7 +41,7 @@ export default function Navigation() {
                 className="flex min-w-0 items-center justify-center px-1 py-0.5"
               >
                 <span
-                  className="inline-flex min-w-[5.1rem] max-w-full flex-col items-center justify-center gap-1 rounded-[1.35rem] px-3 py-2.5 transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
+                  className="inline-flex min-w-[3.8rem] max-w-full flex-col items-center justify-center gap-1 rounded-[1.35rem] px-2 py-2.5 transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
                   style={{
                     color: isActive ? activeColor : 'var(--color-concrete)',
                     background: isActive

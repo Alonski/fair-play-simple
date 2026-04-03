@@ -14,6 +14,11 @@ const dealRoute = createRoute({
   path: '/deal',
   component: lazyRouteComponent(() => import('@components/screens/DealScreen')),
 });
+const chatRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/chat',
+  component: lazyRouteComponent(() => import('@components/screens/ChatScreen')),
+});
 const moreRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/more',
@@ -21,7 +26,7 @@ const moreRoute = createRoute({
 });
 const notFoundRoute = createRoute({ getParentRoute: () => rootRoute, path: '*', component: () => <Navigate to="/" /> });
 
-const routeTree = rootRoute.addChildren([indexRoute, dealRoute, moreRoute, notFoundRoute]);
+const routeTree = rootRoute.addChildren([indexRoute, dealRoute, chatRoute, moreRoute, notFoundRoute]);
 
 export const router = createRouter({ routeTree });
 
