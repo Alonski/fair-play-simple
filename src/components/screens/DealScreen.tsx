@@ -26,7 +26,7 @@ export default function DealScreen() {
   const userId = useAuthStore((s) => s.user?.uid ?? '');
   const readOnlyMode = useAuthStore((s) => s.readOnlyMode);
 
-  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [onboardingDone, setOnboardingDone] = useState(() => !!localStorage.getItem('fp-onboarding-done'));
   const [segment, setSegment] = useState<Segment>('unassigned');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editCard, setEditCard] = useState<CardType | undefined>();
@@ -149,10 +149,10 @@ export default function DealScreen() {
 
   // Show onboarding when all cards are unassigned (first-time use)
   const noCardsAssigned = partnerACards.length === 0 && partnerBCards.length === 0;
-  if (showOnboarding || (noCardsAssigned && cards.length > 0 && !localStorage.getItem('fp-onboarding-done'))) {
+  if (!onboardingDone && noCardsAssigned && cards.length > 0) {
     return (
       <OnboardingScreen onComplete={() => {
-        setShowOnboarding(false);
+        setOnboardingDone(true);
         localStorage.setItem('fp-onboarding-done', '1');
       }} />
     );
@@ -219,7 +219,7 @@ export default function DealScreen() {
               setShowAiSuggestions(true);
               setAiLoading(false);
             }}
-            disabled={readOnlyMode || aiLoading || (partnerACards.length === 0 && partnerBCards.length === 0)}
+            disabled={readOnlyMode || aiLoading}
             className="whitespace-nowrap !text-xs"
           >
             {aiLoading ? '...' : '✨ AI'}
