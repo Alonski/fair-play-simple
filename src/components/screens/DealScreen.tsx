@@ -4,6 +4,9 @@ import { useCardStore, useGameStore } from '@stores/index';
 import { useAuthStore } from '@stores/authStore';
 import { saveSnapshot } from '@services/historyService';
 import { recordEvent, recordDeal, recordReset, recordAssignment } from '@services/statsService';
+import { suggestRebalance } from '@services/aiAdvisorService';
+import { Dialog, DialogTitle, DialogBody, DialogActions } from '@components/catalyst/dialog';
+import type { AISuggestion } from '@types';
 import CardRow from '@components/cards/CardRow';
 import CardModal from '@components/cards/CardModal';
 import OnboardingScreen from '@components/screens/OnboardingScreen';
@@ -31,6 +34,9 @@ export default function DealScreen() {
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [showDealConfirm, setShowDealConfirm] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+  const [aiSuggestions, setAiSuggestions] = useState<AISuggestion[]>([]);
+  const [showAiSuggestions, setShowAiSuggestions] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
 
   useEffect(() => {
     document.title = 'Deal — Fair Play';
@@ -204,6 +210,20 @@ export default function DealScreen() {
           >
             +
           </Button>
+          <Button
+            color="accent"
+            onClick={async () => {
+              setAiLoading(true);
+              const suggestions = await suggestRebalance(cards, partnerAName, partnerBName);
+              setAiSuggestions(suggestions);
+              setShowAiSuggestions(true);
+              setAiLoading(false);
+            }}
+            disabled={readOnlyMode || aiLoading || (partnerACards.length === 0 && partnerBCards.length === 0)}
+            className="whitespace-nowrap !text-xs"
+          >
+            {aiLoading ? '...' : '✨ AI'}
+          </Button>
         </div>
 
         {/* Toast feedback */}
@@ -367,6 +387,58 @@ export default function DealScreen() {
         onConfirm={handleResetConfirmed}
         onCancel={() => setShowResetConfirm(false)}
       />
+
+      {/* AI Rebalance Suggestions */}
+      <Dialog open={showAiSuggestions} onClose={() => setShowAiSuggestions(false)} size="md">
+        <DialogTitle>✨ AI Rebalance Suggestions</DialogTitle>
+        <DialogBody>
+          {aiSuggestions.length === 0 ? (
+            <p className="text-sm font-body text-concrete">
+              Your card distribution looks balanced! No changes needed.
+            </p>
+          ) : (
+            <div className="space-y-3">
+              {aiSuggestions.map((s) => {
+                const card = cards.find((c) => c.id === s.cardId);
+                return (
+                  <div key={s.cardId} className="p-3 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="font-display font-semibold text-ink text-sm">
+                        {card?.title.en || s.cardId}
+                      </span>
+                      <span className={`text-xs font-bold ${s.suggestedHolder === 'partner-a' ? 'text-partner-a' : 'text-partner-b'}`}>
+                        → {s.suggestedHolder === 'partner-a' ? partnerAName : partnerBName}
+                      </span>
+                    </div>
+                    <p className="text-xs text-concrete">{s.reason}</p>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </DialogBody>
+        <DialogActions>
+          <Button plain onClick={() => setShowAiSuggestions(false)}>
+            Dismiss
+          </Button>
+          {aiSuggestions.length > 0 && (
+            <Button
+              color="partner-a"
+              onClick={() => {
+                aiSuggestions.forEach((s) => {
+                  if (s.suggestedHolder === 'partner-a' || s.suggestedHolder === 'partner-b') {
+                    handleAssign(s.cardId, s.suggestedHolder);
+                  }
+                });
+                setShowAiSuggestions(false);
+                setToast(t('game.cardsDealt', 'Cards dealt!'));
+              }}
+            >
+              Apply All
+            </Button>
+          )}
+        </DialogActions>
+      </Dialog>
     </div>
   );
 }

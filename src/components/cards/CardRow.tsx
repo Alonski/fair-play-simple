@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useCardStore } from '@stores/index';
 import { useGameStore } from '@stores/gameStore';
 import { useAuthStore } from '@stores/authStore';
+import { suggestMSC } from '@services/aiAdvisorService';
 import { Button } from '@components/catalyst/button';
 import { Badge } from '@components/catalyst/badge';
 import type { Card as CardType, Category } from '@types';
@@ -63,6 +64,7 @@ export default function CardRow({
   const [expanded, setExpanded] = useState(false);
   const [editingMsc, setEditingMsc] = useState(false);
   const [mscDraft, setMscDraft] = useState('');
+  const [mscAiLoading, setMscAiLoading] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const isRTL = i18n.language === 'he';
@@ -196,12 +198,32 @@ export default function CardRow({
                   {mscNote}
                 </button>
               ) : (
-                <button
-                  onClick={startEditingMsc}
-                  className="w-full text-start px-3 py-2 text-sm font-body text-concrete/70 bg-amber-50/40 rounded-xl border border-dashed border-amber-200/60 hover:bg-amber-50/70 hover:text-concrete transition-colors"
-                >
-                  Add MSC notes…
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={startEditingMsc}
+                    className="flex-1 text-start px-3 py-2 text-sm font-body text-concrete/70 bg-amber-50/40 rounded-xl border border-dashed border-amber-200/60 hover:bg-amber-50/70 hover:text-concrete transition-colors"
+                  >
+                    Add MSC notes…
+                  </button>
+                  <Button
+                    plain
+                    disabled={mscAiLoading || readOnlyMode}
+                    onClick={async (e: React.MouseEvent) => {
+                      e.stopPropagation();
+                      setMscAiLoading(true);
+                      const note = await suggestMSC(card.title.en, card.description.en, card.category, isRTL ? 'he' : 'en');
+                      if (note) {
+                        setMscDraft(note);
+                        setEditingMsc(true);
+                        setTimeout(() => textareaRef.current?.focus(), 0);
+                      }
+                      setMscAiLoading(false);
+                    }}
+                    className="shrink-0 !text-xs text-accent"
+                  >
+                    {mscAiLoading ? '...' : '✨ AI'}
+                  </Button>
+                </div>
               )}
             </div>
 
