@@ -3,6 +3,7 @@ import { defineSecret } from 'firebase-functions/params';
 
 import { translateFlow } from './flows/translate.js';
 import { skipSuggestFlow, dealSuggestFlow, rebalanceFlow, mscSuggestFlow } from './flows/cards.js';
+import { chatFlow } from './flows/chat.js';
 
 const geminiApiKey = defineSecret('GEMINI_API_KEY');
 
@@ -15,3 +16,4 @@ export const skipSuggest = onCallGenkit(genkitOpts, skipSuggestFlow);
 export const dealSuggest = onCallGenkit(genkitOpts, dealSuggestFlow);
 export const rebalance = onCallGenkit(genkitOpts, rebalanceFlow);
 export const mscSuggest = onCallGenkit(genkitOpts, mscSuggestFlow);
+export const chat = onCallGenkit(genkitOpts, chatFlow);
