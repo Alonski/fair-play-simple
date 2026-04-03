@@ -78,7 +78,7 @@ service cloud.firestore {
       }
 
       // Shared chat — both partners can read/write
-      match /sharedChat/messages/{messageId} {
+      match /chats/{chatId}/messages/{messageId} {
         allow read: if isMember(householdId);
         allow create: if isMember(householdId);
         allow delete: if isMember(householdId); // for compaction
@@ -88,6 +88,11 @@ service cloud.firestore {
     // Private chats — each user can only access their own
     match /users/{uid}/chats/{chatId}/messages/{messageId} {
       allow read, write: if isAllowedUser() && request.auth.uid == uid;
+    }
+
+    // Weekly reports
+    match /households/{householdId}/weeklyReports/{reportId} {
+      allow read: if isMember(householdId);
     }
 
     // Push notification tokens — each user manages their own

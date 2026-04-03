@@ -192,8 +192,8 @@ export const chatFlow = ai.defineFlow(
   async ({ message, chatMode, userId, householdId }) => {
     // Determine chat path based on mode
     const chatPath = chatMode === 'shared'
-      ? `households/${householdId}/sharedChat/messages`
-      : `users/${userId}/chats/default/messages`;
+      ? `households/${householdId}/chats/shared/messages`
+      : `users/${userId}/chats/private/messages`;
 
     // Load and compact history
     let history = await loadHistory(chatPath);

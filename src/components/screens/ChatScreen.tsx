@@ -40,8 +40,8 @@ export default function ChatScreen() {
     if (!db || !userId) return;
 
     const colRef = chatMode === 'shared'
-      ? collection(db, 'households', 'shared', 'sharedChat', 'messages')
-      : collection(db, 'users', userId, 'chats', 'default', 'messages');
+      ? collection(db, 'households', 'shared', 'chats', 'shared', 'messages')
+      : collection(db, 'users', userId, 'chats', 'private', 'messages');
 
     const q = query(
       colRef,
