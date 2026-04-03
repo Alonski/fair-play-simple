@@ -4,7 +4,7 @@ import { useCardStore, useGameStore } from '@stores/index';
 import { useAuthStore } from '@stores/authStore';
 import { saveSnapshot } from '@services/historyService';
 import { recordEvent, recordDeal, recordReset, recordAssignment } from '@services/statsService';
-import { suggestRebalance } from '@services/aiAdvisorService';
+import { suggestRebalance, suggestInitialDeal } from '@services/aiAdvisorService';
 import { Dialog, DialogTitle, DialogBody, DialogActions } from '@components/catalyst/dialog';
 import type { AISuggestion } from '@types';
 import CardRow from '@components/cards/CardRow';
@@ -55,11 +55,23 @@ export default function DealScreen() {
   const notInPlayCards = cards.filter((c) => c.status === 'not-in-play');
 
   const handleDeal = async () => {
-    if (currentDealMode !== 'random') return;
     const unassigned = cards.filter((c) => !c.holder && c.status !== 'not-in-play');
     if (unassigned.length === 0) return;
 
-    // Save snapshot before dealing
+    if (currentDealMode === 'ai') {
+      // AI Deal: get suggestions and show dialog for review
+      setAiLoading(true);
+      const noCardsAssigned = partnerACards.length === 0 && partnerBCards.length === 0;
+      const suggestions = noCardsAssigned
+        ? await suggestInitialDeal(cards, partnerAName, partnerBName, 'Household with two partners')
+        : await suggestRebalance(cards, partnerAName, partnerBName);
+      setAiSuggestions(suggestions);
+      setShowAiSuggestions(true);
+      setAiLoading(false);
+      return;
+    }
+
+    // Random deal
     await saveSnapshot('deal', userId).catch(console.error);
 
     const shuffled = [...unassigned];
@@ -185,14 +197,15 @@ export default function DealScreen() {
             className="min-w-0 flex-1"
           >
             <option value="random">{t('game.dealModes.random', 'Random')}</option>
+            <option value="ai">✨ {t('game.dealModes.ai', 'AI Deal')}</option>
           </Select>
           <Button
             color="dark/zinc"
-            onClick={() => setShowDealConfirm(true)}
-            disabled={unassignedCards.length === 0 || readOnlyMode}
+            onClick={() => currentDealMode === 'ai' ? handleDeal() : setShowDealConfirm(true)}
+            disabled={unassignedCards.length === 0 || readOnlyMode || aiLoading}
             className="whitespace-nowrap"
           >
-            {t('game.deal', 'Deal')}
+            {aiLoading ? '✨ ...' : t('game.deal', 'Deal')}
           </Button>
           <Button
             outline
@@ -209,20 +222,6 @@ export default function DealScreen() {
             className="shrink-0 !px-2.5"
           >
             +
-          </Button>
-          <Button
-            color="accent"
-            onClick={async () => {
-              setAiLoading(true);
-              const suggestions = await suggestRebalance(cards, partnerAName, partnerBName);
-              setAiSuggestions(suggestions);
-              setShowAiSuggestions(true);
-              setAiLoading(false);
-            }}
-            disabled={readOnlyMode || aiLoading}
-            className="whitespace-nowrap !text-xs"
-          >
-            {aiLoading ? '...' : '✨ AI'}
           </Button>
         </div>
 
@@ -390,7 +389,7 @@ export default function DealScreen() {
 
       {/* AI Rebalance Suggestions */}
       <Dialog open={showAiSuggestions} onClose={() => setShowAiSuggestions(false)} size="md">
-        <DialogTitle>✨ AI Rebalance Suggestions</DialogTitle>
+        <DialogTitle>✨ AI Suggestions</DialogTitle>
         <DialogBody>
           {aiSuggestions.length === 0 ? (
             <p className="text-sm font-body text-concrete">

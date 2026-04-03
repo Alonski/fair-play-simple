@@ -120,7 +120,7 @@ export interface Partner {
 /**
  * Game & Negotiation Types
  */
-export type DealMode = 'random' | 'weighted' | 'draft' | 'auction' | 'quick';
+export type DealMode = 'random' | 'ai' | 'weighted' | 'draft' | 'auction' | 'quick';
 export type NegotiationStatus = 'pending' | 'accepted' | 'rejected' | 'counter';
 
 export interface NegotiationProposal {

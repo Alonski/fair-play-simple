@@ -75,6 +75,7 @@
     "week": "week",
     "dealModes": {
       "random": "Random Deal",
+      "ai": "AI Deal",
       "weighted": "Weighted",
       "draft": "Draft Mode",
       "auction": "Auction",
