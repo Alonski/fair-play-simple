@@ -75,8 +75,11 @@ export default function App() {
   useEffect(() => {
     const htmlElement = document.documentElement;
     if (theme === 'auto') {
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      htmlElement.classList.toggle('dark', prefersDark);
+      const mq = window.matchMedia('(prefers-color-scheme: dark)');
+      htmlElement.classList.toggle('dark', mq.matches);
+      const handler = (e: MediaQueryListEvent) => htmlElement.classList.toggle('dark', e.matches);
+      mq.addEventListener('change', handler);
+      return () => mq.removeEventListener('change', handler);
     } else {
       htmlElement.classList.toggle('dark', theme === 'dark');
     }

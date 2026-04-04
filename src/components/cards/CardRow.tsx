@@ -58,7 +58,7 @@ export default function CardRow({
   onEdit,
   onToggleNotInPlay,
 }: CardRowProps) {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { partnerAName, partnerBName } = useGameStore();
   const readOnlyMode = useAuthStore((s) => s.readOnlyMode);
   const [expanded, setExpanded] = useState(false);
@@ -173,10 +173,10 @@ export default function CardRow({
             {/* MSC Notes section */}
             <div className="mb-3">
               <p className="text-[10px] font-bold uppercase tracking-widest text-amber-700/60 mb-0.5">
-                Minimum Standard of Care
+                {t('cards.mscTitle')}
               </p>
               <p className="text-[9px] text-amber-700/40 mb-1">
-                What &ldquo;done right&rdquo; looks like for this card
+                {t('cards.mscHint')}
               </p>
               {editingMsc ? (
                 <textarea
@@ -203,7 +203,7 @@ export default function CardRow({
                     onClick={startEditingMsc}
                     className="flex-1 text-start px-3 py-2 text-sm font-body text-concrete/70 bg-amber-50/40 rounded-xl border border-dashed border-amber-200/60 hover:bg-amber-50/70 hover:text-concrete transition-colors"
                   >
-                    Add MSC notes…
+                    {t('cards.addMsc')}
                   </button>
                   <Button
                     plain
@@ -232,7 +232,7 @@ export default function CardRow({
                 onToggleNotInPlay && (
                   <div className="flex items-center gap-2">
                     <Button color="dark/zinc" onClick={(e: React.MouseEvent) => { e.stopPropagation(); onToggleNotInPlay(); }}>
-                      Restore
+                      {t('game.restore')}
                     </Button>
                   </div>
                 )
@@ -249,7 +249,7 @@ export default function CardRow({
                       </Button>
                       {card.holder && (
                         <Button outline onClick={(e: React.MouseEvent) => { e.stopPropagation(); onAssign(null); }}>
-                          Unassign
+                          {t('cards.unassign')}
                         </Button>
                       )}
                     </div>
@@ -258,7 +258,7 @@ export default function CardRow({
                       <div className="flex items-center gap-2 border-t border-gray-100 dark:border-white/5 pt-2">
                         {onToggleNotInPlay && (
                           <Button plain onClick={(e: React.MouseEvent) => { e.stopPropagation(); onToggleNotInPlay(); }}>
-                            Remove
+                            {t('cards.remove')}
                           </Button>
                         )}
                         {onEdit && (
@@ -267,7 +267,7 @@ export default function CardRow({
                             onClick={(e: React.MouseEvent) => { e.stopPropagation(); onEdit(); }}
                             className="ms-auto"
                           >
-                            Edit
+                            {t('common.edit')}
                           </Button>
                         )}
                       </div>
@@ -283,7 +283,7 @@ export default function CardRow({
                     onClick={(e: React.MouseEvent) => { e.stopPropagation(); onEdit(); }}
                     className="ms-auto"
                   >
-                    Edit
+                    {t('common.edit')}
                   </Button>
                 </div>
               )}

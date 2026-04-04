@@ -1,10 +1,10 @@
-import { onCallGenkit } from 'firebase-functions/https';
+import { onCallGenkit, isSignedIn } from 'firebase-functions/https';
 import { defineSecret } from 'firebase-functions/params';
 import { translateFlow } from './flows/translate.js';
 import { skipSuggestFlow, dealSuggestFlow, rebalanceFlow, mscSuggestFlow } from './flows/cards.js';
 import { chatFlow } from './flows/chat.js';
 const geminiApiKey = defineSecret('GEMINI_API_KEY');
-const genkitOpts = { secrets: [geminiApiKey] };
+const genkitOpts = { secrets: [geminiApiKey], authPolicy: isSignedIn() };
 // --- AI Flows exposed as callable Cloud Functions ---
 export const translate = onCallGenkit(genkitOpts, translateFlow);
 export const skipSuggest = onCallGenkit(genkitOpts, skipSuggestFlow);

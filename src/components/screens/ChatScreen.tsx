@@ -61,6 +61,8 @@ export default function ChatScreen() {
         };
       });
       setMessages(msgs);
+    }, (err) => {
+      console.error('Chat listener error:', err);
     });
 
     return unsubscribe;
@@ -102,6 +104,8 @@ export default function ChatScreen() {
       // Response will come via the Firestore onSnapshot listener
     } catch (err) {
       console.error('Chat error:', err);
+      // Remove the optimistic message before adding error
+      setMessages((prev) => prev.filter((m) => m.id !== optimisticMsg.id));
       // Add error message
       setMessages((prev) => [
         ...prev,

@@ -39,7 +39,12 @@ Return an empty array [] if all cards apply.`;
     const jsonMatch = text.match(/\[[\s\S]*\]/);
     if (!jsonMatch)
         return { suggestions: [] };
-    return { suggestions: JSON.parse(jsonMatch[0]) };
+    try {
+        return { suggestions: JSON.parse(jsonMatch[0]) };
+    }
+    catch {
+        return { suggestions: [] };
+    }
 });
 // --- Deal suggestions ---
 export const dealSuggestFlow = ai.defineFlow({
@@ -80,7 +85,12 @@ Return ONLY a JSON array of objects with "cardId", "suggestedHolder" ("partner-a
     const jsonMatch = text.match(/\[[\s\S]*\]/);
     if (!jsonMatch)
         return { suggestions: [] };
-    return { suggestions: JSON.parse(jsonMatch[0]) };
+    try {
+        return { suggestions: JSON.parse(jsonMatch[0]) };
+    }
+    catch {
+        return { suggestions: [] };
+    }
 });
 // --- Rebalance suggestions ---
 export const rebalanceFlow = ai.defineFlow({
@@ -123,7 +133,12 @@ Return ONLY a JSON array of objects with "cardId", "suggestedHolder" ("partner-a
     const jsonMatch = text.match(/\[[\s\S]*\]/);
     if (!jsonMatch)
         return { suggestions: [] };
-    return { suggestions: JSON.parse(jsonMatch[0]) };
+    try {
+        return { suggestions: JSON.parse(jsonMatch[0]) };
+    }
+    catch {
+        return { suggestions: [] };
+    }
 });
 // --- MSC suggestion ---
 export const mscSuggestFlow = ai.defineFlow({

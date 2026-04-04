@@ -61,8 +61,9 @@ export default function DealScreen() {
     if (currentDealMode === 'ai') {
       // AI Deal: get suggestions and show dialog for review
       setAiLoading(true);
-      const noCardsAssigned = partnerACards.length === 0 && partnerBCards.length === 0;
-      const suggestions = noCardsAssigned
+      // Use suggestInitialDeal when there are unassigned cards (it handles mixed state,
+      // only suggesting for unassigned cards). Only use suggestRebalance for pure rebalance.
+      const suggestions = unassigned.length > 0
         ? await suggestInitialDeal(cards, partnerAName, partnerBName, 'Household with two partners')
         : await suggestRebalance(cards, partnerAName, partnerBName);
       setAiSuggestions(suggestions);
@@ -370,8 +371,8 @@ export default function DealScreen() {
 
       <ConfirmDialog
         isOpen={showDealConfirm}
-        title="Deal cards?"
-        message="This will randomly assign unassigned cards between partners. Continue?"
+        title={t('game.dealConfirmTitle')}
+        message={t('game.dealConfirmMessage')}
         confirmLabel="Deal"
         onConfirm={handleDealConfirmed}
         onCancel={() => setShowDealConfirm(false)}
@@ -379,8 +380,8 @@ export default function DealScreen() {
 
       <ConfirmDialog
         isOpen={showResetConfirm}
-        title="Reset all cards?"
-        message="This will unassign all cards and move them back to Unassigned. Your current assignments will be saved in history so you can restore them later."
+        title={t('game.resetConfirmTitle')}
+        message={t('game.resetConfirmMessage')}
         confirmLabel="Reset"
         variant="destructive"
         onConfirm={handleResetConfirmed}
@@ -389,11 +390,11 @@ export default function DealScreen() {
 
       {/* AI Rebalance Suggestions */}
       <Dialog open={showAiSuggestions} onClose={() => setShowAiSuggestions(false)} size="md">
-        <DialogTitle>✨ AI Suggestions</DialogTitle>
+        <DialogTitle>{t('game.aiSuggestionsTitle')}</DialogTitle>
         <DialogBody>
           {aiSuggestions.length === 0 ? (
             <p className="text-sm font-body text-concrete">
-              Your card distribution looks balanced! No changes needed.
+              {t('game.aiBalanced')}
             </p>
           ) : (
             <div className="space-y-3">
@@ -418,12 +419,13 @@ export default function DealScreen() {
         </DialogBody>
         <DialogActions>
           <Button plain onClick={() => setShowAiSuggestions(false)}>
-            Dismiss
+            {t('common.dismiss')}
           </Button>
           {aiSuggestions.length > 0 && (
             <Button
               color="partner-a"
-              onClick={() => {
+              onClick={async () => {
+                await saveSnapshot('deal', userId).catch(console.error);
                 aiSuggestions.forEach((s) => {
                   if (s.suggestedHolder === 'partner-a' || s.suggestedHolder === 'partner-b') {
                     handleAssign(s.cardId, s.suggestedHolder);
@@ -433,7 +435,7 @@ export default function DealScreen() {
                 setToast(t('game.cardsDealt', 'Cards dealt!'));
               }}
             >
-              Apply All
+              {t('game.applyAll')}
             </Button>
           )}
         </DialogActions>

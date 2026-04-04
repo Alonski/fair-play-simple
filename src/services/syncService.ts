@@ -144,6 +144,9 @@ export class SyncService {
 
       useCardStore.setState({ cards: Array.from(currentMap.values()) });
       this.isRemoteUpdate = false;
+    }, (err) => {
+      console.error('Cards listener error:', err);
+      this.setStatus('offline');
     });
 
     // Listen to household document (for game state: partner names, deal mode)
@@ -160,6 +163,9 @@ export class SyncService {
         currentDealMode: data.dealMode || 'random',
       });
       this.isRemoteUpdate = false;
+    }, (err) => {
+      console.error('Household listener error:', err);
+      this.setStatus('offline');
     });
   }
 

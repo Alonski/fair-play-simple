@@ -1,5 +1,6 @@
 import { z } from 'genkit';
 import { FieldValue } from 'firebase-admin/firestore';
+import { HttpsError } from 'firebase-functions/https';
 import { ai } from '../genkit.js';
 import { db } from '../admin.js';
 const SYSTEM_PROMPT = `You are the Fair Play Expert — a friendly, helpful advisor who knows everything about Eve Rodsky's Fair Play method for dividing household responsibilities fairly between partners.
@@ -120,6 +121,12 @@ const saveMemoryTool = ai.defineTool({
     const memoryPath = scope === 'family'
         ? `households/${householdId}/memories`
         : `users/${userId}/memories`;
+    // Cap memories at 100 per scope — delete oldest if at limit
+    const countSnap = await db.collection(memoryPath).orderBy('createdAt', 'asc').get();
+    if (countSnap.size >= 100) {
+        // Delete the oldest memory to make room
+        await countSnap.docs[0].ref.delete();
+    }
     const ref = await db.collection(memoryPath).add({
         content,
         category,
@@ -152,9 +159,10 @@ const recallMemoriesTool = ai.defineTool({
     const memories = [];
     // Load family memories
     if (scope === 'family' || scope === 'all') {
-        let q = db.collection(`households/${householdId}/memories`).orderBy('createdAt', 'desc').limit(50);
+        let q = db.collection(`households/${householdId}/memories`);
         if (category && category !== 'all')
             q = q.where('category', '==', category);
+        q = q.orderBy('createdAt', 'desc').limit(50);
         const snap = await q.get();
         snap.docs.forEach((d) => {
             const data = d.data();
@@ -169,9 +177,10 @@ const recallMemoriesTool = ai.defineTool({
     }
     // Load personal memories
     if ((scope === 'personal' || scope === 'all') && userId) {
-        let q = db.collection(`users/${userId}/memories`).orderBy('createdAt', 'desc').limit(50);
+        let q = db.collection(`users/${userId}/memories`);
         if (category && category !== 'all')
             q = q.where('category', '==', category);
+        q = q.orderBy('createdAt', 'desc').limit(50);
         const snap = await q.get();
         snap.docs.forEach((d) => {
             const data = d.data();
@@ -231,8 +240,17 @@ async function compactHistory(chatPath, messages) {
         .map((m) => `${m.role}: ${m.content.map((c) => c.text || '').join(' ')}`)
         .join('\n');
     const { text: summary } = await ai.generate(`Summarize this conversation history in 3-5 bullet points, preserving key decisions, card assignments discussed, and any commitments made:\n\n${olderText}`);
-    // Delete old messages from Firestore
-    const oldSnap = await db.collection(chatPath).orderBy('createdAt', 'asc').limit(older.length).get();
+    // Find the cutoff timestamp: the oldest "recent" message
+    // Query all messages in order to find the timestamp at the boundary
+    const allSnap = await db.collection(chatPath).orderBy('createdAt', 'asc').get();
+    const cutoffIndex = allSnap.docs.length - COMPACT_KEEP_RECENT;
+    if (cutoffIndex <= 0)
+        return messages;
+    const cutoffTimestamp = allSnap.docs[cutoffIndex].data().createdAt;
+    // Delete messages older than the cutoff using timestamp, not limit
+    const oldSnap = await db.collection(chatPath)
+        .where('createdAt', '<', cutoffTimestamp)
+        .get();
     const batch = db.batch();
     oldSnap.docs.forEach((d) => batch.delete(d.ref));
     // Add summary as a system message
@@ -255,11 +273,17 @@ export const chatFlow = ai.defineFlow({
     inputSchema: z.object({
         message: z.string(),
         chatMode: z.enum(['private', 'shared']),
-        userId: z.string(),
-        householdId: z.string().default('shared'),
     }),
     outputSchema: z.object({ response: z.string() }),
-}, async ({ message, chatMode, userId, householdId }) => {
+}, async ({ message, chatMode }, { context }) => {
+    // Derive userId from auth context (set by onCallGenkit)
+    const userId = context.auth?.uid;
+    if (!userId) {
+        throw new HttpsError('unauthenticated', 'You must be signed in to use chat.');
+    }
+    // Look up householdId from user's Firestore profile
+    const userDoc = await db.doc(`users/${userId}`).get();
+    const householdId = userDoc.data()?.householdId || 'shared';
     // Determine chat path based on mode
     const chatPath = chatMode === 'shared'
         ? `households/${householdId}/chats/shared/messages`

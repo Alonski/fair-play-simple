@@ -45,7 +45,11 @@ Return an empty array [] if all cards apply.`;
     const { text } = await ai.generate(prompt);
     const jsonMatch = text.match(/\[[\s\S]*\]/);
     if (!jsonMatch) return { suggestions: [] };
-    return { suggestions: JSON.parse(jsonMatch[0]) };
+    try {
+      return { suggestions: JSON.parse(jsonMatch[0]) };
+    } catch {
+      return { suggestions: [] };
+    }
   },
 );
 
@@ -92,7 +96,11 @@ Return ONLY a JSON array of objects with "cardId", "suggestedHolder" ("partner-a
     const { text } = await ai.generate(prompt);
     const jsonMatch = text.match(/\[[\s\S]*\]/);
     if (!jsonMatch) return { suggestions: [] };
-    return { suggestions: JSON.parse(jsonMatch[0]) };
+    try {
+      return { suggestions: JSON.parse(jsonMatch[0]) };
+    } catch {
+      return { suggestions: [] };
+    }
   },
 );
 
@@ -142,7 +150,11 @@ Return ONLY a JSON array of objects with "cardId", "suggestedHolder" ("partner-a
     const { text } = await ai.generate(prompt);
     const jsonMatch = text.match(/\[[\s\S]*\]/);
     if (!jsonMatch) return { suggestions: [] };
-    return { suggestions: JSON.parse(jsonMatch[0]) };
+    try {
+      return { suggestions: JSON.parse(jsonMatch[0]) };
+    } catch {
+      return { suggestions: [] };
+    }
   },
 );
 

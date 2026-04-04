@@ -1,6 +1,7 @@
 import { z } from 'genkit';
 import { MessageData } from 'genkit/beta';
-import { FieldValue } from 'firebase-admin/firestore';
+import { FieldValue, Timestamp } from 'firebase-admin/firestore';
+import { HttpsError } from 'firebase-functions/https';
 import { ai } from '../genkit.js';
 import { db } from '../admin.js';
 
@@ -148,6 +149,13 @@ const saveMemoryTool = ai.defineTool(
       ? `households/${householdId}/memories`
       : `users/${userId}/memories`;
 
+    // Cap memories at 100 per scope — delete oldest if at limit
+    const countSnap = await db.collection(memoryPath).orderBy('createdAt', 'asc').get();
+    if (countSnap.size >= 100) {
+      // Delete the oldest memory to make room
+      await countSnap.docs[0].ref.delete();
+    }
+
     const ref = await db.collection(memoryPath).add({
       content,
       category,
@@ -187,8 +195,9 @@ const recallMemoriesTool = ai.defineTool(
 
     // Load family memories
     if (scope === 'family' || scope === 'all') {
-      let q = db.collection(`households/${householdId}/memories`).orderBy('createdAt', 'desc').limit(50);
-      if (category && category !== 'all') q = q.where('category', '==', category) as any;
+      let q: FirebaseFirestore.Query = db.collection(`households/${householdId}/memories`);
+      if (category && category !== 'all') q = q.where('category', '==', category);
+      q = q.orderBy('createdAt', 'desc').limit(50);
       const snap = await q.get();
       snap.docs.forEach((d) => {
         const data = d.data();
@@ -204,8 +213,9 @@ const recallMemoriesTool = ai.defineTool(
 
     // Load personal memories
     if ((scope === 'personal' || scope === 'all') && userId) {
-      let q = db.collection(`users/${userId}/memories`).orderBy('createdAt', 'desc').limit(50);
-      if (category && category !== 'all') q = q.where('category', '==', category) as any;
+      let q: FirebaseFirestore.Query = db.collection(`users/${userId}/memories`);
+      if (category && category !== 'all') q = q.where('category', '==', category);
+      q = q.orderBy('createdAt', 'desc').limit(50);
       const snap = await q.get();
       snap.docs.forEach((d) => {
         const data = d.data();
@@ -283,8 +293,18 @@ async function compactHistory(chatPath: string, messages: MessageData[]): Promis
     `Summarize this conversation history in 3-5 bullet points, preserving key decisions, card assignments discussed, and any commitments made:\n\n${olderText}`
   );
 
-  // Delete old messages from Firestore
-  const oldSnap = await db.collection(chatPath).orderBy('createdAt', 'asc').limit(older.length).get();
+  // Find the cutoff timestamp: the oldest "recent" message
+  // Query all messages in order to find the timestamp at the boundary
+  const allSnap = await db.collection(chatPath).orderBy('createdAt', 'asc').get();
+  const cutoffIndex = allSnap.docs.length - COMPACT_KEEP_RECENT;
+  if (cutoffIndex <= 0) return messages;
+
+  const cutoffTimestamp = allSnap.docs[cutoffIndex].data().createdAt as Timestamp;
+
+  // Delete messages older than the cutoff using timestamp, not limit
+  const oldSnap = await db.collection(chatPath)
+    .where('createdAt', '<', cutoffTimestamp)
+    .get();
   const batch = db.batch();
   oldSnap.docs.forEach((d) => batch.delete(d.ref));
 
@@ -312,12 +332,19 @@ export const chatFlow = ai.defineFlow(
     inputSchema: z.object({
       message: z.string(),
       chatMode: z.enum(['private', 'shared']),
-      userId: z.string(),
-      householdId: z.string().default('shared'),
     }),
     outputSchema: z.object({ response: z.string() }),
   },
-  async ({ message, chatMode, userId, householdId }) => {
+  async ({ message, chatMode }, { context }) => {
+    // Derive userId from auth context (set by onCallGenkit)
+    const userId = (context as any).auth?.uid as string | undefined;
+    if (!userId) {
+      throw new HttpsError('unauthenticated', 'You must be signed in to use chat.');
+    }
+
+    // Look up householdId from user's Firestore profile
+    const userDoc = await db.doc(`users/${userId}`).get();
+    const householdId: string = userDoc.data()?.householdId || 'shared';
     // Determine chat path based on mode
     const chatPath = chatMode === 'shared'
       ? `households/${householdId}/chats/shared/messages`
