@@ -77,6 +77,13 @@ service cloud.firestore {
         allow create: if isMember(householdId);
       }
 
+      // Family memories — both partners can read/write
+      match /memories/{memoryId} {
+        allow read: if isMember(householdId);
+        allow create: if isMember(householdId);
+        allow delete: if isMember(householdId);
+      }
+
       // Shared chat — both partners can read/write
       match /chats/{chatId}/messages/{messageId} {
         allow read: if isMember(householdId);
@@ -93,6 +100,11 @@ service cloud.firestore {
     // Weekly reports
     match /households/{householdId}/weeklyReports/{reportId} {
       allow read: if isMember(householdId);
+    }
+
+    // Personal memories — each user manages their own
+    match /users/{uid}/memories/{memoryId} {
+      allow read, write: if isAllowedUser() && request.auth.uid == uid;
     }
 
     // Push notification tokens — each user manages their own

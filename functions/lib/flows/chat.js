@@ -15,6 +15,13 @@ You speak warmly and practically. You reference Fair Play concepts naturally (CP
 
 When you have access to the household's card data, reference it specifically. For example: "I see Alon currently holds 52 cards including Groceries and Laundry. That's a lot of daily grind cards."
 
+You have a long-term memory system. Use it proactively:
+- When you learn something important about the family (kids, pets, work schedules, preferences), SAVE it using the saveMemory tool with scope "family"
+- When you learn something specific to one partner (personal preferences, strengths, frustrations), SAVE it with scope "personal"
+- At the START of conversations, RECALL memories to ground yourself in what you already know
+- When answering questions, RECALL relevant memories before responding
+- Categories: "profile" (facts about the family), "preference" (likes/dislikes), "decision" (agreements made), "context" (situational info), "note" (misc)
+
 Keep responses concise — 2-3 paragraphs max unless the user asks for more detail.`;
 const MAX_MESSAGES_BEFORE_COMPACT = 50;
 const COMPACT_KEEP_RECENT = 10;
@@ -96,6 +103,107 @@ const explainCardTool = ai.defineTool({
         explanation: `Card: ${card.title?.en || cardTitle}\nCategory: ${card.category}\nDescription: ${card.description?.en || 'No description'}\nFrequency: ${card.metadata?.frequency || 'weekly'}\nTime estimate: ~${card.metadata?.timeEstimate || 30} min/week\nCurrently held by: ${card.holder || 'unassigned'}`,
     };
 });
+// --- Memory tools ---
+const saveMemoryTool = ai.defineTool({
+    name: 'saveMemory',
+    description: 'Save something important to long-term memory so you can recall it in future conversations. Use this proactively when you learn key facts about the family, preferences, decisions, or anything worth remembering. Memories persist across conversations.',
+    inputSchema: z.object({
+        content: z.string().describe('What to remember — be specific and concise'),
+        scope: z.enum(['family', 'personal']).describe('family = both partners can see, personal = only this partner'),
+        category: z.enum(['profile', 'preference', 'decision', 'context', 'note']).describe('Type of memory'),
+    }),
+    outputSchema: z.object({ saved: z.boolean(), id: z.string() }),
+}, async ({ content, scope, category }, { context }) => {
+    const ctx = context;
+    const householdId = ctx.householdId || 'shared';
+    const userId = ctx.userId || '';
+    const memoryPath = scope === 'family'
+        ? `households/${householdId}/memories`
+        : `users/${userId}/memories`;
+    const ref = await db.collection(memoryPath).add({
+        content,
+        category,
+        scope,
+        createdAt: FieldValue.serverTimestamp(),
+        createdBy: userId,
+    });
+    return { saved: true, id: ref.id };
+});
+const recallMemoriesTool = ai.defineTool({
+    name: 'recallMemories',
+    description: 'Recall memories from long-term storage. Use this at the start of conversations or when you need context about the family, their preferences, or past decisions. Always recall memories when a user asks you something that might be informed by what you previously learned.',
+    inputSchema: z.object({
+        scope: z.enum(['family', 'personal', 'all']).describe('Which memories to recall'),
+        category: z.enum(['profile', 'preference', 'decision', 'context', 'note', 'all']).optional().describe('Filter by category, or all'),
+    }),
+    outputSchema: z.object({
+        memories: z.array(z.object({
+            id: z.string(),
+            content: z.string(),
+            category: z.string(),
+            scope: z.string(),
+            createdAt: z.string().optional(),
+        })),
+    }),
+}, async ({ scope, category }, { context }) => {
+    const ctx = context;
+    const householdId = ctx.householdId || 'shared';
+    const userId = ctx.userId || '';
+    const memories = [];
+    // Load family memories
+    if (scope === 'family' || scope === 'all') {
+        let q = db.collection(`households/${householdId}/memories`).orderBy('createdAt', 'desc').limit(50);
+        if (category && category !== 'all')
+            q = q.where('category', '==', category);
+        const snap = await q.get();
+        snap.docs.forEach((d) => {
+            const data = d.data();
+            memories.push({
+                id: d.id,
+                content: data.content,
+                category: data.category,
+                scope: 'family',
+                createdAt: data.createdAt?.toDate?.()?.toISOString() || '',
+            });
+        });
+    }
+    // Load personal memories
+    if ((scope === 'personal' || scope === 'all') && userId) {
+        let q = db.collection(`users/${userId}/memories`).orderBy('createdAt', 'desc').limit(50);
+        if (category && category !== 'all')
+            q = q.where('category', '==', category);
+        const snap = await q.get();
+        snap.docs.forEach((d) => {
+            const data = d.data();
+            memories.push({
+                id: d.id,
+                content: data.content,
+                category: data.category,
+                scope: 'personal',
+                createdAt: data.createdAt?.toDate?.()?.toISOString() || '',
+            });
+        });
+    }
+    return { memories };
+});
+const forgetMemoryTool = ai.defineTool({
+    name: 'forgetMemory',
+    description: 'Delete a specific memory by ID. Use when the user says to forget something or when a memory is outdated.',
+    inputSchema: z.object({
+        id: z.string(),
+        scope: z.enum(['family', 'personal']),
+    }),
+    outputSchema: z.object({ deleted: z.boolean() }),
+}, async ({ id, scope }, { context }) => {
+    const ctx = context;
+    const householdId = ctx.householdId || 'shared';
+    const userId = ctx.userId || '';
+    const path = scope === 'family'
+        ? `households/${householdId}/memories/${id}`
+        : `users/${userId}/memories/${id}`;
+    await db.doc(path).delete();
+    return { deleted: true };
+});
 // --- Chat history management ---
 async function loadHistory(chatPath) {
     const messagesSnap = await db.collection(chatPath)
@@ -167,8 +275,8 @@ export const chatFlow = ai.defineFlow({
     const response = await ai.generate({
         system: SYSTEM_PROMPT,
         messages: history,
-        tools: [getCardStateTool, getStatsTool, explainCardTool],
-        context: { householdId },
+        tools: [getCardStateTool, getStatsTool, explainCardTool, saveMemoryTool, recallMemoriesTool, forgetMemoryTool],
+        context: { householdId, userId },
     });
     // Save AI response
     const aiMessage = { role: 'model', content: [{ text: response.text }] };
