@@ -1,11 +1,29 @@
 import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import Markdown from 'react-markdown';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { collection, query, orderBy, onSnapshot, limit } from 'firebase/firestore';
 import { app, db } from '@services/firebase';
 import { useAuthStore } from '@stores/authStore';
 import { Button } from '@components/catalyst/button';
 import { Textarea } from '@components/catalyst/textarea';
+
+function CopyButton({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <button
+      onClick={() => {
+        navigator.clipboard.writeText(text);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1500);
+      }}
+      className="opacity-0 group-hover:opacity-100 transition-opacity text-[10px] text-concrete hover:text-ink px-1.5 py-0.5 rounded bg-gray-100 dark:bg-white/10"
+      title="Copy to clipboard"
+    >
+      {copied ? '✓' : '⧉'}
+    </button>
+  );
+}
 
 interface ChatMessage {
   id: string;
@@ -177,10 +195,10 @@ export default function ChatScreen() {
         {messages.map((msg) => (
           <div
             key={msg.id}
-            className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+            className={`group flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
           >
             <div
-              className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-sm font-body leading-relaxed ${
+              className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm font-body leading-relaxed ${
                 msg.role === 'user'
                   ? 'bg-partner-a text-white rounded-br-md'
                   : msg.isSummary
@@ -188,10 +206,19 @@ export default function ChatScreen() {
                     : 'bg-white dark:bg-white/10 text-ink border border-gray-100 dark:border-white/10 rounded-bl-md'
               }`}
             >
-              {msg.content.split('\n').map((line, i) => (
-                <p key={i} className={i > 0 ? 'mt-2' : ''}>{line}</p>
-              ))}
+              {msg.role === 'user' ? (
+                <p>{msg.content}</p>
+              ) : (
+                <div className="prose prose-sm dark:prose-invert max-w-none [&_ul]:list-disc [&_ul]:ps-4 [&_ol]:list-decimal [&_ol]:ps-4 [&_li]:my-0.5 [&_p]:my-1 [&_strong]:font-bold [&_h1]:text-base [&_h2]:text-sm [&_h3]:text-sm [&_h1]:font-bold [&_h2]:font-bold [&_h3]:font-bold [&_h1]:mt-3 [&_h2]:mt-2">
+                  <Markdown>{msg.content}</Markdown>
+                </div>
+              )}
             </div>
+            {msg.role === 'model' && !msg.isSummary && (
+              <div className="flex items-end ms-1 mb-1">
+                <CopyButton text={msg.content} />
+              </div>
+            )}
           </div>
         ))}
 

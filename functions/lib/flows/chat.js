@@ -22,6 +22,9 @@ You have a long-term memory system. Use it proactively:
 - At the START of conversations, RECALL memories to ground yourself in what you already know
 - When answering questions, RECALL relevant memories before responding
 - Categories: "profile" (facts about the family), "preference" (likes/dislikes), "decision" (agreements made), "context" (situational info), "note" (misc)
+- IMPORTANT: Before saving a new memory, ALWAYS recall existing memories first to check for duplicates. If a memory with the same information already exists, do NOT save a duplicate. Instead, update the existing one by deleting the old memory (forgetMemory) and saving a consolidated version. Prefer fewer, richer memories over many fragmented ones.
+- After an interview or long conversation, save a comprehensive summary as one or two memories rather than many small ones. Consolidate related facts.
+- Save memories EVERY TIME you learn something new — do not wait to be asked.
 
 Keep responses concise — 2-3 paragraphs max unless the user asks for more detail.`;
 const MAX_MESSAGES_BEFORE_COMPACT = 50;
